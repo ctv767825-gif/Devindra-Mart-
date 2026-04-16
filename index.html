@@ -1,154 +1,166 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DevIndra Mart</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="logo.svg">
-  <meta name="theme-color" content="#111827">
-  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="loginScreen" class="login-screen">
-    <div class="login-wrap">
-      <div class="card" style="background:transparent;box-shadow:none;padding:0;margin-bottom:18px;color:white">
-        <div class="brand"><img id="loginLogo" src="logo.svg" alt="logo"><div><div class="tiny" style="opacity:.8">DEVINDRA MART</div><h1 class="title" style="font-size:30px;color:white;margin-top:6px" id="loginHero">Ghar tak paaye bazaar jaise rate</h1></div></div>
-        <p class="small" style="opacity:.86" id="loginSub">Fast ordering, easy checkout, smart kirana shopping.</p>
-      </div>
-      <div class="card">
-        <div class="tiny muted">LOGIN FIRST</div>
-        <h2 style="margin:8px 0 6px">Quick Login</h2>
-        <input id="loginPhone" class="input" placeholder="Phone number">
-        <div style="height:10px"></div>
-        <label class="check-row"><input type="checkbox" id="robotCheck"> <span>I'm not a robot</span></label>
-        <button class="btn" id="loginBtn">Continue</button>
-      </div>
-      <div class="pill-grid"><div>One-time login</div><div>Quick order</div><div>WhatsApp order</div></div>
-    </div>
-  </div>
-
-  <div id="addressScreen" class="login-screen hidden">
-    <div class="login-wrap">
-      <div class="card" style="margin-bottom:16px"><h2 style="margin-top:0">Address Details</h2><div class="small muted">Login ke baad address fill karke main page open hoga.</div></div>
-      <div class="card">
-        <input id="nameField" class="input" placeholder="Name">
-        <div style="height:10px"></div>
-        <input id="phoneField" class="input" readonly>
-        <div style="height:10px"></div>
-        <textarea id="addressField" class="textarea" placeholder="Full address"></textarea>
-        <div style="height:10px"></div>
-        <div class="row"><input id="cityField" class="input" placeholder="City"><input id="stateField" class="input" placeholder="State"></div>
-        <div style="height:10px"></div>
-        <div class="row"><input id="pincodeField" class="input" placeholder="Pincode"><input id="landmarkField" class="input" placeholder="Landmark"></div>
-        <div style="height:10px"></div>
-        <button class="btn" id="saveAddressBtn">Save & Open App</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="appScreen" class="app hidden">
-    <div class="topbar">
-      <div class="brand"><img id="topLogo" src="logo.svg" alt="logo"><div><div class="tiny muted" id="brandNameTiny">DevIndra Mart</div><div style="font-weight:700" id="topHero">Ghar tak paaye bazaar jaise rate</div></div></div>
-      <a class="btn secondary" style="width:auto;padding:10px 12px" href="admin.html">Admin</a>
-    </div>
-
-    <div class="offer-run"><span id="offerRun">Today offer live hai.</span></div>
-    <div id="noticeBox" class="notice hidden"></div>
-    <div id="promoSlider" class="slider hidden"></div>
-
-    <div id="homeTab">
-      <div class="card hero">
-        <div class="badge">Offer Zone</div>
-        <h2 class="title" style="color:#fff;margin-top:10px" id="heroTitle">Ghar tak paaye bazaar jaise rate</h2>
-        <p class="small" style="opacity:.9" id="heroSub">Fast ordering, easy checkout, smart kirana shopping.</p>
-        <div class="row" style="margin-top:12px"><div class="badge" style="background:rgba(255,255,255,.12);color:#fff" id="minBadge">Min ₹500</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">COD</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">Support</div></div>
-      </div>
-      <div class="searchbar"><span>🔎</span><input id="searchInput" placeholder="Search item, brand ya category"><button class="icon-btn" id="supportQuickBtn">☎</button></div>
-      <div class="chips" id="categoryChips"></div>
-      <div class="section">
-        <div class="card" style="margin:0 0 14px">
-          <div class="between"><h3 id="listingTitle" style="margin:0">All Products</h3><button class="btn secondary" style="width:auto;padding:8px 12px" id="viewBtn">List View</button></div>
+  <div id="loginPage" class="login-shell page">
+    <div style="width:100%;max-width:520px;">
+      <div class="auth-top">
+        <img src="logo.svg" alt="logo" />
+        <div>
+          <div class="small" id="brandSmall">DEVINDRA MART</div>
+          <div class="big" id="brandBig">Ghar tak paaye bazaar jaise rate</div>
         </div>
-        <div id="productsGrid" class="grid"></div>
+      </div>
+      <div class="auth-card">
+        <div style="font-weight:800;color:#64748b;margin-bottom:14px;">LOGIN FIRST</div>
+        <input id="loginMobile" class="input" type="tel" placeholder="Enter mobile number" maxlength="10" />
+        <button class="btn mt16" id="continueBtn">Continue</button>
+        <div class="row mt16">
+          <button class="btn secondary">One-time login</button>
+          <button class="btn secondary">Quick order</button>
+          <button class="btn secondary" id="waLogin">WhatsApp order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="captchaPage" class="login-shell page hidden">
+    <div style="width:100%;max-width:520px;">
+      <div class="auth-top">
+        <img src="logo.svg" alt="logo" />
+        <div>
+          <div class="small">VERIFY</div>
+          <div class="big">Please confirm before we continue</div>
+        </div>
+      </div>
+      <div class="auth-card">
+        <label style="display:flex;gap:12px;align-items:center;font-weight:700;">
+          <input type="checkbox" id="robotCheck" style="width:22px;height:22px;" />
+          <span>I'm not a robot</span>
+        </label>
+        <button class="btn mt16" id="verifyBtn">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="addressPage" class="address-shell page hidden">
+    <div class="glass">
+      <div style="font-size:24px;font-weight:900;">Delivery Address</div>
+      <div style="color:#64748b;margin:6px 0 14px;">Add your address to open the main app.</div>
+      <input id="addrName" class="input mt12" placeholder="Name" />
+      <input id="addrMobile" class="input mt12" type="tel" placeholder="Mobile number" maxlength="10" />
+      <textarea id="addrFull" class="input mt12" rows="4" placeholder="Full address"></textarea>
+      <div class="row mt12">
+        <input id="addrCity" class="input" placeholder="City" />
+        <input id="addrState" class="input" placeholder="State" />
+      </div>
+      <div class="row mt12">
+        <input id="addrPincode" class="input" placeholder="Pincode" />
+        <input id="addrLandmark" class="input" placeholder="Landmark" />
+      </div>
+      <button id="saveAddressBtn" class="btn mt16">Save & Open App</button>
+    </div>
+  </div>
+
+  <div id="appPage" class="page hidden">
+    <div class="topbar">
+      <div class="brand">
+        <img id="storeLogo" src="logo.svg" alt="store logo" />
+        <div>
+          <div class="title" id="storeNameTop">DevIndra Mart</div>
+          <div class="tagline" id="storeTaglineTop">Ghar tak paaye bazaar jaise rate</div>
+        </div>
       </div>
     </div>
 
-    <div id="cartTab" class="hidden">
-      <div class="card"><h3 style="margin-top:0">Checkout</h3><div id="cartItems"></div></div>
-      <div class="card"><div class="small" id="deliverySlabText"></div><div class="small muted" id="nextHint" style="margin-top:6px"></div></div>
+    <div class="screen" id="homeScreen">
+      <div id="notificationBar" class="notice hidden"></div>
+      <div id="promoWrap"></div>
+
+      <div class="hero">
+        <div class="top-categories" id="topCategoryPanel"></div>
+        <h1 id="heroTitle">Ghar tak paaye bazaar jaise rate</h1>
+        <p id="heroSub">Fast ordering, easy checkout, smart kirana shopping.</p>
+        <div class="chips">
+          <span class="chip" id="minChip">Min ₹500</span>
+          <span class="chip">COD</span>
+          <span class="chip">Support</span>
+        </div>
+      </div>
+
+      <div class="searchWrap">
+        <div style="font-size:24px">🔎</div>
+        <input id="searchInput" class="input" style="border:none;padding:0;background:transparent" placeholder="Search item, brand ya category" />
+        <button class="iconBtn" title="Support">☎️</button>
+      </div>
+
+      <div class="section-head">
+        <h2>All Products</h2>
+        <button class="toggle" id="viewToggle">List View</button>
+      </div>
+
+      <div class="subcat-list mb16" id="subCategoryWrap"></div>
+      <div class="products grid" id="productList"></div>
+    </div>
+
+    <div class="screen hidden" id="cartScreen">
       <div class="card">
-        <div class="summary-line"><span>Subtotal</span><span id="subtotalText">₹0</span></div>
-        <div class="summary-line"><span>Delivery</span><span id="deliveryText">₹0</span></div>
-        <div class="summary-line"><span>Next slab</span><span id="nextSlabText">-</span></div>
-        <div class="divider"></div>
-        <div class="summary-line bold"><span>Total</span><span id="totalText">₹0</span></div>
-        <div style="height:10px"></div>
-        <div class="row"><button class="btn" id="orderBtn">Place Order</button><button class="btn danger" style="width:auto" id="clearBtn">Clear</button></div>
+        <h2 style="margin-top:0">Your Cart</h2>
+        <div id="cartItems"></div>
+        <div class="mt16">
+          <div class="row"><div>Subtotal</div><div style="text-align:right" id="subtotalValue">₹0</div></div>
+          <div class="row mt8"><div>Delivery</div><div style="text-align:right" id="deliveryValue">₹0</div></div>
+          <div class="row mt8" style="font-weight:900"><div>Total</div><div style="text-align:right" id="totalValue">₹0</div></div>
+        </div>
+        <div id="minOrderWarning" class="notice hidden mt16">⚠️ Add more items to continue • Minimum order value is ₹500</div>
+        <button class="btn mt16" id="placeOrderBtn">Place Order</button>
       </div>
     </div>
 
-    <div id="accountTab" class="hidden">
+    <div class="screen hidden" id="accountScreen">
       <div class="card">
-        <h3 style="margin-top:0">My Account</h3>
-        <div id="profileBox" class="stack small"></div>
-        <div style="height:10px"></div>
-        <button class="btn" id="editAddressBtn">Edit Address</button>
+        <h2 style="margin-top:0">Account & Address</h2>
+        <div id="accountData"></div>
       </div>
     </div>
 
-    <div id="helpTab" class="hidden">
+    <div class="screen hidden" id="supportScreen">
       <div class="card">
-        <h3 style="margin-top:0" id="helpTitle">Help Center</h3>
-        <div class="small muted" id="helpText">Support ke liye contact karo.</div>
-        <div style="height:12px"></div>
-        <div class="row"><a id="callSupportBtn" class="btn" href="#">Call Support</a><a id="waSupportBtn" class="btn secondary" href="#">WhatsApp</a></div>
+        <h2 style="margin-top:0" id="helpTitle">Help Center</h2>
+        <p id="helpText">Call or WhatsApp our support team for fast help.</p>
+        <div class="help-grid mt16">
+          <a class="help-item" id="callSupportBtn" href="#">📞<div class="mt8">Call Support</div></a>
+          <a class="help-item" id="waSupportBtn" href="#">💬<div class="mt8">WhatsApp</div></a>
+        </div>
       </div>
-      <div class="card">
-        <h3 style="margin-top:0">Category Support</h3>
-        <div id="categorySupportList" class="list"></div>
+    </div>
+
+    <div class="overlay hidden" id="categoryOverlay"></div>
+    <div class="sheet hidden" id="categorySheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">Categories</h3>
+        <button class="smallIcon" id="closeCategorySheet">✕</button>
       </div>
+      <div id="categorySheetList"></div>
     </div>
 
     <div class="bottom-nav">
-      <button class="nav-btn active" data-tab="home">🏠<br><span>Home</span></button>
-      <button class="nav-btn" data-tab="cart">🛒<br><span>Cart</span></button>
-      <button class="nav-btn" data-tab="account">👤<br><span>Account</span></button>
-      <button class="nav-btn" data-tab="help">💬<br><span>Support</span></button>
-      <button class="nav-btn" id="navCategoryBtn">📂<br><span>Category</span></button>
+      <button class="nav-btn active" data-screen="homeScreen"><span>🏠</span><span>Home</span></button>
+      <button class="nav-btn" data-screen="cartScreen"><span>🛒</span><span>Cart</span></button>
+      <button class="nav-btn" data-screen="accountScreen"><span>👤</span><span>Account</span></button>
+      <button class="nav-btn" data-screen="supportScreen"><span>💬</span><span>Support</span></button>
+      <button class="nav-btn" id="categoryNavBtn"><span>📂</span><span>Category</span></button>
     </div>
   </div>
 
-  <div id="toast" class="toast hidden"></div>
-
-  <script>
-(function(){
-  function toast(msg){var el=document.getElementById("toast"); if(el){el.textContent=msg; el.classList.remove("hidden"); setTimeout(function(){el.classList.add("hidden")},2200);} else { alert(msg); }}
-  function bindFallback(){
-    var loginBtn=document.getElementById("loginBtn");
-    var saveBtn=document.getElementById("saveAddressBtn");
-    if(loginBtn){ loginBtn.addEventListener("click", function(){
-      var phone=(document.getElementById("loginPhone")||{}).value||"";
-      var robot=(document.getElementById("robotCheck")||{}).checked;
-      if(String(phone).trim().length<10) return toast("Valid phone number dalo");
-      if(!robot) return toast("Please tick I'm not a robot");
-      localStorage.setItem('dm_session', JSON.stringify({phone:String(phone).trim()}));
-      var pf=document.getElementById("phoneField"); if(pf) pf.value=String(phone).trim();
-      var ls=document.getElementById("loginScreen"); var ad=document.getElementById("addressScreen");
-      if(ls) ls.classList.add("hidden"); if(ad) ad.classList.remove("hidden");
-    }, true); }
-    if(saveBtn){ saveBtn.addEventListener("click", function(){
-      var profile={name:(document.getElementById("nameField")||{}).value||"", phone:(document.getElementById("phoneField")||{}).value||"", address:(document.getElementById("addressField")||{}).value||"", city:(document.getElementById("cityField")||{}).value||"", state:(document.getElementById("stateField")||{}).value||"", pincode:(document.getElementById("pincodeField")||{}).value||"", landmark:(document.getElementById("landmarkField")||{}).value||""};
-      if(!String(profile.name).trim() || !String(profile.address).trim()) return toast("Name aur address bharo");
-      localStorage.setItem('dm_profile', JSON.stringify(profile));
-      var ad=document.getElementById("addressScreen"); var app=document.getElementById("appScreen");
-      if(ad) ad.classList.add("hidden"); if(app) app.classList.remove("hidden");
-    }, true); }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindFallback); else bindFallback();
-})();
-</script>
-<script src="firebase-config.js"></script>
-  <script type="module" src="app.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

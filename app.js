@@ -1,213 +1,236 @@
-import { ensureSeed, getSettings, getCollection, createOrder } from './data.js';
+(async function(){
+  const $ = (id)=>document.getElementById(id);
+  await window.DMData.ensureSeed();
+  let settings = await window.DMData.getSettings();
+  let categories = (await window.DMData.getCollection('categories')).filter(x=>x.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
+  let products = await window.DMData.getCollection('products');
+  let promos = (await window.DMData.getCollection('promos')).filter(x=>x.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
+  let cart = JSON.parse(localStorage.getItem('dm_cart')||'[]');
+  let currentView = localStorage.getItem('dm_view') || 'grid';
+  let currentCategory = null;
+  let currentSubcat = null;
+  let promoIndex = 0;
+  let promoTimer = null;
 
-const state = {
-  settings: null,
-  categories: [],
-  products: [],
-  promos: [],
-  orders: [],
-  cart: JSON.parse(localStorage.getItem('dm_cart') || '{}'),
-  activeTab: 'home',
-  activeCategory: 'all',
-  viewMode: localStorage.getItem('dm_view_mode') || 'grid',
-  profile: JSON.parse(localStorage.getItem('dm_profile') || 'null'),
-  session: JSON.parse(localStorage.getItem('dm_session') || 'null'),
-  search: '',
-  promoIndex: 0,
-  promoTimer: null
-};
+  function setText(id, value){ const el=$(id); if(el) el.textContent=value; }
+  function money(n){ return '₹' + Number(n||0).toFixed(0); }
+  function saveCart(){ localStorage.setItem('dm_cart', JSON.stringify(cart)); }
+  function getDelivery(subtotal){
+    const rules = settings.deliveryRules||[];
+    const hit = rules.find(r=>subtotal >= Number(r.min) && subtotal <= Number(r.max));
+    return hit ? Number(hit.charge) : 0;
+  }
+  function cartSubtotal(){ return cart.reduce((s,x)=>s + x.price*x.qty, 0); }
+  function cartTotal(){ const sub = cartSubtotal(); return sub + getDelivery(sub); }
 
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
-function money(n){ return '₹' + Number(n || 0).toFixed(0); }
-function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'), 2200); }
-function saveProfile(){ localStorage.setItem('dm_profile', JSON.stringify(state.profile)); }
-function saveSession(){ localStorage.setItem('dm_session', JSON.stringify(state.session)); }
-function saveCart(){ localStorage.setItem('dm_cart', JSON.stringify(state.cart)); }
-function slug(text){ return String(text||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'); }
+  function applyBrand(){
+    setText('storeNameTop', settings.storeName);
+    setText('storeTaglineTop', settings.tagline);
+    setText('heroTitle', settings.tagline);
+    setText('heroSub', settings.subtitle);
+    setText('brandSmall', settings.storeName.toUpperCase());
+    setText('brandBig', settings.tagline);
+    $('storeLogo').src = settings.logoUrl || 'logo.svg';
+    setText('minChip', 'Min ₹' + settings.minOrder);
+    $('notificationBar').classList.toggle('hidden', !settings.notificationEnabled || !settings.notificationText);
+    $('notificationBar').textContent = settings.notificationText || '';
+    setText('helpTitle', settings.helpHeading || 'Help Center');
+    setText('helpText', settings.helpText || 'Call or WhatsApp our support team for fast help.');
+    $('callSupportBtn').href = 'tel:' + (settings.supportPhone || '');
+    $('waSupportBtn').href = 'https://wa.me/' + (settings.whatsapp || '');
+    $('waLogin').onclick = ()=> window.open('https://wa.me/' + (settings.whatsapp || ''), '_blank');
+  }
 
-function getDeliveryCharge(subtotal){
-  const slabs = state.settings.deliverySlabs || [];
-  const found = slabs.find(s => subtotal >= s.min && subtotal <= s.max);
-  return found ? Number(found.charge || 0) : 0;
-}
-function getNextSlabText(subtotal){
-  const slabs = state.settings.deliverySlabs || [];
-  const next = slabs.find(s => subtotal < s.min);
-  if (!next) return 'Best slab active';
-  return `${money(next.min - subtotal)} aur add karo`;
-}
-function categoryById(id){ return state.categories.find(c => c.id === id); }
-function getFilteredProducts(){
-  return state.products.filter(p => {
-    const catOk = state.activeCategory === 'all' || p.categoryId === state.activeCategory;
-    const q = state.search.trim().toLowerCase();
-    const txt = [p.name,p.brand,p.size,categoryById(p.categoryId)?.name].join(' ').toLowerCase();
-    const searchOk = !q || txt.includes(q);
-    return catOk && searchOk;
-  });
-}
-function qtyOf(id){ return Number(state.cart[id] || 0); }
-function cartSubtotal(){
-  return Object.entries(state.cart).reduce((sum,[id,qty]) => {
-    const p = state.products.find(x => x.id === id); return sum + (p ? p.price * qty : 0);
-  },0);
-}
+  function renderTopCategories(){
+    $('topCategoryPanel').innerHTML = categories.map(c=>`<button class="category-chip" onclick="window.DMApp.chooseCategory('${c.id}')">${c.name}</button>`).join('');
+    $('categorySheetList').innerHTML = categories.map(c=>{
+      const sub = (c.subcategories||[]).map(s=>`<button class="btn secondary mt8" onclick="window.DMApp.chooseCategory('${c.id}','${String(s).replace(/'/g,"\\'")}'); window.DMApp.closeCategorySheet();">${s}</button>`).join('');
+      return `<div class="card mb16"><div style="font-weight:900;font-size:18px">${c.name}</div>${sub || '<div class="meta mt8">No sub-category</div>'}</div>`;
+    }).join('');
+  }
 
-function renderLoginTexts(){
-  $('#loginHero').textContent = state.settings.heroTitle;
-  $('#loginSub').textContent = state.settings.heroSub;
-  $('#loginLogo').src = state.settings.logoUrl || 'logo.svg';
-}
-function renderHeader(){
-  $('#topLogo').src = state.settings.logoUrl || 'logo.svg';
-  $('#brandNameTiny').textContent = state.settings.storeName;
-  $('#topHero').textContent = state.settings.heroTitle;
-  $('#heroTitle').textContent = state.settings.heroTitle;
-  $('#heroSub').textContent = state.settings.heroSub;
-  $('#offerRun').textContent = state.settings.offerMarquee || '';
-  $('#minBadge').textContent = `Min ${money(state.settings.minOrderValue)}`;
-  const notice = $('#noticeBox');
-  if (state.settings.notificationEnabled && state.settings.notificationText) {
-    notice.textContent = state.settings.notificationText;
-    notice.classList.remove('hidden');
-  } else notice.classList.add('hidden');
-}
-function renderPromos(){
-  const root = $('#promoSlider');
-  const promos = [...state.promos].filter(p => p.enabled).sort((a,b)=>(a.order||0)-(b.order||0));
-  if (!promos.length) { root.classList.add('hidden'); return; }
-  root.classList.remove('hidden');
-  root.innerHTML = promos.map((p,idx)=>`<div class="slide ${idx===0?'active':''}" data-index="${idx}">${p.type==='video'?`<video src="${p.url}" playsinline muted autoplay></video>`:`<img src="${p.url}" alt="promo">`}<div class="slide-caption"><div style="font-weight:700">${p.title||''}</div><div class="small muted">${p.subtitle||''}</div></div></div>`).join('') + `<div class="dots">${promos.map((_,idx)=>`<div class="dot ${idx===0?'active':''}" data-index="${idx}"></div>`).join('')}</div>`;
-  clearInterval(state.promoTimer);
-  state.promoIndex = 0;
-  state.promoTimer = setInterval(()=>{
-    const slides = $$('.slide'); const dots = $$('.dot');
-    if (!slides.length) return;
-    slides[state.promoIndex].classList.remove('active'); dots[state.promoIndex].classList.remove('active');
-    state.promoIndex = (state.promoIndex + 1) % slides.length;
-    slides[state.promoIndex].classList.add('active'); dots[state.promoIndex].classList.add('active');
-  }, 3500);
-}
-function renderCategoryChips(){
-  const root = $('#categoryChips');
-  const cats = [...state.categories].filter(c=>c.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
-  root.innerHTML = `<button class="chip ${state.activeCategory==='all'?'active':''}" data-id="all">All</button>` + cats.map(c=>`<button class="chip ${state.activeCategory===c.id?'active':''}" data-id="${c.id}">${c.name}</button>`).join('');
-  root.querySelectorAll('.chip').forEach(btn=>btn.onclick=()=>{ state.activeCategory = btn.dataset.id; renderCategoryChips(); renderProducts(); });
-}
-function renderProducts(){
-  const root = $('#productsGrid');
-  const items = getFilteredProducts();
-  root.className = state.viewMode === 'grid' ? 'grid' : 'grid list';
-  $('#viewBtn').textContent = state.viewMode === 'grid' ? 'List View' : 'Grid View';
-  $('#listingTitle').textContent = state.activeCategory === 'all' ? 'All Products' : (categoryById(state.activeCategory)?.name || 'Products');
-  root.innerHTML = items.map(p => {
-    const cat = categoryById(p.categoryId);
-    const q = qtyOf(p.id);
-    const wrapper = state.viewMode === 'grid' ? 'product' : 'product listitem';
-    return `<div class="${wrapper}">
-      <img src="${p.image}" alt="${p.name}">
-      <div class="pbody">
-        <p class="pname">${p.name}</p>
-        <div class="psub">${p.brand || ''} ${p.size ? '• ' + p.size : ''}</div>
-        <div class="badges"><span class="badge">${cat?.name || ''}</span>${p.stock?'<span class="badge green">In stock</span>':'<span class="badge red">Out of stock</span>'}</div>
-        <div class="price-row"><div><div class="price">${money(p.price)}</div>${p.mrp?`<div class="strike">${money(p.mrp)}</div>`:''}</div>
-        <div>${q ? `<div class="qty"><button data-minus="${p.id}">-</button><span>${q}</span><button data-plus="${p.id}">+</button></div>` : `<button class="btn" style="width:auto;padding:10px 12px" data-add="${p.id}">Add</button>`}</div></div>
-      </div></div>`;
-  }).join('');
-  root.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addToCart(b.dataset.add));
-  root.querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>addToCart(b.dataset.plus));
-  root.querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.minus, -1));
-}
-function addToCart(id){ state.cart[id] = qtyOf(id) + 1; saveCart(); renderProducts(); renderCart(); toast('Added to cart'); }
-function changeQty(id, delta){ const next = Math.max(0, qtyOf(id)+delta); if (!next) delete state.cart[id]; else state.cart[id]=next; saveCart(); renderProducts(); renderCart(); }
-function clearCart(){ state.cart = {}; saveCart(); renderProducts(); renderCart(); }
-function renderCart(){
-  const itemsRoot = $('#cartItems');
-  const lines = Object.entries(state.cart).map(([id,qty])=>{
-    const p = state.products.find(x=>x.id===id); if (!p) return '';
-    return `<div class="item"><div class="between"><div><div style="font-weight:700">${p.name}</div><div class="small muted">${money(p.price)} × ${qty}</div></div><div class="qty"><button data-cm="${id}">-</button><span>${qty}</span><button data-cp="${id}">+</button></div></div></div>`;
-  }).join('');
-  itemsRoot.innerHTML = lines || '<div class="small muted">Cart empty hai.</div>';
-  itemsRoot.querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>addToCart(b.dataset.cp));
-  itemsRoot.querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>changeQty(b.dataset.cm,-1));
-  const subtotal = cartSubtotal(); const delivery = subtotal ? getDeliveryCharge(subtotal) : 0; const total = subtotal + delivery;
-  $('#subtotalText').textContent = money(subtotal); $('#deliveryText').textContent = money(delivery); $('#totalText').textContent = money(total);
-  $('#nextSlabText').textContent = getNextSlabText(subtotal); $('#nextHint').textContent = subtotal < state.settings.minOrderValue ? `${money(state.settings.minOrderValue - subtotal)} aur add karo minimum order ke liye.` : 'Minimum order complete hai.';
-  $('#deliverySlabText').textContent = (state.settings.deliverySlabs||[]).map(s=>`${money(s.min)}–${money(s.max)} = ${money(s.charge)}`).join(' • ').replace('₹999999','₹5000+');
-}
-function renderProfile(){
-  const p = state.profile || {};
-  $('#profileBox').innerHTML = `<div><b>Name:</b> ${p.name || '-'}</div><div><b>Phone:</b> ${p.phone || '-'}</div><div><b>Address:</b> ${p.address || '-'} ${p.city||''} ${p.state||''} ${p.pincode||''}</div><div><b>Landmark:</b> ${p.landmark || '-'}</div>`;
-  $('#helpTitle').textContent = state.settings.helpTitle || 'Help Center';
-  $('#helpText').textContent = state.settings.helpText || 'Support ke liye contact karo.';
-  $('#callSupportBtn').href = `tel:${state.settings.supportPhone || ''}`;
-  $('#waSupportBtn').href = `https://wa.me/${(state.settings.whatsappNumber||'').replace(/\D/g,'')}`;
-  const list = $('#categorySupportList');
-  list.innerHTML = state.categories.filter(c=>c.active!==false).sort((a,b)=>(a.order||0)-(b.order||0)).map(c=>`<div class="item"><div class="between"><div><div style="font-weight:700">${c.name}</div><div class="small muted">${c.supportType || 'none'} • ${c.supportValue || '-'}</div></div><button class="btn secondary" style="width:auto;padding:8px 12px" data-support="${c.id}">Open</button></div></div>`).join('');
-  list.querySelectorAll('[data-support]').forEach(btn=>btn.onclick=()=>openCategorySupport(btn.dataset.support));
-}
-function openCategorySupport(catId){
-  const cat = categoryById(catId); if (!cat) return;
-  if (cat.supportType === 'call') window.location.href = `tel:${cat.supportValue}`;
-  else if (cat.supportType === 'whatsapp') window.open(`https://wa.me/${String(cat.supportValue).replace(/\D/g,'')}`, '_blank');
-  else if (cat.supportType === 'link') window.open(cat.supportValue, '_blank');
-  else toast('No support action set');
-}
-function switchTab(tab){
-  state.activeTab = tab;
-  ['home','cart','account','help'].forEach(name => $(`#${name}Tab`).classList.toggle('hidden', name !== tab));
-  $$('.nav-btn[data-tab]').forEach(btn=>btn.classList.toggle('active', btn.dataset.tab === tab));
-}
-function scrollToCategories(){ document.getElementById('categoryChips').scrollIntoView({behavior:'smooth', block:'center'}); }
+  function renderSubcats(){
+    if(!currentCategory){ $('subCategoryWrap').innerHTML=''; return; }
+    const cat = categories.find(c=>c.id===currentCategory);
+    if(!cat){ $('subCategoryWrap').innerHTML=''; return; }
+    const chips = ['All', ...(cat.subcategories||[])].map(s=>`<button class="subcat-chip" style="background:${s===currentSubcat || (!currentSubcat&&s==='All') ? '#11213f':'#eef2ff'};color:${s===currentSubcat || (!currentSubcat&&s==='All') ? '#fff':'#11213f'}" onclick="window.DMApp.chooseCategory('${cat.id}','${s==='All'?'':String(s).replace(/'/g,"\\'")}')">${s}</button>`).join('');
+    $('subCategoryWrap').innerHTML = chips;
+  }
 
-async function placeOrder(){
-  const subtotal = cartSubtotal();
-  if (subtotal < state.settings.minOrderValue) { toast(`⚠️ Add more items to continue • Minimum order value is ${money(state.settings.minOrderValue)}`); return; }
-  const delivery = getDeliveryCharge(subtotal); const total = subtotal + delivery;
-  const items = Object.entries(state.cart).map(([id,qty])=>{ const p = state.products.find(x=>x.id===id); return p?{ id, name:p.name, price:p.price, qty }:null; }).filter(Boolean);
-  await createOrder({ profile: state.profile, items, subtotal, delivery, total });
-  const orderText = encodeURIComponent(`New Order\nName: ${state.profile.name}\nPhone: ${state.profile.phone}\nAddress: ${state.profile.address}, ${state.profile.city}, ${state.profile.state}, ${state.profile.pincode}\n\nItems:\n${items.map(i=>`- ${i.name} × ${i.qty} = ${money(i.price*i.qty)}`).join('\n')}\n\nSubtotal: ${money(subtotal)}\nDelivery: ${money(delivery)}\nTotal: ${money(total)}`);
-  const wa = `https://wa.me/${(state.settings.whatsappNumber||'').replace(/\D/g,'')}?text=${orderText}`;
-  toast('Order saved');
-  clearCart();
-  window.open(wa, '_blank');
-}
+  function filteredProducts(){
+    const q = ($('searchInput')?.value || '').toLowerCase().trim();
+    return products.filter(p=>{
+      const catOk = currentCategory ? p.categoryId===currentCategory : true;
+      const subOk = currentSubcat ? p.subcategory===currentSubcat : true;
+      const qOk = !q || [p.name,p.subcategory,p.categoryId].join(' ').toLowerCase().includes(q);
+      return catOk && subOk && qOk && p.stock !== false;
+    });
+  }
 
-function bind(){
-  $('#loginBtn').onclick = () => {
-    const phone = $('#loginPhone').value.trim();
-    const robot = $('#robotCheck') ? $('#robotCheck').checked : true;
-    if (phone.length < 10) return toast('Valid phone number dalo');
-    if (!robot) return toast("Please tick I'm not a robot");
-    state.session = { phone }; saveSession();
-    $('#phoneField').value = phone;
-    $('#loginScreen').classList.add('hidden'); $('#addressScreen').classList.remove('hidden');
+  function renderProducts(){
+    const wrap = $('productList');
+    wrap.className = 'products ' + currentView;
+    wrap.innerHTML = filteredProducts().map(p=>{
+      const inCart = cart.find(x=>x.id===p.id);
+      const cat = categories.find(c=>c.id===p.categoryId);
+      return `<div class="product">
+        <img src="${p.image}" alt="${p.name}">
+        <div style="flex:1">
+          <div class="pname">${p.name}</div>
+          <div class="meta">${cat?.name || ''} • ${p.subcategory || ''}</div>
+          <div class="priceRow mt8"><span>${money(p.price)}</span>${p.mrp ? `<span class="mrp">${money(p.mrp)}</span>`:''}</div>
+          <div class="qtyWrap mt12">
+            <button class="btn ghost" onclick="window.DMApp.contactForCategory('${p.categoryId}')">Support</button>
+            ${inCart ? `<div class="qty"><button onclick="window.DMApp.changeQty('${p.id}',-1)">-</button><strong>${inCart.qty}</strong><button onclick="window.DMApp.changeQty('${p.id}',1)">+</button></div>` : `<button class="btn" onclick="window.DMApp.addToCart('${p.id}')">Add</button>`}
+          </div>
+        </div>
+      </div>`;
+    }).join('') || `<div class="card">No products found.</div>`;
+  }
+
+  function renderCart(){
+    $('cartItems').innerHTML = cart.map(item=>`<div class="card mb16"><div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-weight:800">${item.name}</div><div class="meta">${money(item.price)} × ${item.qty}</div></div><div class="qty"><button onclick="window.DMApp.changeQty('${item.id}',-1)">-</button><strong>${item.qty}</strong><button onclick="window.DMApp.changeQty('${item.id}',1)">+</button></div></div></div>`).join('') || '<div class="meta">Cart is empty.</div>';
+    const sub = cartSubtotal();
+    const del = getDelivery(sub);
+    $('subtotalValue').textContent = money(sub);
+    $('deliveryValue').textContent = money(del);
+    $('totalValue').textContent = money(sub+del);
+    $('minOrderWarning').classList.toggle('hidden', sub >= Number(settings.minOrder||500) || sub===0);
+  }
+
+  function showScreen(id){
+    ['homeScreen','cartScreen','accountScreen','supportScreen'].forEach(s=>$(s).classList.add('hidden'));
+    $(id).classList.remove('hidden');
+    document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
+  }
+
+  function renderAccount(){
+    const data = JSON.parse(localStorage.getItem('dm_address')||'{}');
+    $('accountData').innerHTML = `<div class="row"><div><div class="meta">Name</div><div>${data.name||'-'}</div></div><div><div class="meta">Mobile</div><div>${data.mobile||'-'}</div></div></div>
+    <div class="mt12"><div class="meta">Address</div><div>${data.fullAddress||'-'}</div></div>
+    <div class="row mt12"><div><div class="meta">City</div><div>${data.city||'-'}</div></div><div><div class="meta">State</div><div>${data.state||'-'}</div></div></div>
+    <div class="row mt12"><div><div class="meta">Pincode</div><div>${data.pincode||'-'}</div></div><div><div class="meta">Landmark</div><div>${data.landmark||'-'}</div></div></div>`;
+  }
+
+  function renderPromo(){
+    const active = promos.filter(x=>x.active!==false);
+    const wrap = $('promoWrap');
+    if(!active.length){ wrap.innerHTML=''; return; }
+    const promo = active[promoIndex % active.length];
+    const media = promo.type === 'video'
+      ? `<video class="promo-media" muted playsinline autoplay src="${promo.mediaUrl}"></video>`
+      : `<img class="promo-media" src="${promo.mediaUrl}" alt="promo">`;
+    wrap.innerHTML = `<div class="promo">${media}<div class="promo-content"><div style="font-weight:900;font-size:20px">${promo.title||''}</div><div>${promo.subtitle||''}</div></div></div>`;
+    clearTimeout(promoTimer);
+    promoTimer = setTimeout(()=>{ promoIndex=(promoIndex+1)%active.length; renderPromo(); }, Number(promo.duration||3000));
+  }
+
+  function chooseCategory(catId, sub=''){
+    currentCategory = catId || null;
+    currentSubcat = sub || null;
+    renderSubcats();
+    renderProducts();
+  }
+
+  function addToCart(id){
+    const p = products.find(x=>x.id===id); if(!p) return;
+    const existing = cart.find(x=>x.id===id);
+    if(existing) existing.qty += 1;
+    else cart.push({ id:p.id, name:p.name, price:Number(p.price), qty:1, categoryId:p.categoryId });
+    saveCart(); renderProducts(); renderCart();
+  }
+
+  function changeQty(id, delta){
+    const item = cart.find(x=>x.id===id); if(!item) return;
+    item.qty += delta; if(item.qty<=0) cart = cart.filter(x=>x.id!==id);
+    saveCart(); renderProducts(); renderCart();
+  }
+
+  function contactForCategory(categoryId){
+    const cat = categories.find(c=>c.id===categoryId); if(!cat) return;
+    if(cat.supportType==='call') window.location.href = 'tel:' + cat.supportValue;
+    else if(cat.supportType==='whatsapp') window.open('https://wa.me/' + cat.supportValue, '_blank');
+    else window.open(cat.supportValue, '_blank');
+  }
+
+  async function placeOrder(){
+    const subtotal = cartSubtotal();
+    if(subtotal < Number(settings.minOrder||500)) { renderCart(); return; }
+    const address = JSON.parse(localStorage.getItem('dm_address')||'{}');
+    const order = {
+      createdAt: new Date().toISOString(),
+      mobile: address.mobile || localStorage.getItem('dm_mobile') || '',
+      address,
+      items: cart,
+      subtotal,
+      delivery: getDelivery(subtotal),
+      total: cartTotal(),
+      status: 'pending'
+    };
+    await window.DMData.createOrder(order);
+    alert('Order placed successfully!');
+    cart = []; saveCart(); renderCart(); showScreen('homeScreen');
+  }
+
+  function openCategorySheet(){ $('categoryOverlay').classList.remove('hidden'); $('categorySheet').classList.remove('hidden'); }
+  function closeCategorySheet(){ $('categoryOverlay').classList.add('hidden'); $('categorySheet').classList.add('hidden'); }
+
+  function setupLoginFlow(){
+    const done = localStorage.getItem('dm_address_done') === '1';
+    if(done){ $('loginPage').classList.add('hidden'); $('captchaPage').classList.add('hidden'); $('addressPage').classList.add('hidden'); $('appPage').classList.remove('hidden'); return; }
+    $('continueBtn').onclick = ()=>{
+      const num = $('loginMobile').value.trim();
+      if(num.length < 10) return alert('Sahi mobile number daalo');
+      localStorage.setItem('dm_mobile', num);
+      $('loginPage').classList.add('hidden');
+      $('captchaPage').classList.remove('hidden');
+    };
+    $('verifyBtn').onclick = ()=>{
+      if(!$('robotCheck').checked) return alert("Please tick I'm not a robot");
+      $('captchaPage').classList.add('hidden');
+      $('addressPage').classList.remove('hidden');
+      $('addrMobile').value = localStorage.getItem('dm_mobile') || '';
+    };
+    $('saveAddressBtn').onclick = ()=>{
+      const address = {
+        name: $('addrName').value.trim(),
+        mobile: $('addrMobile').value.trim(),
+        fullAddress: $('addrFull').value.trim(),
+        city: $('addrCity').value.trim(),
+        state: $('addrState').value.trim(),
+        pincode: $('addrPincode').value.trim(),
+        landmark: $('addrLandmark').value.trim()
+      };
+      if(!address.name || !address.mobile || !address.fullAddress) return alert('Name, mobile aur address bharo');
+      localStorage.setItem('dm_address', JSON.stringify(address));
+      localStorage.setItem('dm_address_done', '1');
+      $('addressPage').classList.add('hidden');
+      $('appPage').classList.remove('hidden');
+      renderAccount();
+    };
+  }
+
+  $('viewToggle').onclick = ()=>{
+    currentView = currentView === 'grid' ? 'list' : 'grid';
+    localStorage.setItem('dm_view', currentView);
+    $('viewToggle').textContent = currentView === 'grid' ? 'List View' : 'Grid View';
+    renderProducts();
   };
-  $('#saveAddressBtn').onclick = () => {
-    state.profile = { name: $('#nameField').value.trim(), phone: $('#phoneField').value.trim(), address: $('#addressField').value.trim(), city: $('#cityField').value.trim(), state: $('#stateField').value.trim(), pincode: $('#pincodeField').value.trim(), landmark: $('#landmarkField').value.trim() };
-    if (!state.profile.name || !state.profile.address) return toast('Name aur address bharo');
-    saveProfile();
-    $('#addressScreen').classList.add('hidden'); $('#appScreen').classList.remove('hidden');
-    renderProfile();
-  };
-  $('#viewBtn').onclick = () => { state.viewMode = state.viewMode === 'grid' ? 'list' : 'grid'; localStorage.setItem('dm_view_mode', state.viewMode); renderProducts(); };
-  $('#searchInput').oninput = e => { state.search = e.target.value || ''; renderProducts(); };
-  $('#orderBtn').onclick = placeOrder; $('#clearBtn').onclick = clearCart; $('#editAddressBtn').onclick = () => { $('#appScreen').classList.add('hidden'); $('#addressScreen').classList.remove('hidden'); };
-  $$('.nav-btn[data-tab]').forEach(btn=>btn.onclick=()=>switchTab(btn.dataset.tab));
-  $('#navCategoryBtn').onclick = scrollToCategories;
-  $('#supportQuickBtn').onclick = () => switchTab('help');
-}
+  $('searchInput').oninput = renderProducts;
+  $('placeOrderBtn').onclick = placeOrder;
+  document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>btn.onclick=()=>showScreen(btn.dataset.screen));
+  $('categoryNavBtn').onclick = openCategorySheet;
+  $('categoryOverlay').onclick = closeCategorySheet;
+  $('closeCategorySheet').onclick = closeCategorySheet;
 
-async function init(){
-  await ensureSeed();
-  state.settings = await getSettings();
-  state.categories = await getCollection('categories');
-  state.products = await getCollection('products');
-  state.promos = await getCollection('promos');
-  renderLoginTexts(); renderHeader(); renderPromos(); renderCategoryChips(); renderProducts(); renderCart(); renderProfile(); bind();
-  if (state.profile && state.session) { $('#loginScreen').classList.add('hidden'); $('#addressScreen').classList.add('hidden'); $('#appScreen').classList.remove('hidden'); }
-  else if (state.session) { $('#loginScreen').classList.add('hidden'); $('#addressScreen').classList.remove('hidden'); $('#phoneField').value = state.session.phone || ''; }
-}
-
-init();
+  window.DMApp = { chooseCategory, addToCart, changeQty, contactForCategory, closeCategorySheet };
+  setupLoginFlow();
+  applyBrand();
+  renderTopCategories();
+  renderSubcats();
+  $('viewToggle').textContent = currentView === 'grid' ? 'List View' : 'Grid View';
+  renderProducts();
+  renderCart();
+  renderAccount();
+  renderPromo();
+})();
