@@ -1,151 +1,167 @@
-import { sampleSettings, sampleCategories, sampleProducts, samplePromos } from './data.js';
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+// admin.js
+import { db } from "./firebase-config.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (id) => document.getElementById(id);
-let db;
 
-async function init(){
-  const app = initializeApp(window.firebaseConfig);
-  db = getFirestore(app);
-  bindTabs();
-  bindActions();
-  await loadAll();
-}
+const refs = {
+  categories: collection(db, "categories"),
+  products: collection(db, "products"),
+  promos: collection(db, "promos"),
+  settings: collection(db, "settings")
+};
 
-function bindTabs(){
-  document.querySelectorAll('.admin-menu-btn').forEach(btn=>btn.onclick=()=>{
-    document.querySelectorAll('.admin-menu-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-    btn.classList.add('active'); $(btn.dataset.tab).classList.add('active');
-  });
-}
-
-function bindActions(){
-  $('saveSettingsBtn').onclick = saveSettings;
-  $('addCategoryBtn').onclick = addCategory;
-  $('addProductBtn').onclick = addProduct;
-  $('addPromoBtn').onclick = addPromo;
-  $('saveFutureBtn').onclick = saveFuture;
-  $('seedDemoBtn').onclick = seedDemo;
-}
-
-async function saveSettings(){
+async function addCategory() {
   const payload = {
-    storeName: $('storeNameInput').value || 'Devindra Mart',
-    tagline: $('taglineInput').value || 'Ab ghar tak paaye bazaar jaise rate',
-    noticeText: $('noticeInput').value || '',
-    whatsappNumber: $('whatsappInput').value || '7678256489',
-    supportNumber: $('supportInput').value || '7678256489',
-    minOrder: Number($('minOrderInput').value || 500),
-    storeMapLink: $('storeMapLinkInput').value || '',
-    logoUrl: $('logoInput').value || ''
+    name: $("catName").value.trim(),
+    subcategory: $("catSubcategory").value.trim(),
+    support: $("catSupport").value.trim() || "7678256489",
+    image: $("catImage").value.trim() || "https://via.placeholder.com/300x180?text=Category",
+    actionType: $("catAction").value.trim() || "whatsapp",
+    createdAt: serverTimestamp()
   };
-  await setDoc(doc(db,'settings','store'), payload);
-  alert('Settings saved');
-}
 
-async function addCategory(){
-  const payload = {
-    name_en: $('catNameEn').value,
-    name_hi: $('catNameHi').value,
-    name_hinglish: $('catNameHinglish').value,
-    support: $('catSupport').value || '7678256489',
-    image: $('catImage').value || '',
-    subcategories: ($('catSubs').value || '').split(',').map(v=>v.trim()).filter(Boolean)
-  };
-  await addDoc(collection(db,'categories'), payload);
+  if (!payload.name) return alert("Category name daalo");
+  await addDoc(refs.categories, payload);
+  clearCategoryForm();
   await loadCategories();
+  alert("Category added ✅");
 }
 
-async function addProduct(){
+async function addProduct() {
   const payload = {
-    name_en: $('prodNameEn').value,
-    name_hi: $('prodNameHi').value,
-    name_hinglish: $('prodNameHinglish').value,
-    category: $('prodCategory').value,
-    subcategory: $('prodSubcategory').value,
-    price: Number($('prodPrice').value || 0),
-    image: $('prodImage').value || '',
-    badge: $('prodBadge').value || ''
+    name: $("prodName").value.trim(),
+    category: $("prodCategory").value.trim(),
+    subcategory: $("prodSubcategory").value.trim(),
+    price: Number($("prodPrice").value || 0),
+    image: $("prodImage").value.trim() || "https://via.placeholder.com/300x180?text=Product",
+    stock: $("prodStock").value.trim() || "In Stock",
+    createdAt: serverTimestamp()
   };
-  await addDoc(collection(db,'products'), payload);
+
+  if (!payload.name || !payload.category || !payload.price) {
+    return alert("Product name, category aur price daalo");
+  }
+  await addDoc(refs.products, payload);
+  clearProductForm();
   await loadProducts();
+  alert("Product added ✅");
 }
 
-async function addPromo(){
+async function saveSettings() {
+  const docs = await getDocs(refs.settings);
   const payload = {
-    title: $('promoTitle').value,
-    text: $('promoText').value,
-    type: $('promoType').value,
-    media: $('promoMedia').value
+    storeName: $("storeName").value.trim(),
+    tagline: $("tagline").value.trim(),
+    noticeText: $("noticeText").value.trim(),
+    whatsappNumber: $("whatsappNumber").value.trim() || "7678256489",
+    supportNumber: $("supportNumber").value.trim() || "7678256489",
+    minOrder: Number($("minOrder").value || 500),
+    delivery0to999: Number($("delivery0to999").value || 50),
+    delivery1000to2999: Number($("delivery1000to2999").value || 30),
+    delivery3000to4999: Number($("delivery3000to4999").value || 20),
+    delivery5000plus: Number($("delivery5000plus").value || 10),
+    storeMapLink: $("storeMapLink").value.trim(),
+    updatedAt: serverTimestamp()
   };
-  await addDoc(collection(db,'promos'), payload);
-  await loadPromos();
+
+  if (docs.empty) {
+    await addDoc(refs.settings, payload);
+  } else {
+    await updateDoc(doc(db, "settings", docs.docs[0].id), payload);
+  }
+  alert("Settings saved ✅");
 }
 
-async function saveFuture(){
-  await setDoc(doc(db,'settings','future'), {
-    riderAppName: $('riderAppName').value,
-    riderAppLink: $('riderAppLink').value,
-    billingAppName: $('billingAppName').value,
-    billingAppLink: $('billingAppLink').value,
-    receiptPrefix: $('receiptPrefix').value
+async function loadCategories() {
+  const snap = await getDocs(refs.categories);
+  const wrap = $("categoriesList");
+  wrap.innerHTML = "";
+  snap.forEach((d) => {
+    const item = d.data();
+    const row = document.createElement("div");
+    row.className = "row-item";
+    row.innerHTML = `
+      <div>
+        <strong>${escapeHtml(item.name || "")}</strong>
+        <div class="meta">${escapeHtml(item.subcategory || "")} • ${escapeHtml(item.support || "")}</div>
+      </div>
+      <button data-id="${d.id}" class="danger small">Delete</button>
+    `;
+    row.querySelector("button").onclick = async () => {
+      await deleteDoc(doc(db, "categories", d.id));
+      await loadCategories();
+    };
+    wrap.appendChild(row);
   });
-  alert('Future settings saved');
 }
 
-async function loadAll(){
-  await Promise.all([loadSettings(), loadCategories(), loadProducts(), loadPromos(), loadOrders()]);
+async function loadProducts() {
+  const snap = await getDocs(refs.products);
+  const wrap = $("productsList");
+  wrap.innerHTML = "";
+  snap.forEach((d) => {
+    const item = d.data();
+    const row = document.createElement("div");
+    row.className = "row-item";
+    row.innerHTML = `
+      <div>
+        <strong>${escapeHtml(item.name || "")}</strong>
+        <div class="meta">${escapeHtml(item.category || "")}${item.subcategory ? " / " + escapeHtml(item.subcategory) : ""} • ₹${Number(item.price || 0)}</div>
+      </div>
+      <button data-id="${d.id}" class="danger small">Delete</button>
+    `;
+    row.querySelector("button").onclick = async () => {
+      await deleteDoc(doc(db, "products", d.id));
+      await loadProducts();
+    };
+    wrap.appendChild(row);
+  });
 }
 
-async function loadSettings(){
-  const snap = await getDoc(doc(db,'settings','store'));
-  const s = snap.exists() ? snap.data() : sampleSettings;
-  $('storeNameInput').value = s.storeName || '';
-  $('taglineInput').value = s.tagline || '';
-  $('noticeInput').value = s.noticeText || '';
-  $('whatsappInput').value = s.whatsappNumber || '7678256489';
-  $('supportInput').value = s.supportNumber || '7678256489';
-  $('minOrderInput').value = s.minOrder || 500;
-  $('storeMapLinkInput').value = s.storeMapLink || '';
-  $('logoInput').value = s.logoUrl || '';
+async function loadSettings() {
+  const snap = await getDocs(refs.settings);
+  if (snap.empty) return;
+  const s = snap.docs[0].data();
+  $("storeName").value = s.storeName || "";
+  $("tagline").value = s.tagline || "";
+  $("noticeText").value = s.noticeText || "";
+  $("whatsappNumber").value = s.whatsappNumber || "7678256489";
+  $("supportNumber").value = s.supportNumber || "7678256489";
+  $("minOrder").value = s.minOrder ?? 500;
+  $("delivery0to999").value = s.delivery0to999 ?? 50;
+  $("delivery1000to2999").value = s.delivery1000to2999 ?? 30;
+  $("delivery3000to4999").value = s.delivery3000to4999 ?? 20;
+  $("delivery5000plus").value = s.delivery5000plus ?? 10;
+  $("storeMapLink").value = s.storeMapLink || "";
 }
 
-async function loadCategories(){
-  const snap = await getDocs(collection(db,'categories'));
-  const list = snap.empty ? sampleCategories : snap.docs.map(d=>({id:d.id,...d.data()}));
-  $('adminCategoryList').innerHTML = list.map(c=>`<div class="admin-item"><strong>${c.name_hinglish || c.name_en}</strong><span>${(c.subcategories||[]).join(', ')}</span><button data-del-cat="${c.id}">Delete</button></div>`).join('');
-  document.querySelectorAll('[data-del-cat]').forEach(btn=>btn.onclick=async()=>{ await deleteDoc(doc(db,'categories',btn.dataset.delCat)); loadCategories(); });
+function clearCategoryForm() {
+  ["catName", "catSubcategory", "catSupport", "catImage", "catAction"].forEach((id) => $(id).value = "");
+}
+function clearProductForm() {
+  ["prodName", "prodCategory", "prodSubcategory", "prodPrice", "prodImage", "prodStock"].forEach((id) => $(id).value = "");
+}
+function escapeHtml(v) {
+  return String(v)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-async function loadProducts(){
-  const snap = await getDocs(collection(db,'products'));
-  const list = snap.empty ? sampleProducts : snap.docs.map(d=>({id:d.id,...d.data()}));
-  $('adminProductList').innerHTML = list.map(p=>`<div class="admin-item"><strong>${p.name_hinglish || p.name_en}</strong><span>${p.category} • ₹${p.price}</span><button data-del-prod="${p.id}">Delete</button></div>`).join('');
-  document.querySelectorAll('[data-del-prod]').forEach(btn=>btn.onclick=async()=>{ await deleteDoc(doc(db,'products',btn.dataset.delProd)); loadProducts(); });
-}
-
-async function loadPromos(){
-  const snap = await getDocs(collection(db,'promos'));
-  const list = snap.empty ? samplePromos : snap.docs.map(d=>({id:d.id,...d.data()}));
-  $('adminPromoList').innerHTML = list.map(p=>`<div class="admin-item"><strong>${p.title}</strong><span>${p.type}</span><button data-del-promo="${p.id}">Delete</button></div>`).join('');
-  document.querySelectorAll('[data-del-promo]').forEach(btn=>btn.onclick=async()=>{ await deleteDoc(doc(db,'promos',btn.dataset.delPromo)); loadPromos(); });
-}
-
-async function loadOrders(){
-  const snap = await getDocs(collection(db,'orders'));
-  const list = snap.docs.map(d=>({id:d.id,...d.data()}));
-  $('adminOrders').innerHTML = list.length ? list.map(o=>`<div class="admin-item"><strong>${o.profile?.name || 'Customer'}</strong><span>₹${o.total || 0} • ${o.profile?.phone || ''}</span></div>`).join('') : '<div class="muted">No orders yet</div>';
-}
-
-async function seedDemo(){
-  await setDoc(doc(db,'settings','store'), sampleSettings);
-  for (const c of sampleCategories) await addDoc(collection(db,'categories'), c);
-  for (const p of sampleProducts) await addDoc(collection(db,'products'), p);
-  for (const pr of samplePromos) await addDoc(collection(db,'promos'), pr);
-  await loadAll();
-  alert('Demo data seeded');
-}
-
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener("DOMContentLoaded", async () => {
+  $("addCategoryBtn").onclick = addCategory;
+  $("addProductBtn").onclick = addProduct;
+  $("saveSettingsBtn").onclick = saveSettings;
+  await Promise.all([loadCategories(), loadProducts(), loadSettings()]);
+});
