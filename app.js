@@ -177,7 +177,9 @@ async function placeOrder(){
 function bind(){
   $('#loginBtn').onclick = () => {
     const phone = $('#loginPhone').value.trim();
+    const robot = $('#robotCheck') ? $('#robotCheck').checked : true;
     if (phone.length < 10) return toast('Valid phone number dalo');
+    if (!robot) return toast("Please tick I'm not a robot");
     state.session = { phone }; saveSession();
     $('#phoneField').value = phone;
     $('#loginScreen').classList.add('hidden'); $('#addressScreen').classList.remove('hidden');

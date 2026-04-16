@@ -33,3 +33,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-seri
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.kpi{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:14px}.kpi .num{font-size:22px;font-weight:700;margin-top:6px}
 .footer-space{height:16px}
 a{text-decoration:none;color:inherit}
+
+.check-row{display:flex;align-items:center;gap:8px;margin:10px 0 14px;color:#6b7280;font-size:14px}
+.check-row input{width:auto;accent-color:#111827}

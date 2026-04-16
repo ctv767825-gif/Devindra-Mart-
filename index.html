@@ -21,6 +21,7 @@
         <h2 style="margin:8px 0 6px">Quick Login</h2>
         <input id="loginPhone" class="input" placeholder="Phone number">
         <div style="height:10px"></div>
+        <label class="check-row"><input type="checkbox" id="robotCheck"> <span>I'm not a robot</span></label>
         <button class="btn" id="loginBtn">Continue</button>
       </div>
       <div class="pill-grid"><div>One-time login</div><div>Quick order</div><div>WhatsApp order</div></div>
@@ -120,7 +121,34 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="firebase-config.js"></script>
+  <script>
+(function(){
+  function toast(msg){var el=document.getElementById("toast"); if(el){el.textContent=msg; el.classList.remove("hidden"); setTimeout(function(){el.classList.add("hidden")},2200);} else { alert(msg); }}
+  function bindFallback(){
+    var loginBtn=document.getElementById("loginBtn");
+    var saveBtn=document.getElementById("saveAddressBtn");
+    if(loginBtn){ loginBtn.addEventListener("click", function(){
+      var phone=(document.getElementById("loginPhone")||{}).value||"";
+      var robot=(document.getElementById("robotCheck")||{}).checked;
+      if(String(phone).trim().length<10) return toast("Valid phone number dalo");
+      if(!robot) return toast("Please tick I'm not a robot");
+      localStorage.setItem('dm_session', JSON.stringify({phone:String(phone).trim()}));
+      var pf=document.getElementById("phoneField"); if(pf) pf.value=String(phone).trim();
+      var ls=document.getElementById("loginScreen"); var ad=document.getElementById("addressScreen");
+      if(ls) ls.classList.add("hidden"); if(ad) ad.classList.remove("hidden");
+    }, true); }
+    if(saveBtn){ saveBtn.addEventListener("click", function(){
+      var profile={name:(document.getElementById("nameField")||{}).value||"", phone:(document.getElementById("phoneField")||{}).value||"", address:(document.getElementById("addressField")||{}).value||"", city:(document.getElementById("cityField")||{}).value||"", state:(document.getElementById("stateField")||{}).value||"", pincode:(document.getElementById("pincodeField")||{}).value||"", landmark:(document.getElementById("landmarkField")||{}).value||""};
+      if(!String(profile.name).trim() || !String(profile.address).trim()) return toast("Name aur address bharo");
+      localStorage.setItem('dm_profile', JSON.stringify(profile));
+      var ad=document.getElementById("addressScreen"); var app=document.getElementById("appScreen");
+      if(ad) ad.classList.add("hidden"); if(app) app.classList.remove("hidden");
+    }, true); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindFallback); else bindFallback();
+})();
+</script>
+<script src="firebase-config.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
