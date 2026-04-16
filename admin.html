@@ -1,58 +1,104 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DevIndra Mart Admin</title><link rel="icon" href="logo.svg"><link rel="stylesheet" href="style.css"></head><body>
-<div class="app">
-  <div class="topbar"><div class="brand"><img src="logo.svg"><div><div class="subtle">ADMIN PANEL</div><h1 class="title">DevIndra Mart Admin</h1></div></div><a class="btn secondary smallbtn" href="index.html">Open customer app</a></div>
-  <div class="section stack">
-    <div class="card stack">
-      <div class="between"><h2 class="title" style="font-size:18px">Store settings</h2><button id="seedDemoBtn" class="btn warn smallbtn" style="width:auto">Seed demo data</button></div>
-      <input id="storeName" class="input" placeholder="Store name">
-      <input id="storeTagline" class="input" placeholder="Tagline">
-      <input id="noticeText" class="input" placeholder="Top notification text">
-      <input id="whatsappNumber" class="input" placeholder="WhatsApp number">
-      <div class="row"><input id="minOrder" class="input" type="number" placeholder="Minimum order"><input id="freeNote" class="input" placeholder="Small helper note"></div>
-      <textarea id="deliveryRulesText" class="textarea" placeholder="Delivery rules note"></textarea>
-      <button id="saveSettingsBtn" class="btn">Save settings</button>
-    </div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devindra Mart Admin</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="firebase-config.js"></script>
+  <script type="module" src="admin.js"></script>
+</head>
+<body class="admin-body">
+  <div class="admin-wrap">
+    <aside class="admin-sidebar glass-card">
+      <img src="logo.svg" class="admin-logo" alt="logo" />
+      <div class="admin-title">Admin Panel</div>
+      <div class="admin-menu">
+        <button class="admin-menu-btn active" data-tab="settingsTab">Store</button>
+        <button class="admin-menu-btn" data-tab="categoriesTab">Categories</button>
+        <button class="admin-menu-btn" data-tab="productsTab">Products</button>
+        <button class="admin-menu-btn" data-tab="promosTab">Promos</button>
+        <button class="admin-menu-btn" data-tab="ordersTab">Orders</button>
+        <button class="admin-menu-btn" data-tab="futureTab">Future</button>
+      </div>
+    </aside>
 
-    <div class="card stack">
-      <h2 class="title" style="font-size:18px">Promos / Ads</h2>
-      <div class="row"><input id="promoTitle" class="input" placeholder="Promo title"><input id="promoSubtitle" class="input" placeholder="Promo subtitle"></div>
-      <div class="row"><select id="promoType" class="input"><option value="image">Image</option><option value="video">Video</option></select><input id="promoMedia" class="input" placeholder="Image / video URL"></div>
-      <button id="addPromoBtn" class="btn">Add promo</button>
-      <div id="promoList" class="table-list"></div>
-    </div>
+    <main class="admin-main">
+      <section id="settingsTab" class="admin-tab glass-card active">
+        <h2>Store Settings</h2>
+        <div class="admin-grid">
+          <input id="storeNameInput" class="input" placeholder="Store name" />
+          <input id="taglineInput" class="input" placeholder="Tagline" />
+          <input id="noticeInput" class="input" placeholder="Top notice text" />
+          <input id="whatsappInput" class="input" placeholder="WhatsApp number" value="7678256489" />
+          <input id="supportInput" class="input" placeholder="Support number" value="7678256489" />
+          <input id="minOrderInput" class="input" type="number" placeholder="Min order" value="500" />
+          <input id="storeMapLinkInput" class="input" placeholder="Store map link / current location link" />
+          <input id="logoInput" class="input" placeholder="Logo URL (optional)" />
+        </div>
+        <button id="saveSettingsBtn" class="primary-btn">Save Settings</button>
+      </section>
 
-    <div class="card stack">
-      <h2 class="title" style="font-size:18px">Categories & Subcategories</h2>
-      <div class="row"><input id="categoryName" class="input" placeholder="Category name"><input id="categoryImage" class="input" placeholder="Category image URL"></div>
-      <div class="row"><input id="categorySupport" class="input" placeholder="Support number"><input id="categoryAction" class="input" placeholder="Action type: whatsapp/call/link"></div>
-      <input id="categorySubs" class="input" placeholder="Subcategories (comma separated)">
-      <button id="addCategoryBtn" class="btn">Add category</button>
-      <div id="categoryList" class="table-list"></div>
-    </div>
+      <section id="categoriesTab" class="admin-tab glass-card">
+        <h2>Categories</h2>
+        <div class="admin-grid">
+          <input id="catNameEn" class="input" placeholder="Category (English)" />
+          <input id="catNameHi" class="input" placeholder="Category (Hindi)" />
+          <input id="catNameHinglish" class="input" placeholder="Category (Hinglish)" />
+          <input id="catSupport" class="input" placeholder="Support number" value="7678256489" />
+          <input id="catImage" class="input" placeholder="Category image URL" />
+          <input id="catSubs" class="input" placeholder="Subcategories (comma separated)" />
+        </div>
+        <button id="addCategoryBtn" class="primary-btn">Add Category</button>
+        <div id="adminCategoryList" class="admin-list"></div>
+      </section>
 
-    <div class="card stack">
-      <h2 class="title" style="font-size:18px">Products</h2>
-      <div class="row"><input id="productName" class="input" placeholder="Product name"><input id="productPrice" class="input" type="number" placeholder="Price"></div>
-      <div class="row"><input id="productMrp" class="input" type="number" placeholder="MRP"><input id="productImage" class="input" placeholder="Product image URL"></div>
-      <div class="row"><select id="productCategory" class="input"></select><input id="productSubcategory" class="input" placeholder="Subcategory"></div>
-      <div class="row"><input id="productBadge" class="input" placeholder="Badge e.g. Bestseller"><input id="productKeywords" class="input" placeholder="Keywords for voice match"></div>
-      <button id="addProductBtn" class="btn">Add product</button>
-      <div id="productList" class="table-list"></div>
-    </div>
+      <section id="productsTab" class="admin-tab glass-card">
+        <h2>Products</h2>
+        <div class="admin-grid">
+          <input id="prodNameEn" class="input" placeholder="Product (English)" />
+          <input id="prodNameHi" class="input" placeholder="Product (Hindi)" />
+          <input id="prodNameHinglish" class="input" placeholder="Product (Hinglish)" />
+          <input id="prodCategory" class="input" placeholder="Category" />
+          <input id="prodSubcategory" class="input" placeholder="Subcategory" />
+          <input id="prodPrice" class="input" type="number" placeholder="Price" />
+          <input id="prodImage" class="input" placeholder="Image URL" />
+          <input id="prodBadge" class="input" placeholder="Badge (optional)" />
+        </div>
+        <button id="addProductBtn" class="primary-btn">Add Product</button>
+        <div id="adminProductList" class="admin-list"></div>
+      </section>
 
-    <div class="card stack">
-      <h2 class="title" style="font-size:18px">Orders</h2>
-      <div id="ordersList" class="table-list"></div>
-    </div>
+      <section id="promosTab" class="admin-tab glass-card">
+        <h2>Promos / Ads</h2>
+        <div class="admin-grid">
+          <input id="promoTitle" class="input" placeholder="Promo title" />
+          <input id="promoText" class="input" placeholder="Promo text" />
+          <select id="promoType" class="input"><option value="image">Image</option><option value="video">Video</option></select>
+          <input id="promoMedia" class="input" placeholder="Image / Video URL" />
+        </div>
+        <button id="addPromoBtn" class="primary-btn">Add Promo</button>
+        <div id="adminPromoList" class="admin-list"></div>
+      </section>
 
-    <div class="card stack">
-      <h2 class="title" style="font-size:18px">Future integrations</h2>
-      <div class="row"><input id="riderApp" class="input" placeholder="Rider app / link"><input id="billingApp" class="input" placeholder="Billing app / link"></div>
-      <input id="receiptPrefix" class="input" placeholder="Receipt prefix">
-      <button id="saveFutureBtn" class="btn secondary">Save future integrations</button>
-    </div>
+      <section id="ordersTab" class="admin-tab glass-card">
+        <h2>Orders</h2>
+        <div id="adminOrders" class="admin-list"></div>
+      </section>
+
+      <section id="futureTab" class="admin-tab glass-card">
+        <h2>Future Integrations</h2>
+        <div class="admin-grid">
+          <input id="riderAppName" class="input" placeholder="Rider app name" />
+          <input id="riderAppLink" class="input" placeholder="Rider app link" />
+          <input id="billingAppName" class="input" placeholder="Billing app name" />
+          <input id="billingAppLink" class="input" placeholder="Billing app link" />
+          <input id="receiptPrefix" class="input" placeholder="Receipt prefix" />
+        </div>
+        <button id="saveFutureBtn" class="primary-btn">Save Future Settings</button>
+        <button id="seedDemoBtn" class="secondary-btn">Seed Demo Data</button>
+      </section>
+    </main>
   </div>
-</div>
-<script src="firebase-config.js"></script>
-<script type="module" src="admin.js"></script>
-</body></html>
+</body>
+</html>

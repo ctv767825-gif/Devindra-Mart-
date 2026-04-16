@@ -1,15 +1,9 @@
 {
-  "name": "DevIndra Mart",
-  "short_name": "DevMart",
-  "start_url": "/",
+  "name": "Devindra Mart",
+  "short_name": "DevindraMart",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "icons": [
-    {
-      "src": "logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
-    }
-  ]
+  "background_color": "#ffffff",
+  "theme_color": "#12265a",
+  "icons": []
 }

@@ -1,91 +1,210 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DevIndra Mart</title>
-<link rel="manifest" href="manifest.json"><link rel="icon" href="logo.svg"><meta name="theme-color" content="#0f172a">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devindra Mart</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="firebase-config.js"></script>
+  <script type="module" src="app.js"></script>
 </head>
 <body>
-<div class="app" id="appRoot">
-  <div id="loginView" class="login-wrap">
-    <div class="login-hero">
-      <div class="between"><div class="brand"><img src="logo.svg"><div><div class="subtle" data-i18n="welcomeLabel">WELCOME</div><h1 class="title" id="storeNameLogin">DevIndra Mart</h1></div></div><div class="pill" data-i18n="quickDelivery">Fast delivery</div></div>
-      <p class="subtle" id="storeTagline">Ab ghar tak paaye bazaar jaise rate.</p>
-      <div class="langs" style="margin-top:12px">
-        <button class="lang-btn" data-lang="hinglish">Hinglish</button>
-        <button class="lang-btn" data-lang="en">English</button>
-        <button class="lang-btn" data-lang="hi">हिंदी</button>
-      </div>
-    </div>
-    <div class="login-card">
-      <div class="subtle" style="font-weight:700;margin-bottom:10px" data-i18n="loginFirst">LOGIN FIRST</div>
-      <input id="loginPhone" class="input" type="tel" inputmode="numeric" placeholder="Enter mobile number">
-      <button id="continueBtn" class="btn" style="margin-top:14px" data-i18n="continue">Continue</button>
-      <div id="robotBox" class="card hidden" style="margin:14px 0 0;padding:14px">
-        <label class="between" style="justify-content:flex-start">
-          <input id="robotCheck" type="checkbox"><span data-i18n="notRobot">I'm not a robot</span>
+  <div id="splash" class="splash-screen active">
+    <img src="logo.svg" alt="Devindra Mart" class="splash-logo" />
+    <div class="splash-title">Devindra Mart</div>
+    <div class="splash-sub">Premium daily essentials</div>
+  </div>
+
+  <div id="loginScreen" class="screen login-screen">
+    <div class="auth-card glass-card">
+      <img src="logo.svg" class="auth-logo" alt="logo" />
+      <h1>Welcome Back</h1>
+      <p class="muted">Fast order. Premium experience.</p>
+      <label class="field-label">Mobile Number</label>
+      <input id="loginPhone" class="input" type="tel" maxlength="10" placeholder="Enter mobile number" />
+      <button id="showRobotBtn" class="primary-btn">Continue</button>
+      <div id="robotWrap" class="robot-box hidden">
+        <label class="robot-row">
+          <input id="robotCheck" type="checkbox" />
+          <span>I'm not a robot</span>
         </label>
-        <button id="verifyBtn" class="btn" style="margin-top:12px" data-i18n="verifyContinue">Verify & Continue</button>
-      </div>
-      <div class="form-grid" style="margin-top:14px">
-        <div class="card" style="margin:0;padding:14px;text-align:center"><div class="icon">🛍️</div><div class="small" data-i18n="quickOrder">Quick order</div></div>
-        <div class="card" style="margin:0;padding:14px;text-align:center"><div class="icon">💬</div><div class="small" data-i18n="whatsAppOrder">WhatsApp order</div></div>
+        <button id="verifyBtn" class="primary-btn full">Verify & Continue</button>
       </div>
     </div>
   </div>
 
-  <div id="addressView" class="login-wrap hidden">
-    <div class="login-hero"><div class="between"><div><div class="subtle" data-i18n="deliveryAddress">DELIVERY ADDRESS</div><h2 class="title" data-i18n="saveAddress">Save your address</h2></div><img src="logo.svg" style="width:48px;height:48px;border-radius:14px"></div></div>
-    <div class="login-card">
-      <div class="form-grid">
-        <input id="addrName" class="input" placeholder="Name">
-        <input id="addrPhone" class="input" placeholder="Phone" disabled>
-        <input id="addrLine" class="input full" placeholder="Full Address">
-        <input id="addrLandmark" class="input" placeholder="Landmark">
-        <input id="addrCity" class="input" placeholder="City">
-        <input id="addrState" class="input" placeholder="State">
-        <input id="addrPincode" class="input" placeholder="Pincode">
-        <textarea id="addrNote" class="textarea full" placeholder="Delivery note (optional)"></textarea>
+  <div id="addressScreen" class="screen hidden auth-gradient">
+    <div class="auth-card glass-card large">
+      <h2>Delivery Address</h2>
+      <p class="muted">Fill your details to continue</p>
+      <input id="profileName" class="input" placeholder="Full name" />
+      <input id="profilePhone" class="input" placeholder="Mobile number" disabled />
+      <textarea id="profileAddress" class="input textarea" placeholder="Full address"></textarea>
+      <input id="profileLandmark" class="input" placeholder="Landmark" />
+      <div class="double-actions">
+        <button id="detectLocationBtn" class="secondary-btn">Use Current Location</button>
+        <button id="saveAddressBtn" class="primary-btn">Save & Open App</button>
       </div>
-      <div class="row" style="margin-top:12px"><button id="getLocationBtn" class="btn secondary" data-i18n="useCurrentLocation">Use current location</button><button id="saveAddressBtn" class="btn" data-i18n="saveOpenApp">Save & Open App</button></div>
-      <div id="locationStatus" class="subtle" style="margin-top:10px"></div>
+      <div id="locationHint" class="hint"></div>
     </div>
   </div>
 
-  <div id="mainView" class="hidden">
-    <div class="topbar">
-      <div class="brand"><img src="logo.svg"><div><div class="subtle" id="topWelcome">Welcome back</div><h1 class="title" id="storeNameTop">DevIndra Mart</h1></div></div>
-      <div class="row"><button id="langToggleBtn" class="icon-btn" title="Language">🌐</button><button id="micBtn" class="icon-btn" title="Voice">🎤</button></div>
+  <div id="appScreen" class="screen hidden">
+    <header class="topbar">
+      <div class="notice-bar" id="noticeBar"></div>
+      <div class="brand-row">
+        <div class="brand-left">
+          <img src="logo.svg" alt="logo" class="brand-logo" />
+          <div>
+            <div class="brand-name" id="storeName">Devindra Mart</div>
+            <div class="brand-sub" id="storeTagline">Ab ghar tak paaye bazaar jaise rate</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="langBtn" class="icon-btn">🌐</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="hero-slider glass-card" id="promoSlider"></section>
+
+      <section class="top-categories" id="topCategories"></section>
+
+      <section class="section-head">
+        <div>
+          <h3 id="allProductsTitle">All Products</h3>
+          <p class="muted small">Choose your daily essentials</p>
+        </div>
+        <div class="view-switch" aria-label="view switch">
+          <button id="gridBtn" class="view-btn active">Grid</button>
+          <button id="listBtn" class="view-btn">List</button>
+        </div>
+      </section>
+
+      <section class="search-row">
+        <input id="searchInput" class="input search-input" placeholder="Search products" />
+        <button id="voiceBtn" class="voice-btn">🎤</button>
+      </section>
+
+      <section id="activeFilterBar" class="filter-bar hidden"></section>
+      <section id="productsGrid" class="products-grid"></section>
+    </main>
+
+    <div id="cartBar" class="cart-bar hidden">
+      <div>
+        <strong id="cartCountText">0 items</strong>
+        <div id="cartTotalText">₹0</div>
+      </div>
+      <button id="openCartBtn" class="primary-btn small-btn">View Cart</button>
     </div>
-    <div id="noticeBar" class="notice hidden"></div>
-    <div class="section">
-      <div id="promoSlider" class="carousel hidden"></div>
-    </div>
-    <div class="searchbar"><span>🔎</span><input id="searchInput" placeholder="Search items, brands, category"><button id="clearSearchBtn" class="icon-btn smallbtn">✕</button></div>
-    <div id="topCategories" class="chips"></div>
-    <div class="section between" style="padding-top:4px"><div><h2 class="title" style="font-size:18px" data-i18n="allProducts">All Products</h2><div class="subtle" id="subheadText">Browse by category</div></div><div class="row"><button id="gridBtn" class="icon-btn" title="Grid">▦</button><button id="listBtn" class="icon-btn" title="List">☰</button></div></div>
-    <div class="section"><div id="productsGrid" class="grid"></div></div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active">🏠<span>Home</span></button>
+      <button id="supportBtn" class="nav-btn">🛟<span>Support</span></button>
+      <button id="categoryBtn" class="nav-btn">🗂️<span>Category</span></button>
+      <button id="profileBtn" class="nav-btn">👤<span>Profile</span></button>
+    </nav>
   </div>
-</div>
 
-<div id="sheetBackdrop" class="sheet-backdrop hidden"></div>
-<div id="categorySheet" class="sheet hidden"></div>
-<div id="helpSheet" class="sheet hidden"></div>
-<div id="profileSheet" class="sheet hidden"></div>
-<div id="cartSheet" class="sheet hidden"></div>
-<div id="langSheet" class="sheet hidden"></div>
+  <div id="categorySheet" class="sheet hidden">
+    <div class="sheet-card large-sheet">
+      <div class="sheet-head">
+        <h3>Categories</h3>
+        <button class="close-btn" data-close="categorySheet">✕</button>
+      </div>
+      <div class="category-layout">
+        <div id="mainCategoryList" class="main-cat-list"></div>
+        <div>
+          <div class="sub-head">Subcategories</div>
+          <div id="subCategoryList" class="sub-cat-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div id="cartBar" class="cartbar hidden"><div><div style="font-weight:800" data-i18n="cartReady">Cart ready</div><div class="small" id="cartBarText"></div></div><button id="openCartBtn" class="btn secondary" style="width:auto;padding:10px 14px" data-i18n="openCart">Open Cart</button></div>
+  <div id="supportSheet" class="sheet hidden">
+    <div class="sheet-card">
+      <div class="sheet-head">
+        <h3>Help Center</h3>
+        <button class="close-btn" data-close="supportSheet">✕</button>
+      </div>
+      <div class="help-options">
+        <a id="helpCall" class="help-card" href="#">📞 Call Support</a>
+        <a id="helpWhatsApp" class="help-card" href="#" target="_blank">💬 WhatsApp Support</a>
+      </div>
+      <div id="helperBot" class="helper-bot">
+        <div class="bot-title">AI Helper</div>
+        <div id="botMessages" class="bot-messages">
+          <div class="bot-msg">Hi Aditya jha ब्राह्मण 👋 Ask me about stock, delivery charges, minimum order, or products.</div>
+        </div>
+        <div class="bot-actions">
+          <button class="pill-btn" data-bot="stock">Stock</button>
+          <button class="pill-btn" data-bot="delivery">Delivery</button>
+          <button class="pill-btn" data-bot="minimum">Min Order</button>
+          <button class="pill-btn" data-bot="support">Support</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<nav class="navbar hidden" id="bottomNav">
-  <button class="nav-btn active" data-nav="home"><span class="icon">🏠</span><span data-i18n="home">Home</span></button>
-  <button class="nav-btn" data-open="help"><span class="icon">💬</span><span data-i18n="support">Support</span></button>
-  <button class="nav-btn" data-open="category"><span class="icon">📂</span><span data-i18n="category">Category</span></button>
-  <button class="nav-btn" data-open="cart"><span class="icon">🛒</span><span data-i18n="cart">Cart</span></button>
-  <button class="nav-btn" data-open="profile"><span class="icon">👤</span><span data-i18n="profile">Profile</span></button>
-</nav>
+  <div id="profileSheet" class="sheet hidden">
+    <div class="sheet-card">
+      <div class="sheet-head">
+        <h3>My Profile</h3>
+        <button class="close-btn" data-close="profileSheet">✕</button>
+      </div>
+      <input id="editName" class="input" placeholder="Name" />
+      <input id="editPhone" class="input" disabled />
+      <textarea id="editAddress" class="input textarea" placeholder="Address"></textarea>
+      <input id="editLandmark" class="input" placeholder="Landmark" />
+      <input id="editCity" class="input" placeholder="City" />
+      <input id="editState" class="input" placeholder="State" />
+      <input id="editPincode" class="input" placeholder="Pincode" />
+      <div class="double-actions">
+        <button id="profileLocationBtn" class="secondary-btn">Update Current Location</button>
+        <button id="saveProfileBtn" class="primary-btn">Save Profile</button>
+      </div>
+      <button id="logoutBtn" class="danger-btn">Logout</button>
+    </div>
+  </div>
 
-<script src="firebase-config.js"></script>
-<script type="module" src="app.js"></script>
-</body></html>
+  <div id="cartSheet" class="sheet hidden">
+    <div class="sheet-card large-sheet">
+      <div class="sheet-head">
+        <h3>My Cart</h3>
+        <button class="close-btn" data-close="cartSheet">✕</button>
+      </div>
+      <div id="cartItems" class="cart-items"></div>
+      <div class="bill-box">
+        <div><span>Subtotal</span><strong id="subtotalText">₹0</strong></div>
+        <div><span>Delivery</span><strong id="deliveryText">₹0</strong></div>
+        <div class="total-row"><span>Total</span><strong id="finalTotalText">₹0</strong></div>
+      </div>
+      <button id="checkoutBtn" class="primary-btn full">Order on WhatsApp</button>
+    </div>
+  </div>
+
+  <div id="langSheet" class="sheet hidden">
+    <div class="sheet-card small-sheet">
+      <div class="sheet-head">
+        <h3>Language</h3>
+        <button class="close-btn" data-close="langSheet">✕</button>
+      </div>
+      <div class="lang-options">
+        <button class="lang-opt" data-lang="hinglish">Hinglish</button>
+        <button class="lang-opt" data-lang="en">English</button>
+        <button class="lang-opt" data-lang="hi">Hindi</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader-ring"></div>
+    <div class="loading-text">Loading your premium store...</div>
+  </div>
+
+  <div id="successToast" class="success-toast hidden">Order sent successfully ✅</div>
+</body>
+</html>

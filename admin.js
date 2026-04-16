@@ -1,31 +1,151 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-const app = initializeApp(window.firebaseConfig); const db=getFirestore(app);
-const FIXED_WHATSAPP='7678256489';
-const $=s=>document.querySelector(s);
-const SAMPLE={settings:{storeName:'DevIndra Mart',storeTagline:'Ab ghar tak paaye bazaar jaise rate.',noticeText:'Fresh deals today',whatsappNumber:FIXED_WHATSAPP,minOrder:500,freeNote:'Fast service',deliveryRules:[[0,999,50],[1000,2999,30],[3000,4999,20],[5000,999999,10]]}, categories:[{name:'Kirana',image:'',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Atta','Rice','Oil','Spices']},{name:'Fruits',image:'',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Seasonal','Premium','Daily Use']}], products:[{name:'Basmati Rice 1kg',price:140,mrp:165,image:'',category:'Kirana',subcategory:'Rice',badge:'Daily',keywords:'rice chawal'}], promos:[{type:'image',media:'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=60',title:'Smart grocery deals',subtitle:'Fresh stock • Better price'}]};
-async function saveDoc(path,data){const parts=path.split('/'); await setDoc(doc(db,parts[0],parts[1]),data,{merge:true});}
-async function add(name,data){await addDoc(collection(db,name),data); await loadAll();}
-async function del(name,id){await deleteDoc(doc(db,name,id)); await loadAll();}
-async function get(name){const snap=await getDocs(collection(db,name)); return snap.docs.map(d=>({id:d.id,...d.data()}));}
-async function loadAll(){
- try{
-  const [cats,products,promos,orders]=await Promise.all([get('categories'),get('products'),get('promos'),get('orders')]);
-  const settingsSnap=await getDocs(collection(db,'settings')); let settings={}; settingsSnap.forEach(d=>{if(d.id==='app') settings=d.data()});
-  $('#storeName').value=settings.storeName||''; $('#storeTagline').value=settings.storeTagline||''; $('#noticeText').value=settings.noticeText||''; $('#whatsappNumber').value=settings.whatsappNumber||FIXED_WHATSAPP; $('#minOrder').value=settings.minOrder||500; $('#freeNote').value=settings.freeNote||''; $('#deliveryRulesText').value=JSON.stringify(settings.deliveryRules||[],null,2);
-  renderCategories(cats); renderProducts(products,cats); renderPromos(promos); renderOrders(orders);
- }catch(e){console.log(e)}
-}
-function renderCategories(cats){ $('#productCategory').innerHTML='<option value="">Select category</option>'+cats.map(c=>`<option value="${c.name}">${c.name}</option>`).join(''); $('#categoryList').innerHTML=cats.map(c=>`<div class="card between"><div><strong>${c.name}</strong><div class="small">${(c.subcategories||[]).join(', ')}</div></div><button class="btn red smallbtn" data-delcat="${c.id}" style="width:auto">Delete</button></div>`).join(''); document.querySelectorAll('[data-delcat]').forEach(b=>b.onclick=()=>del('categories',b.dataset.delcat)); }
-function renderProducts(items,cats){ $('#productList').innerHTML=items.map(p=>`<div class="card between"><div><strong>${p.name}</strong><div class="small">${p.category}${p.subcategory?' • '+p.subcategory:''} • ₹${p.price}</div></div><button class="btn red smallbtn" data-delprod="${p.id}" style="width:auto">Delete</button></div>`).join(''); document.querySelectorAll('[data-delprod]').forEach(b=>b.onclick=()=>del('products',b.dataset.delprod)); }
-function renderPromos(items){ $('#promoList').innerHTML=items.map(p=>`<div class="card between"><div><strong>${p.title||'Promo'}</strong><div class="small">${p.type}</div></div><button class="btn red smallbtn" data-delpromo="${p.id}" style="width:auto">Delete</button></div>`).join(''); document.querySelectorAll('[data-delpromo]').forEach(b=>b.onclick=()=>del('promos',b.dataset.delpromo)); }
-function renderOrders(items){ items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)); $('#ordersList').innerHTML=items.length?items.map(o=>`<div class="card"><div class="between"><strong>${o.name||'Customer'}</strong><span>₹${o.total||0}</span></div><div class="small">${o.phone||''}</div><div class="small">${o.address||''}</div></div>`).join(''):'<div class="card">No orders yet</div>'; }
+import { sampleSettings, sampleCategories, sampleProducts, samplePromos } from './data.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-$('#saveSettingsBtn').onclick=async()=>{ let rules; try{rules=JSON.parse($('#deliveryRulesText').value||'[]')}catch{rules=[[0,999,50],[1000,2999,30],[3000,4999,20],[5000,999999,10]]}
-  await saveDoc('settings/app',{storeName:$('#storeName').value||'DevIndra Mart',storeTagline:$('#storeTagline').value||'',noticeText:$('#noticeText').value||'',whatsappNumber:$('#whatsappNumber').value||FIXED_WHATSAPP,minOrder:Number($('#minOrder').value||500),freeNote:$('#freeNote').value||'',deliveryRules:rules}); alert('Settings saved'); loadAll(); };
-$('#addCategoryBtn').onclick=async()=>{ await add('categories',{name:$('#categoryName').value,image:$('#categoryImage').value,support:$('#categorySupport').value||FIXED_WHATSAPP,action:$('#categoryAction').value||'whatsapp',subcategories:($('#categorySubs').value||'').split(',').map(s=>s.trim()).filter(Boolean)}); $('#categoryName').value=''; $('#categoryImage').value=''; $('#categorySupport').value=''; $('#categoryAction').value=''; $('#categorySubs').value=''; };
-$('#addProductBtn').onclick=async()=>{ await add('products',{name:$('#productName').value,price:Number($('#productPrice').value||0),mrp:Number($('#productMrp').value||0),image:$('#productImage').value||'',category:$('#productCategory').value,subcategory:$('#productSubcategory').value||'',badge:$('#productBadge').value||'',keywords:$('#productKeywords').value||''}); ['#productName','#productPrice','#productMrp','#productImage','#productSubcategory','#productBadge','#productKeywords'].forEach(s=>$(s).value=''); };
-$('#addPromoBtn').onclick=async()=>{ await add('promos',{type:$('#promoType').value,media:$('#promoMedia').value,title:$('#promoTitle').value,subtitle:$('#promoSubtitle').value}); ['#promoTitle','#promoSubtitle','#promoMedia'].forEach(s=>$(s).value=''); };
-$('#saveFutureBtn').onclick=async()=>{ await saveDoc('settings/app',{riderApp:$('#riderApp').value||'',billingApp:$('#billingApp').value||'',receiptPrefix:$('#receiptPrefix').value||''}); alert('Future integrations saved'); };
-$('#seedDemoBtn').onclick=async()=>{ await saveDoc('settings/app',SAMPLE.settings); for(const c of SAMPLE.categories) await add('categories',c); for(const p of SAMPLE.products) await add('products',p); for(const x of SAMPLE.promos) await add('promos',x); alert('Demo data added'); };
-loadAll();
+const $ = (id) => document.getElementById(id);
+let db;
+
+async function init(){
+  const app = initializeApp(window.firebaseConfig);
+  db = getFirestore(app);
+  bindTabs();
+  bindActions();
+  await loadAll();
+}
+
+function bindTabs(){
+  document.querySelectorAll('.admin-menu-btn').forEach(btn=>btn.onclick=()=>{
+    document.querySelectorAll('.admin-menu-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active'); $(btn.dataset.tab).classList.add('active');
+  });
+}
+
+function bindActions(){
+  $('saveSettingsBtn').onclick = saveSettings;
+  $('addCategoryBtn').onclick = addCategory;
+  $('addProductBtn').onclick = addProduct;
+  $('addPromoBtn').onclick = addPromo;
+  $('saveFutureBtn').onclick = saveFuture;
+  $('seedDemoBtn').onclick = seedDemo;
+}
+
+async function saveSettings(){
+  const payload = {
+    storeName: $('storeNameInput').value || 'Devindra Mart',
+    tagline: $('taglineInput').value || 'Ab ghar tak paaye bazaar jaise rate',
+    noticeText: $('noticeInput').value || '',
+    whatsappNumber: $('whatsappInput').value || '7678256489',
+    supportNumber: $('supportInput').value || '7678256489',
+    minOrder: Number($('minOrderInput').value || 500),
+    storeMapLink: $('storeMapLinkInput').value || '',
+    logoUrl: $('logoInput').value || ''
+  };
+  await setDoc(doc(db,'settings','store'), payload);
+  alert('Settings saved');
+}
+
+async function addCategory(){
+  const payload = {
+    name_en: $('catNameEn').value,
+    name_hi: $('catNameHi').value,
+    name_hinglish: $('catNameHinglish').value,
+    support: $('catSupport').value || '7678256489',
+    image: $('catImage').value || '',
+    subcategories: ($('catSubs').value || '').split(',').map(v=>v.trim()).filter(Boolean)
+  };
+  await addDoc(collection(db,'categories'), payload);
+  await loadCategories();
+}
+
+async function addProduct(){
+  const payload = {
+    name_en: $('prodNameEn').value,
+    name_hi: $('prodNameHi').value,
+    name_hinglish: $('prodNameHinglish').value,
+    category: $('prodCategory').value,
+    subcategory: $('prodSubcategory').value,
+    price: Number($('prodPrice').value || 0),
+    image: $('prodImage').value || '',
+    badge: $('prodBadge').value || ''
+  };
+  await addDoc(collection(db,'products'), payload);
+  await loadProducts();
+}
+
+async function addPromo(){
+  const payload = {
+    title: $('promoTitle').value,
+    text: $('promoText').value,
+    type: $('promoType').value,
+    media: $('promoMedia').value
+  };
+  await addDoc(collection(db,'promos'), payload);
+  await loadPromos();
+}
+
+async function saveFuture(){
+  await setDoc(doc(db,'settings','future'), {
+    riderAppName: $('riderAppName').value,
+    riderAppLink: $('riderAppLink').value,
+    billingAppName: $('billingAppName').value,
+    billingAppLink: $('billingAppLink').value,
+    receiptPrefix: $('receiptPrefix').value
+  });
+  alert('Future settings saved');
+}
+
+async function loadAll(){
+  await Promise.all([loadSettings(), loadCategories(), loadProducts(), loadPromos(), loadOrders()]);
+}
+
+async function loadSettings(){
+  const snap = await getDoc(doc(db,'settings','store'));
+  const s = snap.exists() ? snap.data() : sampleSettings;
+  $('storeNameInput').value = s.storeName || '';
+  $('taglineInput').value = s.tagline || '';
+  $('noticeInput').value = s.noticeText || '';
+  $('whatsappInput').value = s.whatsappNumber || '7678256489';
+  $('supportInput').value = s.supportNumber || '7678256489';
+  $('minOrderInput').value = s.minOrder || 500;
+  $('storeMapLinkInput').value = s.storeMapLink || '';
+  $('logoInput').value = s.logoUrl || '';
+}
+
+async function loadCategories(){
+  const snap = await getDocs(collection(db,'categories'));
+  const list = snap.empty ? sampleCategories : snap.docs.map(d=>({id:d.id,...d.data()}));
+  $('adminCategoryList').innerHTML = list.map(c=>`<div class="admin-item"><strong>${c.name_hinglish || c.name_en}</strong><span>${(c.subcategories||[]).join(', ')}</span><button data-del-cat="${c.id}">Delete</button></div>`).join('');
+  document.querySelectorAll('[data-del-cat]').forEach(btn=>btn.onclick=async()=>{ await deleteDoc(doc(db,'categories',btn.dataset.delCat)); loadCategories(); });
+}
+
+async function loadProducts(){
+  const snap = await getDocs(collection(db,'products'));
+  const list = snap.empty ? sampleProducts : snap.docs.map(d=>({id:d.id,...d.data()}));
+  $('adminProductList').innerHTML = list.map(p=>`<div class="admin-item"><strong>${p.name_hinglish || p.name_en}</strong><span>${p.category} • ₹${p.price}</span><button data-del-prod="${p.id}">Delete</button></div>`).join('');
+  document.querySelectorAll('[data-del-prod]').forEach(btn=>btn.onclick=async()=>{ await deleteDoc(doc(db,'products',btn.dataset.delProd)); loadProducts(); });
+}
+
+async function loadPromos(){
+  const snap = await getDocs(collection(db,'promos'));
+  const list = snap.empty ? samplePromos : snap.docs.map(d=>({id:d.id,...d.data()}));
+  $('adminPromoList').innerHTML = list.map(p=>`<div class="admin-item"><strong>${p.title}</strong><span>${p.type}</span><button data-del-promo="${p.id}">Delete</button></div>`).join('');
+  document.querySelectorAll('[data-del-promo]').forEach(btn=>btn.onclick=async()=>{ await deleteDoc(doc(db,'promos',btn.dataset.delPromo)); loadPromos(); });
+}
+
+async function loadOrders(){
+  const snap = await getDocs(collection(db,'orders'));
+  const list = snap.docs.map(d=>({id:d.id,...d.data()}));
+  $('adminOrders').innerHTML = list.length ? list.map(o=>`<div class="admin-item"><strong>${o.profile?.name || 'Customer'}</strong><span>₹${o.total || 0} • ${o.profile?.phone || ''}</span></div>`).join('') : '<div class="muted">No orders yet</div>';
+}
+
+async function seedDemo(){
+  await setDoc(doc(db,'settings','store'), sampleSettings);
+  for (const c of sampleCategories) await addDoc(collection(db,'categories'), c);
+  for (const p of sampleProducts) await addDoc(collection(db,'products'), p);
+  for (const pr of samplePromos) await addDoc(collection(db,'promos'), pr);
+  await loadAll();
+  alert('Demo data seeded');
+}
+
+window.addEventListener('DOMContentLoaded', init);

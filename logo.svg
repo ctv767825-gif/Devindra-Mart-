@@ -1,9 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <rect width="256" height="256" rx="48" fill="#0f172a"/>
-  <rect x="42" y="92" width="172" height="96" rx="18" fill="#ffffff"/>
-  <path d="M84 92c0-28 19-46 44-46s44 18 44 46" fill="none" stroke="#22c55e" stroke-width="16" stroke-linecap="round"/>
-  <circle cx="96" cy="132" r="10" fill="#22c55e"/>
-  <circle cx="128" cy="132" r="10" fill="#f59e0b"/>
-  <circle cx="160" cy="132" r="10" fill="#ef4444"/>
-  <text x="128" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#ffffff">DevIndra Mart</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2049ad"/>
+      <stop offset="100%" stop-color="#10204f"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="28" fill="url(#g)"/>
+  <path d="M28 42h64l-5 34H33z" fill="#fff" opacity=".95"/>
+  <circle cx="44" cy="84" r="8" fill="#fff"/>
+  <circle cx="78" cy="84" r="8" fill="#fff"/>
+  <path d="M34 32h10l6 18" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
 </svg>
