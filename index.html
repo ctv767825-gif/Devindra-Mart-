@@ -1,631 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>DevIndra Mart</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="logo.svg">
-<meta name="theme-color" content="#0f172a">
-<style>
-:root{
-  --bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;
-  --primary:#111827;--primary2:#1f2937;--soft:#f1f5f9;--green:#15803d;--red:#b91c1c;--amber:#a16207;
-  --shadow:0 10px 30px rgba(15,23,42,.08);--radius:22px;
-}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-.hidden{display:none!important}
-.app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:96px}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.brand{display:flex;align-items:center;gap:10px}
-.brand img{width:38px;height:38px;border-radius:12px}
-.tiny{font-size:12px}.small{font-size:13px}.muted{color:var(--muted)}
-.title{font-size:22px;font-weight:700;margin:0}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px}
-.hero{color:#fff;background:linear-gradient(135deg,#0f172a,#334155)}
-.row{display:flex;gap:10px}.between{display:flex;justify-content:space-between;align-items:center;gap:10px}.stack{display:flex;flex-direction:column;gap:8px}
-.btn,.chip,.lang-btn,.nav-btn,.icon-btn{border:0;cursor:pointer;transition:.2s}
-.btn{padding:12px 14px;border-radius:16px;background:var(--primary);color:#fff;font-weight:700;width:100%}
-.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--border)}
-.btn.warn{background:#fef3c7;color:var(--amber)}.btn.danger{background:#fee2e2;color:var(--red)}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.lang-btn{padding:8px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px}
-.lang-btn.active{background:var(--primary);color:#fff}
-.icon-btn{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid var(--border)}
-.input,.textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:#fff;color:var(--text);font-size:14px}
-.textarea{min-height:88px;resize:vertical}
-.searchbar{display:flex;gap:8px;align-items:center;background:#fff;border-radius:18px;padding:10px 12px;box-shadow:var(--shadow);margin:14px}
-.searchbar input{border:0;outline:none;width:100%;background:transparent}
-.chips{display:flex;gap:8px;overflow:auto;padding:0 14px 4px}
-.chip{padding:9px 12px;border-radius:999px;background:#fff;border:1px solid var(--border);white-space:nowrap}
-.chip.active{background:#111827;color:#fff}
-.section{padding:0 14px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.grid.list{grid-template-columns:1fr}
-.product{background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
-.product img{width:100%;height:128px;object-fit:cover;background:#e2e8f0}
-.pbody{padding:12px}
-.pname{font-size:14px;font-weight:700;margin:0}
-.psub{font-size:12px;color:var(--muted);margin-top:4px}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.badge{padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;font-weight:700}
-.badge.red{background:#fee2e2;color:var(--red)}
-.badge.green{background:#dcfce7;color:var(--green)}
-.price-row{display:flex;justify-content:space-between;align-items:end;gap:8px}
-.price{font-size:16px;font-weight:700}.strike{font-size:12px;color:#94a3b8;text-decoration:line-through}
-.qty{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:12px;padding:3px}
-.qty button{width:28px;height:28px;border:0;border-radius:8px;background:var(--soft);cursor:pointer}
-.product.listitem{display:grid;grid-template-columns:82px 1fr auto;align-items:center;gap:10px;padding:10px}
-.product.listitem img{width:82px;height:82px;border-radius:14px}
-.product.listitem .pbody{padding:0}
-.suggestion-box,.voice-box{margin:0 14px 12px;background:#fff;border-radius:18px;padding:12px;box-shadow:var(--shadow)}
-.voice-box{border:1px dashed var(--border)}
-.voice-box.active{background:#eef2ff;border-color:#111827}
-.suggestion-pill{display:inline-block;margin:4px;padding:8px 10px;border-radius:999px;background:var(--soft);font-size:12px;cursor:pointer}
-.summary-line{display:flex;justify-content:space-between;margin:8px 0;font-size:14px}
-.summary-line.bold{font-weight:700}.divider{height:1px;background:var(--border);margin:12px 0}
-.bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:8px;z-index:30}
-.nav-btn{padding:10px 6px;border-radius:16px;background:#fff;border:1px solid transparent;font-size:11px}
-.nav-btn.active{background:var(--soft);border-color:var(--border)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;background:#111827;color:#fff;padding:12px 16px;border-radius:999px;z-index:50;font-size:13px;max-width:92%;text-align:center}
-.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:end;z-index:40}
-.modal.show{display:flex}
-.modal-card{background:#fff;width:100%;max-width:480px;margin:0 auto;border-top-left-radius:28px;border-top-right-radius:28px;padding:16px;max-height:88vh;overflow:auto}
-.modal-card img{width:100%;height:220px;object-fit:cover;border-radius:20px;background:#e2e8f0}
-.login-screen{min-height:100vh;background:linear-gradient(135deg,#020617,#1e293b);color:#fff;padding:20px;display:flex;align-items:center}
-.login-wrap{max-width:460px;margin:0 auto;width:100%}
-.pill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pill-grid div{background:rgba(255,255,255,.08);padding:12px;border-radius:18px;text-align:center;font-size:12px}
-.offer-run{margin:0 14px 14px;background:#111827;color:#fff;border-radius:16px;padding:10px 12px;font-size:13px;white-space:nowrap;overflow:hidden}
-.offer-run span{display:inline-block;padding-left:100%;animation:marquee 14s linear infinite}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
-.chat-box{background:#f8fafc;border-radius:18px;padding:10px;max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px}
-.chat-msg{padding:10px 12px;border-radius:16px;font-size:13px;max-width:88%}
-.chat-msg.bot{background:#fff}.chat-msg.user{background:#111827;color:#fff;align-self:flex-end}
-</style>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="logo.svg"><meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="loginScreen" class="login-screen">
-  <div class="login-wrap">
-    <div class="card" style="background:transparent;box-shadow:none;padding:0;margin-bottom:18px;color:white">
-      <div class="brand"><img src="logo.svg" alt="logo"><div><div class="tiny" style="opacity:.8">DEVINDRA MART</div><h1 class="title" style="font-size:30px;color:white;margin-top:6px" id="loginHero">Ghar tak paaye bazaar jaise rate</h1></div></div>
-      <p class="small" style="opacity:.86" id="loginSub">Fast ordering, easy checkout, smart kirana shopping.</p>
-    </div>
-    <div class="card">
-      <div class="tiny muted">LOGIN FIRST</div>
-      <h2 style="margin:8px 0 6px">Quick Login</h2>
-      <div id="phoneStep">
-        <input id="loginPhone" class="input" placeholder="Phone number">
-        <div style="height:10px"></div>
-        <button class="btn" onclick="startLogin()">Continue</button>
-      </div>
-      <div id="captchaStep" class="hidden">
-        <div class="card" style="margin:0;box-shadow:none;background:#f8fafc">
-          <div style="font-weight:700;margin-bottom:8px">Verification</div>
-          <div class="small muted" style="margin-bottom:10px">I'm not a robot tick karke aage badho.</div>
-          <button class="btn secondary" id="captchaBtn" onclick="verifyLogin()">I'm not a robot</button>
-        </div>
+<div class="app" id="appRoot">
+  <div id="loginView" class="login-wrap">
+    <div class="login-hero">
+      <div class="between"><div class="brand"><img src="logo.svg"><div><div class="subtle" data-i18n="welcomeLabel">WELCOME</div><h1 class="title" id="storeNameLogin">DevIndra Mart</h1></div></div><div class="pill" data-i18n="quickDelivery">Fast delivery</div></div>
+      <p class="subtle" id="storeTagline">Ab ghar tak paaye bazaar jaise rate.</p>
+      <div class="langs" style="margin-top:12px">
+        <button class="lang-btn" data-lang="hinglish">Hinglish</button>
+        <button class="lang-btn" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="hi">हिंदी</button>
       </div>
     </div>
-    <div class="pill-grid"><div>One-time login</div><div>Quick order</div><div>WhatsApp order</div></div>
-  </div>
-</div>
-
-<div id="appScreen" class="app hidden">
-  <div class="topbar">
-    <div class="brand"><img src="logo.svg" alt="logo"><div><div class="tiny muted">DevIndra Mart</div><div style="font-weight:700" id="topHero">Ghar tak paaye bazaar jaise rate</div></div></div>
-    <div class="row">
-      <button class="lang-btn active" data-lang="hinglish" onclick="setLanguage('hinglish')">Hinglish</button>
-      <button class="lang-btn" data-lang="hindi" onclick="setLanguage('hindi')">हिंदी</button>
-      <button class="lang-btn" data-lang="english" onclick="setLanguage('english')">English</button>
+    <div class="login-card">
+      <div class="subtle" style="font-weight:700;margin-bottom:10px" data-i18n="loginFirst">LOGIN FIRST</div>
+      <input id="loginPhone" class="input" type="tel" inputmode="numeric" placeholder="Enter mobile number">
+      <button id="continueBtn" class="btn" style="margin-top:14px" data-i18n="continue">Continue</button>
+      <div id="robotBox" class="card hidden" style="margin:14px 0 0;padding:14px">
+        <label class="between" style="justify-content:flex-start">
+          <input id="robotCheck" type="checkbox"><span data-i18n="notRobot">I'm not a robot</span>
+        </label>
+        <button id="verifyBtn" class="btn" style="margin-top:12px" data-i18n="verifyContinue">Verify & Continue</button>
+      </div>
+      <div class="form-grid" style="margin-top:14px">
+        <div class="card" style="margin:0;padding:14px;text-align:center"><div class="icon">🛍️</div><div class="small" data-i18n="quickOrder">Quick order</div></div>
+        <div class="card" style="margin:0;padding:14px;text-align:center"><div class="icon">💬</div><div class="small" data-i18n="whatsAppOrder">WhatsApp order</div></div>
+      </div>
     </div>
   </div>
 
-  <div class="offer-run"><span id="offerRun">Today offer: ₹699 par SAVE50, ₹999 par FIRST100, aur voice se bhi order karo.</span></div>
-
-  <div id="homeTab">
-    <div class="card hero">
-      <div class="badge">Offer Zone</div>
-      <h2 class="title" style="color:#fff;margin-top:10px" id="heroTitle">Ghar tak paaye bazaar jaise rate</h2>
-      <p class="small" style="opacity:.9" id="heroSub">Fast ordering, easy checkout, smart kirana shopping.</p>
-      <div class="row" style="margin-top:12px"><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">Min ₹500</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">COD</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">Voice On</div></div>
+  <div id="addressView" class="login-wrap hidden">
+    <div class="login-hero"><div class="between"><div><div class="subtle" data-i18n="deliveryAddress">DELIVERY ADDRESS</div><h2 class="title" data-i18n="saveAddress">Save your address</h2></div><img src="logo.svg" style="width:48px;height:48px;border-radius:14px"></div></div>
+    <div class="login-card">
+      <div class="form-grid">
+        <input id="addrName" class="input" placeholder="Name">
+        <input id="addrPhone" class="input" placeholder="Phone" disabled>
+        <input id="addrLine" class="input full" placeholder="Full Address">
+        <input id="addrLandmark" class="input" placeholder="Landmark">
+        <input id="addrCity" class="input" placeholder="City">
+        <input id="addrState" class="input" placeholder="State">
+        <input id="addrPincode" class="input" placeholder="Pincode">
+        <textarea id="addrNote" class="textarea full" placeholder="Delivery note (optional)"></textarea>
+      </div>
+      <div class="row" style="margin-top:12px"><button id="getLocationBtn" class="btn secondary" data-i18n="useCurrentLocation">Use current location</button><button id="saveAddressBtn" class="btn" data-i18n="saveOpenApp">Save & Open App</button></div>
+      <div id="locationStatus" class="subtle" style="margin-top:10px"></div>
     </div>
+  </div>
 
-    <div class="searchbar"><span>🔎</span><input id="searchInput" placeholder="Search item, brand ya category" oninput="onSearch(this.value)"><button class="icon-btn" onclick="startVoice()">🎤</button></div>
-    <div id="voiceBox" class="voice-box hidden"><div style="font-weight:700" id="voiceTitle">Listening...</div><div class="small muted" id="voiceTranscript">Say: add atta, 2 milk, search rice</div></div>
-    <div id="suggestionBox" class="suggestion-box hidden"></div>
-    <div class="chips" id="categoryChips"></div>
-
+  <div id="mainView" class="hidden">
+    <div class="topbar">
+      <div class="brand"><img src="logo.svg"><div><div class="subtle" id="topWelcome">Welcome back</div><h1 class="title" id="storeNameTop">DevIndra Mart</h1></div></div>
+      <div class="row"><button id="langToggleBtn" class="icon-btn" title="Language">🌐</button><button id="micBtn" class="icon-btn" title="Voice">🎤</button></div>
+    </div>
+    <div id="noticeBar" class="notice hidden"></div>
     <div class="section">
-      <div class="card" style="margin:0 0 14px">
-        <div class="between">
-          <h3 id="listingTitle" style="margin:0">All Products</h3>
-          <button class="btn secondary" style="width:auto;padding:8px 12px" id="viewBtn" onclick="toggleView()">List View</button>
-        </div>
-      </div>
-      <div id="productsGrid" class="grid"></div>
+      <div id="promoSlider" class="carousel hidden"></div>
     </div>
-  </div>
-
-  <div id="cartTab" class="hidden">
-    <div class="card"><h3 style="margin-top:0" id="checkoutTitle">Checkout</h3><div id="cartItems"></div></div>
-    <div class="card"><div class="small" id="deliverySlabText">₹0–₹999 = ₹50 • ₹1000–₹2999 = ₹30 • ₹3000–₹4999 = ₹20 • ₹5000+ = ₹10</div><div class="small muted" id="nextHint" style="margin-top:6px">Cart badhne par delivery auto kam ho jayega.</div></div>
-    <div class="card">
-      <div class="summary-line"><span id="subtotalLbl">Subtotal</span><span id="subtotalText">₹0</span></div>
-      <div class="summary-line"><span id="deliveryLbl">Delivery</span><span id="deliveryText">₹0</span></div>
-      <div class="summary-line"><span id="nextLbl">Next slab</span><span id="nextSlabText">-</span></div>
-      <div class="divider"></div>
-      <div class="summary-line bold"><span id="totalLbl">Total</span><span id="totalText">₹0</span></div>
-      <div style="height:10px"></div>
-      <div class="row"><button class="btn" onclick="placeOrder()" id="orderBtn">Order on WhatsApp</button><button class="btn danger" style="width:auto" onclick="clearCart()" id="clearBtn">Clear</button></div>
-    </div>
-  </div>
-
-  <div id="accountTab" class="hidden">
-    <div class="card">
-      <h3 style="margin-top:0" id="addressTitle">Delivery Address</h3>
-      <input id="nameField" class="input" placeholder="Name">
-      <div style="height:10px"></div>
-      <input id="phoneField" class="input" readonly style="background:#f1f5f9">
-      <div style="height:10px"></div>
-      <textarea id="addressField" class="textarea" placeholder="Address"></textarea>
-      <div style="height:10px"></div>
-      <div class="row"><input id="cityField" class="input" placeholder="City"><input id="stateField" class="input" placeholder="State"></div>
-      <div style="height:10px"></div>
-      <div class="row"><input id="pincodeField" class="input" placeholder="Pincode"><input id="landmarkField" class="input" placeholder="Landmark"></div>
-      <div style="height:10px"></div>
-      <div class="small muted" id="locationStatus">Current location not saved</div>
-      <div style="height:10px"></div>
-      <div class="row"><button class="btn" onclick="saveProfile()">Save Changes</button><button class="btn secondary" onclick="captureLocation()">Use Current Location</button></div>
-      <div style="height:10px"></div>
-      <button class="btn danger" onclick="logout()">Logout</button>
-    </div>
-  </div>
-
-  <div id="chatTab" class="hidden">
-    <div class="card">
-      <div class="between"><h3 style="margin-top:0" id="chatTitle">Smart Assistant</h3><button class="btn secondary" style="width:auto" onclick="seedSuggestions()">Tips</button></div>
-      <div id="chatMessages" class="chat-box"></div>
-      <div style="height:10px"></div>
-      <div class="row"><input id="chatInput" class="input" placeholder="Pucho kuch bhi..." style="flex:1"><button class="btn" style="width:auto" onclick="sendChat()">Send</button></div>
-    </div>
-  </div>
-
-  <div class="bottom-nav">
-    <button class="nav-btn active" id="navHome" onclick="switchTab('home')">🏠<br><span id="navHomeText">Home</span></button>
-    <button class="nav-btn" id="navCart" onclick="switchTab('cart')">🛒<br><span id="navCartText">Cart</span></button>
-    <button class="nav-btn" id="navAccount" onclick="switchTab('account')">👤<br><span id="navAccountText">Account</span></button>
-    <button class="nav-btn" id="navChat" onclick="switchTab('chat')">💬<br><span id="navChatText">Chat</span></button>
-    <button class="nav-btn" id="navCategory" onclick="openCategoryPanel()">📂<br><span id="navViewText">Category</span></button>
+    <div class="searchbar"><span>🔎</span><input id="searchInput" placeholder="Search items, brands, category"><button id="clearSearchBtn" class="icon-btn smallbtn">✕</button></div>
+    <div id="topCategories" class="chips"></div>
+    <div class="section between" style="padding-top:4px"><div><h2 class="title" style="font-size:18px" data-i18n="allProducts">All Products</h2><div class="subtle" id="subheadText">Browse by category</div></div><div class="row"><button id="gridBtn" class="icon-btn" title="Grid">▦</button><button id="listBtn" class="icon-btn" title="List">☰</button></div></div>
+    <div class="section"><div id="productsGrid" class="grid"></div></div>
   </div>
 </div>
 
-<div id="productModal" class="modal" onclick="closeModal(event)">
-  <div class="modal-card">
-    <div class="between" style="margin-bottom:12px"><button class="icon-btn" onclick="hideModal()">←</button><div style="font-weight:700" id="modalTitle">Product Details</div><div style="width:42px"></div></div>
-    <img id="modalImg" src="" alt="">
-    <div style="height:12px"></div>
-    <h3 id="modalName" style="margin:0 0 4px"></h3>
-    <div id="modalSub" class="small muted"></div>
-    <div id="modalBadges" class="badges"></div>
-    <div class="between"><div><div id="modalPrice" class="price"></div><div id="modalMrp" class="strike"></div></div><div class="stack" style="width:150px"><button class="btn" onclick="modalAdd()">Add to Cart</button><button class="btn secondary" onclick="modalOrder()">Order Now</button></div></div>
-  </div>
-</div>
+<div id="sheetBackdrop" class="sheet-backdrop hidden"></div>
+<div id="categorySheet" class="sheet hidden"></div>
+<div id="helpSheet" class="sheet hidden"></div>
+<div id="profileSheet" class="sheet hidden"></div>
+<div id="cartSheet" class="sheet hidden"></div>
+<div id="langSheet" class="sheet hidden"></div>
 
-<div id="toast" class="toast hidden"></div>
+<div id="cartBar" class="cartbar hidden"><div><div style="font-weight:800" data-i18n="cartReady">Cart ready</div><div class="small" id="cartBarText"></div></div><button id="openCartBtn" class="btn secondary" style="width:auto;padding:10px 14px" data-i18n="openCart">Open Cart</button></div>
 
-<script>
-const UI = {
-  hinglish:{
-    hero:"Ghar tak paaye bazaar jaise rate", sub:"Fast ordering, easy checkout, smart kirana shopping.",
-    search:"Search item, brand ya category", all:"All Products", list:"List View", grid:"Grid View",
-    home:"Home", cart:"Cart", account:"Account", chat:"Chat", view:"View", checkout:"Checkout",
-    order:"Order on WhatsApp", clear:"Clear", subtotal:"Subtotal", delivery:"Delivery", total:"Total",
-    next:"Next slab", address:"Address Form", locationSaved:"Current location saved", locationNot:"Current location not saved",
-    cartEmpty:"Cart empty hai.", voiceHint:"Say: add atta, 2 milk, search rice", voiceUnsupported:"Voice search supported nahi hai",
-    voiceNoMatch:"Voice se item samajh nahi aaya", noResult:"No exact match. Try one of these.", chatTitle:"Smart Assistant"
-  },
-  hindi:{
-    hero:"घर तक पाएँ बाजार जैसे रेट", sub:"फास्ट ऑर्डर, आसान चेकआउट, स्मार्ट किराना शॉपिंग।",
-    search:"आइटम, ब्रांड या कैटेगरी खोजें", all:"सभी प्रोडक्ट", list:"लिस्ट व्यू", grid:"ग्रिड व्यू",
-    home:"होम", cart:"कार्ट", account:"अकाउंट", chat:"चैट", view:"व्यू", checkout:"चेकआउट",
-    order:"व्हाट्सऐप पर ऑर्डर", clear:"साफ करें", subtotal:"सबटोटल", delivery:"डिलीवरी", total:"टोटल",
-    next:"अगला स्लैब", address:"पता फॉर्म", locationSaved:"करंट लोकेशन सेव है", locationNot:"करंट लोकेशन सेव नहीं है",
-    cartEmpty:"कार्ट खाली है।", voiceHint:"बोलें: add atta, 2 milk, search rice", voiceUnsupported:"वॉइस सर्च सपोर्ट नहीं है",
-    voiceNoMatch:"वॉइस से आइटम नहीं मिला", noResult:"सटीक मैच नहीं मिला। ये देखें।", chatTitle:"स्मार्ट असिस्टेंट"
-  },
-  english:{
-    hero:"Get market-like prices at your doorstep", sub:"Fast ordering, easy checkout, smart grocery shopping.",
-    search:"Search item, brand or category", all:"All Products", list:"List View", grid:"Grid View",
-    home:"Home", cart:"Cart", account:"Account", chat:"Chat", view:"View", checkout:"Checkout",
-    order:"Order on WhatsApp", clear:"Clear", subtotal:"Subtotal", delivery:"Delivery", total:"Total",
-    next:"Next slab", address:"Address Form", locationSaved:"Current location saved", locationNot:"Current location not saved",
-    cartEmpty:"Cart is empty.", voiceHint:"Say: add atta, 2 milk, search rice", voiceUnsupported:"Voice search not supported",
-    voiceNoMatch:"Could not match any item from voice", noResult:"No exact match. Try one of these.", chatTitle:"Smart Assistant"
-  }
-};
+<nav class="navbar hidden" id="bottomNav">
+  <button class="nav-btn active" data-nav="home"><span class="icon">🏠</span><span data-i18n="home">Home</span></button>
+  <button class="nav-btn" data-open="help"><span class="icon">💬</span><span data-i18n="support">Support</span></button>
+  <button class="nav-btn" data-open="category"><span class="icon">📂</span><span data-i18n="category">Category</span></button>
+  <button class="nav-btn" data-open="cart"><span class="icon">🛒</span><span data-i18n="cart">Cart</span></button>
+  <button class="nav-btn" data-open="profile"><span class="icon">👤</span><span data-i18n="profile">Profile</span></button>
+</nav>
 
-const categories = ["All","Atta Rice Dal","Oil Masala","Snacks Biscuits","Dairy Products","Beverages","Household Items","Personal Care","Baby Care","Fruits Vegetables","Cleaning Items"];
-const categoryNames = {
-  "All":{hinglish:"All",hindi:"सभी",english:"All"},
-  "Atta Rice Dal":{hinglish:"Atta Rice Dal",hindi:"आटा चावल दाल",english:"Flour Rice Lentils"},
-  "Oil Masala":{hinglish:"Oil Masala",hindi:"तेल मसाला",english:"Oil Spices"},
-  "Snacks Biscuits":{hinglish:"Snacks Biscuits",hindi:"स्नैक्स बिस्किट",english:"Snacks Biscuits"},
-  "Dairy Products":{hinglish:"Dairy Products",hindi:"डेयरी प्रोडक्ट",english:"Dairy Products"},
-  "Beverages":{hinglish:"Beverages",hindi:"पेय पदार्थ",english:"Beverages"},
-  "Household Items":{hinglish:"Household Items",hindi:"घरेलू सामान",english:"Household Items"},
-  "Personal Care":{hinglish:"Personal Care",hindi:"पर्सनल केयर",english:"Personal Care"},
-  "Baby Care":{hinglish:"Baby Care",hindi:"बेबी केयर",english:"Baby Care"},
-  "Fruits Vegetables":{hinglish:"Fruits Vegetables",hindi:"फल सब्जियां",english:"Fruits Vegetables"},
-  "Cleaning Items":{hinglish:"Cleaning Items",hindi:"सफाई सामान",english:"Cleaning Items"}
-};
-
-const products = [
- {id:1,cat:"Atta Rice Dal",name:{hinglish:"Aashirvaad Atta",hindi:"आशीर्वाद आटा",english:"Aashirvaad Flour"},brand:"Aashirvaad",size:"5 kg",price:289,mrp:320,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=1200&auto=format&fit=crop",aliases:["atta","aata","ata","ashirwad atta","asirwad atta","ashar bat","a ti a"]},
- {id:2,cat:"Atta Rice Dal",name:{hinglish:"Fortune Atta",hindi:"फॉर्च्यून आटा",english:"Fortune Flour"},brand:"Fortune",size:"10 kg",price:520,mrp:570,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=1200&auto=format&fit=crop",aliases:["fortune atta","flour"]},
- {id:3,cat:"Atta Rice Dal",name:{hinglish:"India Gate Rice",hindi:"इंडिया गेट चावल",english:"India Gate Rice"},brand:"India Gate",size:"5 kg",price:569,mrp:610,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=1200&auto=format&fit=crop",aliases:["rice","chawal"]},
- {id:4,cat:"Atta Rice Dal",name:{hinglish:"Toor Dal",hindi:"तूर दाल",english:"Pigeon Pea Lentils"},brand:"Fortune",size:"1 kg",price:130,mrp:145,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1615485925873-7915b7f2d3dc?q=80&w=1200&auto=format&fit=crop",aliases:["dal","daal","toor","arhar"]},
- {id:5,cat:"Oil Masala",name:{hinglish:"Fortune Mustard Oil",hindi:"फॉर्च्यून सरसों तेल",english:"Mustard Oil"},brand:"Fortune",size:"1 litre",price:182,mrp:195,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=1200&auto=format&fit=crop",aliases:["oil","tel","sarso tel"]},
- {id:6,cat:"Oil Masala",name:{hinglish:"Tata Salt",hindi:"टाटा नमक",english:"Tata Salt"},brand:"Tata",size:"1 kg",price:28,mrp:30,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1514996937319-344454492b37?q=80&w=1200&auto=format&fit=crop",aliases:["salt","namak"]},
- {id:7,cat:"Snacks Biscuits",name:{hinglish:"Parle-G Biscuits",hindi:"पार्ले-जी बिस्किट",english:"Parle-G Biscuits"},brand:"Parle",size:"800 g",price:88,mrp:95,inStock:true,popular:false,featured:true,image:"https://images.unsplash.com/photo-1585238342024-78d387f4a707?q=80&w=1200&auto=format&fit=crop",aliases:["biscuit","biskut","biscut","parleg"]},
- {id:8,cat:"Snacks Biscuits",name:{hinglish:"Good Day Biscuit",hindi:"गुड डे बिस्किट",english:"Good Day Biscuit"},brand:"Britannia",size:"200 g",price:35,mrp:40,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=1200&auto=format&fit=crop",aliases:["goodday","good day"]},
- {id:9,cat:"Snacks Biscuits",name:{hinglish:"Marigold Biscuit",hindi:"मैरीगोल्ड बिस्किट",english:"Marigold Biscuit"},brand:"Britannia",size:"100 g",price:18,mrp:20,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1541599188778-cdc73298e8b1?q=80&w=1200&auto=format&fit=crop",aliases:["marigold","marie biscuit"]},
- {id:10,cat:"Snacks Biscuits",name:{hinglish:"Happy Happy Biscuit",hindi:"हैप्पी हैप्पी बिस्किट",english:"Happy Happy Biscuit"},brand:"Parle",size:"100 g",price:18,mrp:20,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1200&auto=format&fit=crop",aliases:["happy happy","happy biscuit"]},
- {id:11,cat:"Dairy Products",name:{hinglish:"Amul Milk",hindi:"अमूल दूध",english:"Amul Milk"},brand:"Amul",size:"1 litre",price:56,mrp:58,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=1200&auto=format&fit=crop",aliases:["milk","doodh"]},
- {id:12,cat:"Dairy Products",name:{hinglish:"Amul Butter",hindi:"अमूल मक्खन",english:"Amul Butter"},brand:"Amul",size:"500 g",price:280,mrp:310,inStock:true,popular:false,featured:true,image:"https://images.unsplash.com/photo-1625944525533-473f1b3d54dd?q=80&w=1200&auto=format&fit=crop",aliases:["butter","makhan"]},
- {id:13,cat:"Beverages",name:{hinglish:"Tea Leaves",hindi:"चायपत्ती",english:"Tea Leaves"},brand:"Tata Tea",size:"250 g",price:140,mrp:160,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?q=80&w=1200&auto=format&fit=crop",aliases:["tea","chai","chaypatti","chaipatti"]},
- {id:14,cat:"Atta Rice Dal",name:{hinglish:"Besan",hindi:"बेसन",english:"Gram Flour"},brand:"Fresh",size:"1 kg",price:82,mrp:95,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1627485937980-221c88ac04f9?q=80&w=1200&auto=format&fit=crop",aliases:["besan","gram flour"]},
- {id:15,cat:"Atta Rice Dal",name:{hinglish:"Gur",hindi:"गुड़",english:"Jaggery"},brand:"Fresh",size:"1 kg",price:70,mrp:78,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?q=80&w=1200&auto=format&fit=crop",aliases:["gur","gud","jaggery"]},
- {id:16,cat:"Fruits Vegetables",name:{hinglish:"Potato",hindi:"आलू",english:"Potato"},brand:"Fresh",size:"1 kg",price:25,mrp:32,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=1200&auto=format&fit=crop",aliases:["potato","aloo"]},
- {id:17,cat:"Fruits Vegetables",name:{hinglish:"Apple",hindi:"सेब",english:"Apple"},brand:"Fresh",size:"1 kg",price:120,mrp:145,inStock:true,popular:false,featured:true,image:"https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=1200&auto=format&fit=crop",aliases:["apple","seb"]},
- {id:18,cat:"Cleaning Items",name:{hinglish:"Phenyl",hindi:"फिनाइल",english:"Phenyl"},brand:"Clean Home",size:"1 litre",price:80,mrp:95,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop",aliases:["phenyl","cleaner"]},
- {id:19,cat:"Household Items",name:{hinglish:"Surf Excel",hindi:"सर्फ एक्सेल",english:"Surf Excel"},brand:"Surf Excel",size:"1 kg",price:118,mrp:130,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1583947215259-38e31be8751f?q=80&w=1200&auto=format&fit=crop",aliases:["surf","detergent","washing powder"]},
- {id:20,cat:"Personal Care",name:{hinglish:"Colgate Toothpaste",hindi:"कोलगेट टूथपेस्ट",english:"Colgate Toothpaste"},brand:"Colgate",size:"200 g",price:95,mrp:110,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?q=80&w=1200&auto=format&fit=crop",aliases:["colgate","toothpaste"]},
- {id:21,cat:"Baby Care",name:{hinglish:"Baby Powder",hindi:"बेबी पाउडर",english:"Baby Powder"},brand:"Baby Care",size:"200 g",price:120,mrp:150,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop",aliases:["baby powder"]},
- {id:22,cat:"Household Items",name:{hinglish:"Garbage Bags",hindi:"कचरा बैग",english:"Garbage Bags"},brand:"Home",size:"1 pack",price:60,mrp:75,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=1200&auto=format&fit=crop",aliases:["garbage bag","dustbin bag"]}
-];
-
-const state = {
-  language: localStorage.getItem('dm_lang') || 'hinglish',
-  viewMode: localStorage.getItem('dm_view_mode') || 'grid',
-  category: 'All',
-  search: '',
-  cart: {},
-  profile: {name:'', phone:'', address:'', city:'', state:'', pincode:'', landmark:''},
-  locationLink: '',
-  selectedId: null,
-  chat: [{role:'bot', text:'Namaste 👋 Main stock, price, order, delivery aur setting me help kar sakta hoon.'}],
-  loginPhone: ''
-};
-
-function sessionPhone(){ try{return JSON.parse(localStorage.getItem('dm_session')||'{}').phone||'';}catch(e){return '';} }
-function key(name){ const p=sessionPhone(); return p?`dm_${name}_${p}`:null; }
-function saveScoped(name,v){ const k=key(name); if(k) localStorage.setItem(k, JSON.stringify(v)); }
-function loadScoped(name,fallback){ const k=key(name); if(!k) return fallback; const raw=localStorage.getItem(k); return raw?JSON.parse(raw):fallback; }
-function migrateOld(phone){
-  [['profile','dm_profile'],['cart','dm_cart'],['location_link','dm_location_link']].forEach(([name, old])=>{
-    const nk=`dm_${name}_${phone}`;
-    if(!localStorage.getItem(nk) && localStorage.getItem(old)) localStorage.setItem(nk, localStorage.getItem(old));
-  });
-}
-function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.remove('hidden'); clearTimeout(window.tt); window.tt=setTimeout(()=>el.classList.add('hidden'),2200); }
-function normalize(s){ return String(s).toLowerCase().replace(/[^a-z0-9\u0900-\u097f]/g,''); }
-function productLabel(p){ return p.name[state.language] || p.name.hinglish; }
-function categoryLabel(c){ return categoryNames[c][state.language] || c; }
-function searchPool(p){ return [p.name.hinglish,p.name.hindi,p.name.english,p.brand,p.cat,...(p.aliases||[])].join(' '); }
-function fuzzyIncludes(text, query){
-  text=normalize(text); query=normalize(query);
-  if(!query) return true;
-  if(text.includes(query)) return true;
-  let qi=0; for(let i=0;i<text.length && qi<query.length;i++){ if(text[i]===query[qi]) qi++; }
-  return qi===query.length;
-}
-function searchScore(p,q){
-  if(!q) return 1;
-  const pool=normalize(searchPool(p));
-  const nq=normalize(q);
-  if(pool.includes(nq)) return 100;
-  if(fuzzyIncludes(pool,q)) return 70;
-  const aliasHit=(p.aliases||[]).some(a=>fuzzyIncludes(a,q));
-  if(aliasHit) return 90;
-  return 0;
-}
-function filteredProducts(){
-  return products
-    .filter(p=>state.category==='All' || p.cat===state.category)
-    .map(p=>({...p, _score:searchScore(p,state.search)}))
-    .filter(p=>state.search? p._score>0 : true)
-    .sort((a,b)=>b._score-a._score || a.id-b.id);
-}
-function suggestions(){
-  if(!state.search.trim()) return [];
-  return products.map(p=>({...p,_score:searchScore(p,state.search)})).filter(p=>p._score>0).sort((a,b)=>b._score-a._score).slice(0,6);
-}
-function formatINR(v){ return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(v); }
-function deliveryCharge(s){ if(s<=0) return 0; if(s<1000) return 50; if(s<3000) return 30; if(s<5000) return 20; return 10; }
-function nextSlab(sub){ if(sub<1000) return `₹${1000-sub} aur add karo, delivery ₹30 ho jayega`; if(sub<3000) return `₹${3000-sub} aur add karo, delivery ₹20 ho jayega`; if(sub<5000) return `₹${5000-sub} aur add karo, delivery ₹10 ho jayega`; return 'Lowest delivery charge unlocked'; }
-function cartItems(){ return products.filter(p=>(state.cart[p.id]||0)>0).map(p=>({...p, qty:state.cart[p.id], total:state.cart[p.id]*p.price})); }
-
-function renderLanguage(){
-  const t=UI[state.language];
-  document.getElementById('loginHero').textContent=t.hero;
-  document.getElementById('loginSub').textContent=t.sub;
-  document.getElementById('topHero').textContent=t.hero;
-  document.getElementById('heroTitle').textContent=t.hero;
-  document.getElementById('heroSub').textContent=t.sub;
-  document.getElementById('searchInput').placeholder=t.search;
-  document.getElementById('listingTitle').textContent=state.search ? state.search : t.all;
-  document.getElementById('viewBtn').textContent=state.viewMode==='grid'?t.list:t.grid;
-  document.getElementById('checkoutTitle').textContent=t.checkout;
-  document.getElementById('subtotalLbl').textContent=t.subtotal;
-  document.getElementById('deliveryLbl').textContent=t.delivery;
-  document.getElementById('totalLbl').textContent=t.total;
-  document.getElementById('nextLbl').textContent=t.next;
-  document.getElementById('addressTitle').textContent=t.address;
-  document.getElementById('locationStatus').textContent=state.locationLink?t.locationSaved:t.locationNot;
-  document.getElementById('chatTitle').textContent=t.chatTitle;
-  document.getElementById('orderBtn').textContent=t.order;
-  document.getElementById('clearBtn').textContent=t.clear;
-  document.getElementById('navHomeText').textContent=t.home;
-  document.getElementById('navCartText').textContent=t.cart;
-  document.getElementById('navAccountText').textContent=t.account;
-  document.getElementById('navChatText').textContent=t.chat;
-  document.getElementById('navViewText').textContent=t.view;
-  document.getElementById('voiceTranscript').textContent=t.voiceHint;
-  document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.lang===state.language));
-}
-function renderCategories(){
-  const box=document.getElementById('categoryChips'); box.innerHTML='';
-  categories.forEach(c=>{
-    const btn=document.createElement('button');
-    btn.className='chip'+(state.category===c?' active':'');
-    btn.textContent=categoryLabel(c);
-    btn.onclick=()=>{state.category=c; renderAll();};
-    box.appendChild(btn);
-  });
-}
-function actionHtml(p,qty){
-  const t=UI[state.language];
-  if(!p.inStock) return `<button class="btn warn" style="width:auto;padding:9px 10px">${t.outStock||'Out of Stock'}</button>`;
-  if(qty===0) return `<div class="stack" style="width:110px"><button class="btn" style="width:auto" onclick="addToCart(${p.id})">${t.add||'Add'}</button><button class="btn secondary" style="width:auto" onclick="quickOrder(${p.id})">${t.orderNow||'Order Now'}</button></div>`;
-  return `<div class="qty"><button onclick="decCart(${p.id})">-</button><span>${qty}</span><button onclick="addToCart(${p.id})">+</button></div>`;
-}
-function renderProducts(){
-  const grid=document.getElementById('productsGrid');
-  grid.className=state.viewMode==='list'?'grid list':'grid';
-  grid.innerHTML=filteredProducts().map(p=>{
-    const qty=state.cart[p.id]||0;
-    const disc=Math.max(0,Math.round(((p.mrp-p.price)/p.mrp)*100));
-    if(state.viewMode==='list'){
-      return `<div class="product listitem" onclick="openProduct(${p.id})"><img src="${p.image}"><div class="pbody"><p class="pname">${productLabel(p)}</p><div class="psub">${categoryLabel(p.cat)} • ${p.size}</div><div class="badges">${disc?`<span class="badge">${disc}% OFF</span>`:''}${p.popular?`<span class="badge">Popular</span>`:''}${!p.inStock?`<span class="badge red">${UI[state.language].outStock||'Out of Stock'}</span>`:''}</div></div><div class="price-row"><div><div class="price">${formatINR(p.price)}</div><div class="strike">${formatINR(p.mrp)}</div></div><div onclick="event.stopPropagation()">${actionHtml(p,qty)}</div></div></div>`;
-    }
-    return `<div class="product"><img src="${p.image}" onclick="openProduct(${p.id})"><div class="pbody"><p class="pname" onclick="openProduct(${p.id})">${productLabel(p)}</p><div class="psub">${categoryLabel(p.cat)} • ${p.size}</div><div class="badges">${disc?`<span class="badge">${disc}% OFF</span>`:''}${p.popular?`<span class="badge">Popular</span>`:''}${!p.inStock?`<span class="badge red">${UI[state.language].outStock||'Out of Stock'}</span>`:''}</div><div class="price-row"><div><div class="price">${formatINR(p.price)}</div><div class="strike">${formatINR(p.mrp)}</div></div><div>${actionHtml(p,qty)}</div></div></div></div>`;
-  }).join('');
-}
-function renderSuggestions(){
-  const box=document.getElementById('suggestionBox');
-  const list=suggestions();
-  if(!state.search.trim()){ box.classList.add('hidden'); box.innerHTML=''; return; }
-  if(!list.length){ box.classList.remove('hidden'); box.innerHTML=`<div class="small muted">${UI[state.language].noResult}</div>`; return; }
-  box.classList.remove('hidden');
-  box.innerHTML=`<div class="small muted" style="margin-bottom:6px">${UI[state.language].noResult}</div>`+list.map(p=>`<span class="suggestion-pill" onclick="pickSuggestion(${p.id})">${productLabel(p)}</span>`).join('');
-}
-function pickSuggestion(id){
-  const p=products.find(x=>x.id===id); if(!p) return;
-  state.search=p.name.hinglish; document.getElementById('searchInput').value=p.name.hinglish; renderAll();
-}
-function renderCart(){
-  const items=cartItems();
-  const box=document.getElementById('cartItems');
-  box.innerHTML=!items.length?`<div class="small muted">${UI[state.language].cartEmpty}</div>`:items.map(i=>`<div class="between" style="padding:10px 0;border-bottom:1px solid #e2e8f0"><div><div style="font-weight:700">${productLabel(i)}</div><div class="small muted">${i.qty} x ${formatINR(i.price)}</div></div><div style="font-weight:700">${formatINR(i.total)}</div></div>`).join('');
-  const subtotal=items.reduce((a,b)=>a+b.total,0); const del=deliveryCharge(subtotal);
-  document.getElementById('subtotalText').textContent=formatINR(subtotal);
-  document.getElementById('deliveryText').textContent=formatINR(del);
-  document.getElementById('totalText').textContent=formatINR(subtotal+del);
-  document.getElementById('nextSlabText').textContent=nextSlab(subtotal);
-}
-function renderProfile(){
-  document.getElementById('nameField').value=state.profile.name||'';
-  document.getElementById('phoneField').value=state.profile.phone||sessionPhone();
-  document.getElementById('addressField').value=state.profile.address||'';
-  document.getElementById('cityField').value=state.profile.city||'';
-  document.getElementById('stateField').value=state.profile.state||'';
-  document.getElementById('pincodeField').value=state.profile.pincode||'';
-  document.getElementById('landmarkField').value=state.profile.landmark||'';
-}
-function renderChat(){
-  const box=document.getElementById('chatMessages');
-  box.innerHTML=state.chat.map(m=>`<div class="chat-msg ${m.role}">${m.text}</div>`).join('');
-  box.scrollTop=box.scrollHeight;
-}
-function persist(){
-  saveScoped('cart',state.cart); saveScoped('profile',state.profile); saveScoped('location_link',state.locationLink);
-  localStorage.setItem('dm_lang',state.language); localStorage.setItem('dm_view_mode',state.viewMode);
-}
-function renderAll(){ renderLanguage(); renderCategories(); renderSuggestions(); renderProducts(); renderCart(); renderProfile(); renderChat(); persist(); }
-
-function onSearch(v){ state.search=v; renderAll(); }
-function setLanguage(lang){ state.language=lang; renderAll(); }
-function toggleView(){ state.viewMode=state.viewMode==='grid'?'list':'grid'; renderAll(); }
-function addToCart(id){ state.cart[id]=(state.cart[id]||0)+1; renderAll(); }
-function decCart(id){ state.cart[id]=(state.cart[id]||0)-1; if(state.cart[id]<=0) delete state.cart[id]; renderAll(); }
-function quickOrder(id){ addToCart(id); switchTab('cart'); showToast('Added to cart'); }
-function clearCart(){ state.cart={}; renderAll(); }
-
-function startLogin(){
-  const phone=(document.getElementById('loginPhone').value||'').replace(/\D/g,'');
-  if(phone.length!==10) return showToast('Valid phone number daalo');
-  state.loginPhone='+91'+phone;
-  document.getElementById('phoneStep').classList.add('hidden');
-  document.getElementById('captchaStep').classList.remove('hidden');
-}
-function verifyLogin(){
-  localStorage.setItem('dm_session', JSON.stringify({phone:state.loginPhone}));
-  migrateOld(state.loginPhone);
-  loadUser();
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('appScreen').classList.remove('hidden');
-  renderAll();
-  switchTab('account');
-  showToast('Address fill karke app use karo');
-}
-function loadUser(){
-  const phone=sessionPhone();
-  state.cart=loadScoped('cart',{});
-  state.profile=loadScoped('profile',{name:'',phone, address:'', city:'', state:'', pincode:'', landmark:''});
-  state.locationLink=loadScoped('location_link','');
-  state.profile.phone=phone;
-}
-function saveProfile(){
-  state.profile.name=document.getElementById('nameField').value.trim();
-  state.profile.phone=document.getElementById('phoneField').value.trim();
-  state.profile.address=document.getElementById('addressField').value.trim();
-  state.profile.city=document.getElementById('cityField').value.trim();
-  state.profile.state=document.getElementById('stateField').value.trim();
-  state.profile.pincode=document.getElementById('pincodeField').value.trim();
-  state.profile.landmark=document.getElementById('landmarkField').value.trim();
-  renderAll(); showToast('Profile updated');
-}
-function captureLocation(){
-  if(!navigator.geolocation) return showToast('Location support nahi hai');
-  navigator.geolocation.getCurrentPosition((pos)=>{ state.locationLink=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`; renderAll(); showToast('Location saved'); }, ()=>showToast('Location permission denied'));
-}
-function logout(){
-  localStorage.removeItem('dm_session');
-  document.getElementById('appScreen').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('phoneStep').classList.remove('hidden');
-  document.getElementById('captchaStep').classList.add('hidden');
-  showToast('Logged out');
-}
-function placeOrder(){
-  const items=cartItems();
-  if(!state.profile.name || !state.profile.address){ switchTab('account'); return showToast('Pehle naam aur address fill karo'); }
-  const subtotal=items.reduce((a,b)=>a+b.total,0); const del=deliveryCharge(subtotal);
-  let msg=`🛒 *New Order - DevIndra Mart*%0A%0A👤 Name: ${state.profile.name}%0A📞 Phone: ${state.profile.phone}%0A📍 Address: ${state.profile.address}, ${state.profile.city}, ${state.profile.state} - ${state.profile.pincode}%0A`;
-  if(state.profile.landmark) msg+=`🏷 Landmark: ${state.profile.landmark}%0A`;
-  if(state.locationLink) msg+=`🗺 Map: ${state.locationLink}%0A`;
-  msg+=`%0A📦 *Items:*%0A`; items.forEach(i=>msg+=`- ${productLabel(i)} x ${i.qty} = ₹${i.total}%0A`);
-  msg+=`%0A💰 Subtotal: ₹${subtotal}%0A🚚 Delivery: ₹${del}%0A🔥 *Total: ₹${subtotal+del}*`;
-  window.open(`https://wa.me/917678256489?text=${msg}`,'_blank');
-}
-
-function openCategoryPanel(){
-  switchTab('home');
-  const el=document.getElementById('categoryChips');
-  if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); }
-  showToast('Category upar available hai');
-}
-
-function switchTab(name){
-  ['home','cart','account','chat'].forEach(t=>{
-    document.getElementById(t+'Tab').classList.add('hidden');
-    document.getElementById('nav'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('active');
-  });
-  document.getElementById(name+'Tab').classList.remove('hidden');
-  document.getElementById('nav'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
-}
-function openProduct(id){
-  state.selectedId=id; const p=products.find(x=>x.id===id); if(!p) return;
-  document.getElementById('modalImg').src=p.image;
-  document.getElementById('modalName').textContent=productLabel(p);
-  document.getElementById('modalSub').textContent=`${categoryLabel(p.cat)} • ${p.size}`;
-  document.getElementById('modalPrice').textContent=formatINR(p.price);
-  document.getElementById('modalMrp').textContent=formatINR(p.mrp);
-  const disc=Math.max(0,Math.round(((p.mrp-p.price)/p.mrp)*100));
-  document.getElementById('modalBadges').innerHTML=`${disc?`<span class="badge">${disc}% OFF</span>`:''}${p.popular?`<span class="badge">Popular</span>`:''}${!p.inStock?`<span class="badge red">Out of Stock</span>`:'<span class="badge green">In Stock</span>'}`;
-  document.getElementById('productModal').classList.add('show');
-}
-function hideModal(){ document.getElementById('productModal').classList.remove('show'); }
-function closeModal(e){ if(e.target.id==='productModal') hideModal(); }
-function modalAdd(){ if(state.selectedId!=null) addToCart(state.selectedId); }
-function modalOrder(){ if(state.selectedId!=null){ quickOrder(state.selectedId); hideModal(); } }
-
-function botReply(q){
-  const text=q.toLowerCase();
-  const top=suggestions()[0];
-  if(text.includes('stock')){
-    const inS=products.filter(p=>p.inStock).length, outS=products.filter(p=>!p.inStock).length;
-    return `${inS} items stock me hain, ${outS} out of stock hain.`;
-  }
-  if(text.includes('price')){
-    const p=top || products.find(x=>searchScore(x,q)>0);
-    return p?`${productLabel(p)} ka price ${formatINR(p.price)} hai.`:'Kaun sa item ka price chahiye?';
-  }
-  if(text.includes('delivery')) return document.getElementById('deliverySlabText').textContent;
-  if(text.includes('language')) return 'Top right se Hinglish, Hindi ya English select karo.';
-  if(text.includes('category')) return 'Top category bar se category choose karo.';
-  if(text.includes('order')) return 'Item add karo, cart me jao, address save karo, phir WhatsApp order dabao.';
-  if(text.includes('cheap') || text.includes('sasta')){
-    const cheapest=[...products].sort((a,b)=>a.price-b.price).slice(0,3).map(p=>`${productLabel(p)} ${formatINR(p.price)}`).join(', ');
-    return `Ye saste items dekh lo: ${cheapest}`;
-  }
-  const p=products.find(x=>searchScore(x,q)>0);
-  if(p) return `${productLabel(p)} ${formatINR(p.price)} me available hai${p.inStock?' aur stock me hai.':' lekin abhi out of stock hai.'}`;
-  return 'Main stock, price, order, delivery, category aur setting me help kar sakta hoon.';
-}
-function sendChat(){
-  const input=document.getElementById('chatInput'); const q=input.value.trim(); if(!q) return;
-  state.chat.push({role:'user', text:q}); state.chat.push({role:'bot', text:botReply(q)}); input.value=''; renderChat();
-}
-function seedSuggestions(){
-  state.chat.push({role:'bot', text:'Try asking: atta ka price kya hai, stock me kya hai, sasta kya hai, delivery charge kya hai.'});
-  renderChat();
-}
-
-function voiceUI(show,title,text){
-  const box=document.getElementById('voiceBox');
-  box.classList.toggle('hidden',!show);
-  box.classList.toggle('active',show);
-  document.getElementById('voiceTitle').textContent=title||'Listening...';
-  document.getElementById('voiceTranscript').textContent=text||UI[state.language].voiceHint;
-}
-function parseMultiAdd(spoken){
-  const txt=spoken.toLowerCase();
-  let hits=[];
-  products.forEach(p=>{
-    const score=searchScore(p,txt);
-    if(score>0) hits.push({p,score});
-  });
-  hits=hits.sort((a,b)=>b.score-a.score);
-  return hits.slice(0,3).map(x=>x.p);
-}
-function voiceCommand(spoken){
-  const low=spoken.toLowerCase();
-  const qtyMatch=low.match(/(\d+)/); const qty=qtyMatch?parseInt(qtyMatch[1],10):1;
-  const items=parseMultiAdd(low);
-  if(!items.length) return showToast(UI[state.language].voiceNoMatch);
-  if(low.includes('search')||low.includes('find')){
-    state.search=items[0].name.hinglish; document.getElementById('searchInput').value=items[0].name.hinglish; renderAll(); return;
-  }
-  if(low.includes('+') || low.includes(' and ') || low.includes(' aur ')){
-    items.forEach((p,i)=>{ const c=i===0?qty:1; for(let k=0;k<c;k++) addToCart(p.id); });
-    return showToast('Multiple items added');
-  }
-  for(let k=0;k<qty;k++) addToCart(items[0].id);
-  if(low.includes('order now')||low.includes('send order')){ switchTab('cart'); setTimeout(placeOrder,250); }
-}
-function startVoice(){
-  if(navigator.vibrate) navigator.vibrate(80);
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR) return showToast(UI[state.language].voiceUnsupported);
-  const rec=new SR(); rec.lang='en-IN'; rec.interimResults=true; rec.continuous=false;
-  voiceUI(true,'Listening...',UI[state.language].voiceHint);
-  rec.onresult=e=>{
-    const spoken=Array.from(e.results).map(r=>r[0].transcript).join(' ');
-    voiceUI(true,'Processing...',spoken);
-    if(e.results[e.results.length-1].isFinal) setTimeout(()=>{ voiceCommand(spoken); voiceUI(false); },350);
-  };
-  rec.onerror=()=>{ voiceUI(false); showToast(UI[state.language].voiceUnsupported); };
-  rec.onend=()=>setTimeout(()=>voiceUI(false),500);
-  rec.start();
-}
-
-(function init(){
-  const phone=sessionPhone();
-  if(phone){ loadUser(); document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); }
-  renderAll();
-})();
-</script>
-</body>
-</html>
+<script src="firebase-config.js"></script>
+<script type="module" src="app.js"></script>
+</body></html>

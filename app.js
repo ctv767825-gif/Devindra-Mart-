@@ -1,236 +1,101 @@
-(async function(){
-  const $ = (id)=>document.getElementById(id);
-  await window.DMData.ensureSeed();
-  let settings = await window.DMData.getSettings();
-  let categories = (await window.DMData.getCollection('categories')).filter(x=>x.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
-  let products = await window.DMData.getCollection('products');
-  let promos = (await window.DMData.getCollection('promos')).filter(x=>x.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
-  let cart = JSON.parse(localStorage.getItem('dm_cart')||'[]');
-  let currentView = localStorage.getItem('dm_view') || 'grid';
-  let currentCategory = null;
-  let currentSubcat = null;
-  let promoIndex = 0;
-  let promoTimer = null;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, addDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  function setText(id, value){ const el=$(id); if(el) el.textContent=value; }
-  function money(n){ return '₹' + Number(n||0).toFixed(0); }
-  function saveCart(){ localStorage.setItem('dm_cart', JSON.stringify(cart)); }
-  function getDelivery(subtotal){
-    const rules = settings.deliveryRules||[];
-    const hit = rules.find(r=>subtotal >= Number(r.min) && subtotal <= Number(r.max));
-    return hit ? Number(hit.charge) : 0;
-  }
-  function cartSubtotal(){ return cart.reduce((s,x)=>s + x.price*x.qty, 0); }
-  function cartTotal(){ const sub = cartSubtotal(); return sub + getDelivery(sub); }
+const app = initializeApp(window.firebaseConfig);
+const db = getFirestore(app);
+const FIXED_WHATSAPP = '7678256489';
 
-  function applyBrand(){
-    setText('storeNameTop', settings.storeName);
-    setText('storeTaglineTop', settings.tagline);
-    setText('heroTitle', settings.tagline);
-    setText('heroSub', settings.subtitle);
-    setText('brandSmall', settings.storeName.toUpperCase());
-    setText('brandBig', settings.tagline);
-    $('storeLogo').src = settings.logoUrl || 'logo.svg';
-    setText('minChip', 'Min ₹' + settings.minOrder);
-    $('notificationBar').classList.toggle('hidden', !settings.notificationEnabled || !settings.notificationText);
-    $('notificationBar').textContent = settings.notificationText || '';
-    setText('helpTitle', settings.helpHeading || 'Help Center');
-    setText('helpText', settings.helpText || 'Call or WhatsApp our support team for fast help.');
-    $('callSupportBtn').href = 'tel:' + (settings.supportPhone || '');
-    $('waSupportBtn').href = 'https://wa.me/' + (settings.whatsapp || '');
-    $('waLogin').onclick = ()=> window.open('https://wa.me/' + (settings.whatsapp || ''), '_blank');
-  }
+const SAMPLE = {
+  settings:{storeName:'DevIndra Mart', storeTagline:'Ab ghar tak paaye bazaar jaise rate.', noticeText:'Fresh deals today • Order on WhatsApp also available', whatsappNumber:FIXED_WHATSAPP, minOrder:500, deliveryRules:[[0,999,50],[1000,2999,30],[3000,4999,20],[5000,999999,10]], freeNote:'Fast service in your area', riderApp:'', billingApp:'', receiptPrefix:'DM'},
+  categories:[
+    {id:'kirana',name:'Kirana',image:'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=60',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Atta','Rice','Oil','Spices']},
+    {id:'fruits',name:'Fruits',image:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=60',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Seasonal','Premium','Daily Use']},
+    {id:'vegetables',name:'Vegetables',image:'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=60',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Leafy','Daily Use','Fresh Cut']},
+    {id:'dairy',name:'Dairy',image:'https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=800&q=60',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Milk','Paneer','Butter']},
+    {id:'medical',name:'Medical',image:'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=60',support:FIXED_WHATSAPP,action:'whatsapp',subcategories:['Basic Care','Tablets','Wellness']}
+  ],
+  products:[
+    {id:'aashirvaad',name:'Aashirvaad Atta 5kg',price:265,mrp:299,image:'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=60',category:'Kirana',subcategory:'Atta',badge:'Popular',keywords:'atta flour aashirvaad'},
+    {id:'rice',name:'Basmati Rice 1kg',price:140,mrp:165,image:'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=60',category:'Kirana',subcategory:'Rice',badge:'Daily',keywords:'rice chawal basmati'},
+    {id:'oil',name:'Fortune Oil 1L',price:165,mrp:180,image:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=60',category:'Kirana',subcategory:'Oil',badge:'Fresh',keywords:'oil tel fortune'},
+    {id:'apple',name:'Royal Apple 1kg',price:180,mrp:220,image:'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=800&q=60',category:'Fruits',subcategory:'Premium',badge:'Premium',keywords:'apple seb'},
+    {id:'banana',name:'Banana 1 dozen',price:65,mrp:80,image:'https://images.unsplash.com/photo-1574226516831-e1dff420e43e?auto=format&fit=crop&w=800&q=60',category:'Fruits',subcategory:'Daily Use',badge:'Daily',keywords:'banana kela'},
+    {id:'potato',name:'Potato 1kg',price:38,mrp:45,image:'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=60',category:'Vegetables',subcategory:'Daily Use',badge:'Fresh',keywords:'potato aloo'},
+    {id:'tomato',name:'Tomato 1kg',price:42,mrp:50,image:'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=60',category:'Vegetables',subcategory:'Daily Use',badge:'Fresh',keywords:'tomato tamatar'},
+    {id:'milk',name:'Amul Milk 1L',price:68,mrp:72,image:'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=800&q=60',category:'Dairy',subcategory:'Milk',badge:'Cold',keywords:'milk doodh amul'},
+    {id:'paneer',name:'Fresh Paneer 200g',price:95,mrp:110,image:'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=60',category:'Dairy',subcategory:'Paneer',badge:'Soft',keywords:'paneer'},
+    {id:'dolo',name:'Dolo 650 (sample)',price:32,mrp:35,image:'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=800&q=60',category:'Medical',subcategory:'Tablets',badge:'Basic',keywords:'dolo tablet medicine'}
+  ],
+  promos:[
+    {id:'p1',type:'image',media:'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=60',title:'Smart grocery deals',subtitle:'Fresh stock • Better price • Fast WhatsApp order'},
+    {id:'p2',type:'image',media:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=1200&q=60',title:'Fresh fruits everyday',subtitle:'Selected quality at fair rates'}
+  ]
+};
 
-  function renderTopCategories(){
-    $('topCategoryPanel').innerHTML = categories.map(c=>`<button class="category-chip" onclick="window.DMApp.chooseCategory('${c.id}')">${c.name}</button>`).join('');
-    $('categorySheetList').innerHTML = categories.map(c=>{
-      const sub = (c.subcategories||[]).map(s=>`<button class="btn secondary mt8" onclick="window.DMApp.chooseCategory('${c.id}','${String(s).replace(/'/g,"\\'")}'); window.DMApp.closeCategorySheet();">${s}</button>`).join('');
-      return `<div class="card mb16"><div style="font-weight:900;font-size:18px">${c.name}</div>${sub || '<div class="meta mt8">No sub-category</div>'}</div>`;
-    }).join('');
-  }
+const I18N={
+  hinglish:{welcomeLabel:'WELCOME',quickDelivery:'Fast delivery',loginFirst:'LOGIN FIRST',continue:'Continue',notRobot:"I'm not a robot",verifyContinue:'Verify & Continue',quickOrder:'Quick order',whatsAppOrder:'WhatsApp order',deliveryAddress:'DELIVERY ADDRESS',saveAddress:'Save your address',useCurrentLocation:'Use current location',saveOpenApp:'Save & Open App',allProducts:'All Products',home:'Home',support:'Support',category:'Category',cart:'Cart',profile:'Profile',cartReady:'Cart ready',openCart:'Open Cart',profileTitle:'Your profile',minOrderText:'Minimum order value is ₹500',addMore:'Add more items to continue',subtotal:'Subtotal',delivery:'Delivery',total:'Total',placeOrder:'Place order',orderWhatsapp:'Order on WhatsApp',helpCenter:'Help Center',callSupport:'Call support',chatWhatsapp:'Chat on WhatsApp',voiceHint:'Use mic and speak item names',emptyCart:'Cart is empty',saveProfile:'Save profile',language:'Language'},
+  en:{welcomeLabel:'WELCOME',quickDelivery:'Fast delivery',loginFirst:'LOGIN FIRST',continue:'Continue',notRobot:"I'm not a robot",verifyContinue:'Verify & Continue',quickOrder:'Quick order',whatsAppOrder:'WhatsApp order',deliveryAddress:'DELIVERY ADDRESS',saveAddress:'Save your address',useCurrentLocation:'Use current location',saveOpenApp:'Save & Open App',allProducts:'All Products',home:'Home',support:'Support',category:'Category',cart:'Cart',profile:'Profile',cartReady:'Cart ready',openCart:'Open Cart',profileTitle:'Your profile',minOrderText:'Minimum order value is ₹500',addMore:'Add more items to continue',subtotal:'Subtotal',delivery:'Delivery',total:'Total',placeOrder:'Place order',orderWhatsapp:'Order on WhatsApp',helpCenter:'Help Center',callSupport:'Call support',chatWhatsapp:'Chat on WhatsApp',voiceHint:'Use mic and speak item names',emptyCart:'Cart is empty',saveProfile:'Save profile',language:'Language'},
+  hi:{welcomeLabel:'स्वागत है',quickDelivery:'तेज़ डिलीवरी',loginFirst:'पहले लॉगिन करें',continue:'जारी रखें',notRobot:'मैं रोबोट नहीं हूँ',verifyContinue:'सत्यापित करें और आगे बढ़ें',quickOrder:'फटाफट ऑर्डर',whatsAppOrder:'व्हाट्सऐप ऑर्डर',deliveryAddress:'डिलीवरी पता',saveAddress:'अपना पता सेव करें',useCurrentLocation:'वर्तमान लोकेशन लें',saveOpenApp:'सेव करें और ऐप खोलें',allProducts:'सभी प्रोडक्ट',home:'होम',support:'सहायता',category:'श्रेणी',cart:'कार्ट',profile:'प्रोफाइल',cartReady:'कार्ट तैयार है',openCart:'कार्ट खोलें',profileTitle:'आपकी प्रोफाइल',minOrderText:'न्यूनतम ऑर्डर ₹500',addMore:'जारी रखने के लिए और आइटम जोड़ें',subtotal:'कुल',delivery:'डिलीवरी',total:'टोटल',placeOrder:'ऑर्डर करें',orderWhatsapp:'व्हाट्सऐप पर ऑर्डर',helpCenter:'हेल्प सेंटर',callSupport:'सपोर्ट कॉल',chatWhatsapp:'व्हाट्सऐप चैट',voiceHint:'माइक से आइटम बोलें',emptyCart:'कार्ट खाली है',saveProfile:'प्रोफाइल सेव करें',language:'भाषा'}
+};
 
-  function renderSubcats(){
-    if(!currentCategory){ $('subCategoryWrap').innerHTML=''; return; }
-    const cat = categories.find(c=>c.id===currentCategory);
-    if(!cat){ $('subCategoryWrap').innerHTML=''; return; }
-    const chips = ['All', ...(cat.subcategories||[])].map(s=>`<button class="subcat-chip" style="background:${s===currentSubcat || (!currentSubcat&&s==='All') ? '#11213f':'#eef2ff'};color:${s===currentSubcat || (!currentSubcat&&s==='All') ? '#fff':'#11213f'}" onclick="window.DMApp.chooseCategory('${cat.id}','${s==='All'?'':String(s).replace(/'/g,"\\'")}')">${s}</button>`).join('');
-    $('subCategoryWrap').innerHTML = chips;
-  }
+const state={settings:{...SAMPLE.settings}, categories:[...SAMPLE.categories], products:[...SAMPLE.products], promos:[...SAMPLE.promos], cart:JSON.parse(localStorage.getItem('cart')||'[]'), user:JSON.parse(localStorage.getItem('userProfile')||'null'), lang:localStorage.getItem('lang')||'hinglish', gridMode:localStorage.getItem('gridMode')||'grid', selectedCategory:'', selectedSubcategory:'', search:'', location:null};
 
-  function filteredProducts(){
-    const q = ($('searchInput')?.value || '').toLowerCase().trim();
-    return products.filter(p=>{
-      const catOk = currentCategory ? p.categoryId===currentCategory : true;
-      const subOk = currentSubcat ? p.subcategory===currentSubcat : true;
-      const qOk = !q || [p.name,p.subcategory,p.categoryId].join(' ').toLowerCase().includes(q);
-      return catOk && subOk && qOk && p.stock !== false;
-    });
-  }
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+function t(k){return (I18N[state.lang]||I18N.hinglish)[k]||k;}
+function saveLocal(){localStorage.setItem('cart',JSON.stringify(state.cart)); if(state.user) localStorage.setItem('userProfile',JSON.stringify(state.user)); localStorage.setItem('lang',state.lang); localStorage.setItem('gridMode',state.gridMode);}
+function inr(n){return '₹'+Number(n||0).toFixed(0)}
+function deliveryCharge(sub){const rules=state.settings.deliveryRules||SAMPLE.settings.deliveryRules; for(const [min,max,charge] of rules){ if(sub>=min && sub<=max) return charge; } return 0;}
+function getSubtotal(){return state.cart.reduce((a,b)=>a+b.price*b.qty,0)}
+function uid(){return Math.random().toString(36).slice(2,10)}
+function getFilteredProducts(){return state.products.filter(p=>{
+  const catOk=!state.selectedCategory||p.category===state.selectedCategory;
+  const subOk=!state.selectedSubcategory||p.subcategory===state.selectedSubcategory;
+  const q=(state.search||'').trim().toLowerCase();
+  const text=(p.name+' '+(p.keywords||'')+' '+p.category+' '+(p.subcategory||'')).toLowerCase();
+  const searchOk=!q||text.includes(q);
+  return catOk&&subOk&&searchOk;
+});}
 
-  function renderProducts(){
-    const wrap = $('productList');
-    wrap.className = 'products ' + currentView;
-    wrap.innerHTML = filteredProducts().map(p=>{
-      const inCart = cart.find(x=>x.id===p.id);
-      const cat = categories.find(c=>c.id===p.categoryId);
-      return `<div class="product">
-        <img src="${p.image}" alt="${p.name}">
-        <div style="flex:1">
-          <div class="pname">${p.name}</div>
-          <div class="meta">${cat?.name || ''} • ${p.subcategory || ''}</div>
-          <div class="priceRow mt8"><span>${money(p.price)}</span>${p.mrp ? `<span class="mrp">${money(p.mrp)}</span>`:''}</div>
-          <div class="qtyWrap mt12">
-            <button class="btn ghost" onclick="window.DMApp.contactForCategory('${p.categoryId}')">Support</button>
-            ${inCart ? `<div class="qty"><button onclick="window.DMApp.changeQty('${p.id}',-1)">-</button><strong>${inCart.qty}</strong><button onclick="window.DMApp.changeQty('${p.id}',1)">+</button></div>` : `<button class="btn" onclick="window.DMApp.addToCart('${p.id}')">Add</button>`}
-          </div>
-        </div>
-      </div>`;
-    }).join('') || `<div class="card">No products found.</div>`;
-  }
+async function fetchCollection(name){const snap=await getDocs(collection(db,name)); return snap.docs.map(d=>({id:d.id,...d.data()}));}
+async function fetchDoc(path){try{const parts=path.split('/'); const ref=doc(db,parts[0],parts[1]); const snap=await (await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')).getDoc(ref); return snap.exists()?snap.data():null;}catch{return null}}
+async function loadData(){
+  try{
+    const [cats,products,promos] = await Promise.all([fetchCollection('categories'),fetchCollection('products'),fetchCollection('promos')]);
+    const settings = await fetchDoc('settings/app');
+    if(cats.length) state.categories=cats;
+    if(products.length) state.products=products;
+    if(promos.length) state.promos=promos;
+    if(settings) state.settings={...state.settings,...settings};
+  }catch(e){console.log('Firestore fallback',e)}
+  renderAll();
+}
 
-  function renderCart(){
-    $('cartItems').innerHTML = cart.map(item=>`<div class="card mb16"><div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-weight:800">${item.name}</div><div class="meta">${money(item.price)} × ${item.qty}</div></div><div class="qty"><button onclick="window.DMApp.changeQty('${item.id}',-1)">-</button><strong>${item.qty}</strong><button onclick="window.DMApp.changeQty('${item.id}',1)">+</button></div></div></div>`).join('') || '<div class="meta">Cart is empty.</div>';
-    const sub = cartSubtotal();
-    const del = getDelivery(sub);
-    $('subtotalValue').textContent = money(sub);
-    $('deliveryValue').textContent = money(del);
-    $('totalValue').textContent = money(sub+del);
-    $('minOrderWarning').classList.toggle('hidden', sub >= Number(settings.minOrder||500) || sub===0);
-  }
+function renderI18n(){ $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n)); $$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang)); }
+function renderTop(){ $('#storeNameLogin').textContent=state.settings.storeName; $('#storeTagline').textContent=state.settings.storeTagline; $('#storeNameTop').textContent=state.settings.storeName; $('#noticeBar').textContent=state.settings.noticeText||''; $('#noticeBar').classList.toggle('hidden',!state.settings.noticeText); $('#subheadText').textContent=state.selectedSubcategory? state.selectedCategory+' • '+state.selectedSubcategory : (state.selectedCategory||'Browse by category'); }
+function renderPromos(){ const root=$('#promoSlider'); if(!state.promos.length){root.classList.add('hidden'); root.innerHTML=''; return;} root.classList.remove('hidden'); root.innerHTML=state.promos.map((p,i)=>`<div class="slide ${i===0?'active':''}">${p.type==='video'?`<video src="${p.media}" muted playsinline autoplay loop></video>`:`<img src="${p.media}" alt="promo">`}<div class="overlay"><div><h3>${p.title||state.settings.storeName}</h3><p>${p.subtitle||''}</p></div></div></div>`).join(''); let idx=0; clearInterval(window.__promoInt); window.__promoInt=setInterval(()=>{const slides=[...root.querySelectorAll('.slide')]; slides.forEach(s=>s.classList.remove('active')); idx=(idx+1)%slides.length; slides[idx].classList.add('active');},3500); }
+function renderCategories(){ const top=$('#topCategories'); top.innerHTML=`<button class="chip ${!state.selectedCategory?'active':''}" data-cat="">All</button>`+state.categories.map(c=>`<button class="chip ${state.selectedCategory===c.name?'active':''}" data-cat="${c.name}">${c.name}</button>`).join(''); top.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{state.selectedCategory=b.dataset.cat; state.selectedSubcategory=''; renderAll();}); }
+function renderProducts(){ const root=$('#productsGrid'); root.className='grid'+(state.gridMode==='list'?' list':''); const items=getFilteredProducts(); root.innerHTML=items.map(p=>{const cartItem=state.cart.find(i=>i.id===p.id); return `<div class="product ${state.gridMode==='list'?'listitem':''}"><img src="${p.image}" alt="${p.name}"><div class="pbody"><p class="pname">${p.name}</p><p class="psub">${p.category}${p.subcategory?' • '+p.subcategory:''}</p><div class="badges">${p.badge?`<span class="badge green">${p.badge}</span>`:''}${p.mrp&&p.mrp>p.price?`<span class="badge red">Save ${inr(p.mrp-p.price)}</span>`:''}</div><div class="between"><div><div class="price">${inr(p.price)}</div>${p.mrp?`<div class="strike">${inr(p.mrp)}</div>`:''}</div>${cartItem?`<div class="qty"><button data-dec="${p.id}">−</button><span>${cartItem.qty}</span><button data-inc="${p.id}">+</button></div>`:`<button class="btn secondary smallbtn" data-add="${p.id}" style="width:auto">${t('cart')}</button>`}</div></div></div>`;}).join(''); root.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>changeQty(b.dataset.add,1)); root.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>changeQty(b.dataset.inc,1)); root.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>changeQty(b.dataset.dec,-1)); }
+function renderCartBar(){ const sub=getSubtotal(); const count=state.cart.reduce((a,b)=>a+b.qty,0); $('#cartBar').classList.toggle('hidden',count===0); $('#bottomNav').classList.remove('hidden'); if(count){ $('#cartBarText').textContent=`${count} items • ${inr(sub+deliveryCharge(sub))}`; } }
+function renderSheets(){ renderCategorySheet(); renderHelpSheet(); renderProfileSheet(); renderCartSheet(); renderLangSheet(); }
+function renderCategorySheet(){ const root=$('#categorySheet'); const cat=state.categories.find(c=>c.name===state.selectedCategory) || null; if(!cat){ root.innerHTML=`<div class="between"><h3>${t('category')}</h3><button class="icon-btn" id="closeCategory">✕</button></div><div class="stack">${state.categories.map(c=>`<button class="btn secondary catpick" data-cat="${c.name}">${c.name}</button>`).join('')}</div>`; } else { root.innerHTML=`<div class="between"><h3>${cat.name}</h3><button class="icon-btn" id="closeCategory">✕</button></div><div class="stack">${(cat.subcategories||[]).map(s=>`<button class="btn secondary subpick" data-sub="${s}">${s}</button>`).join('')}<button class="btn" id="backCats">Back to categories</button></div>`; root.querySelectorAll('.subpick').forEach(b=>b.onclick=()=>{state.selectedSubcategory=b.dataset.sub; closeSheets(); renderAll();}); root.querySelector('#backCats').onclick=()=>{state.selectedCategory=''; state.selectedSubcategory=''; openSheet('category'); renderAll();}; }
+ root.querySelectorAll('.catpick').forEach(b=>b.onclick=()=>{state.selectedCategory=b.dataset.cat; state.selectedSubcategory=''; openSheet('category'); renderAll();}); root.querySelector('#closeCategory').onclick=closeSheets; }
+function renderHelpSheet(){ const root=$('#helpSheet'); root.innerHTML=`<div class="between"><h3>${t('helpCenter')}</h3><button class="icon-btn" id="closeHelp">✕</button></div><div class="help-links"><a href="tel:${FIXED_WHATSAPP}"><span>${t('callSupport')}</span><strong>${FIXED_WHATSAPP}</strong></a><a target="_blank" href="https://wa.me/91${FIXED_WHATSAPP}?text=Hello%20DevIndra%20Mart"><span>${t('chatWhatsapp')}</span><strong>${FIXED_WHATSAPP}</strong></a></div><div class="card" style="margin:0"><div class="small">${t('voiceHint')}</div></div>`; root.querySelector('#closeHelp').onclick=closeSheets; }
+function renderProfileSheet(){ const u=state.user||{phone:localStorage.getItem('mobile')||'',name:'',address:'',city:'',state:'',pincode:'',landmark:'',note:'',mapLink:''}; const root=$('#profileSheet'); root.innerHTML=`<div class="between"><h3>${t('profileTitle')}</h3><button class="icon-btn" id="closeProfile">✕</button></div><div class="stack"><input id="pName" class="input" value="${u.name||''}" placeholder="Name"><input id="pPhone" class="input" value="${u.phone||''}" disabled><input id="pAddress" class="input" value="${u.address||''}" placeholder="Address"><div class="row"><input id="pCity" class="input" value="${u.city||''}" placeholder="City"><input id="pState" class="input" value="${u.state||''}" placeholder="State"></div><div class="row"><input id="pPincode" class="input" value="${u.pincode||''}" placeholder="Pincode"><input id="pLandmark" class="input" value="${u.landmark||''}" placeholder="Landmark"></div><textarea id="pNote" class="textarea" placeholder="Notes">${u.note||''}</textarea><button id="saveProfileBtn" class="btn">${t('saveProfile')}</button></div>`; root.querySelector('#closeProfile').onclick=closeSheets; root.querySelector('#saveProfileBtn').onclick=()=>{state.user={...u,phone:u.phone,name:$('#pName').value,address:$('#pAddress').value,city:$('#pCity').value,state:$('#pState').value,pincode:$('#pPincode').value,landmark:$('#pLandmark').value,note:$('#pNote').value,mapLink:u.mapLink||''}; saveLocal(); closeSheets();}; }
+function renderCartSheet(){ const root=$('#cartSheet'); const sub=getSubtotal(), del=deliveryCharge(sub), total=sub+del; const list=state.cart.length? state.cart.map(i=>`<div class="kv"><div><strong>${i.name}</strong><div class="small">${i.qty} x ${inr(i.price)}</div></div><div>${inr(i.qty*i.price)}</div></div>`).join('') : `<div class="small">${t('emptyCart')}</div>`; root.innerHTML=`<div class="between"><h3>${t('cart')}</h3><button class="icon-btn" id="closeCart">✕</button></div>${list}<div class="card" style="margin:12px 0 0"><div class="kv"><span>${t('subtotal')}</span><strong>${inr(sub)}</strong></div><div class="kv"><span>${t('delivery')}</span><strong>${inr(del)}</strong></div><div class="kv" style="border-bottom:0"><span>${t('total')}</span><strong>${inr(total)}</strong></div></div><div class="row" style="margin-top:12px"><button id="clearCartBtn" class="btn secondary">Clear</button><button id="waCheckoutBtn" class="btn green">${t('orderWhatsapp')}</button></div>`; root.querySelector('#closeCart').onclick=closeSheets; root.querySelector('#clearCartBtn').onclick=()=>{state.cart=[]; saveLocal(); renderAll(); openSheet('cart');}; root.querySelector('#waCheckoutBtn').onclick=placeWhatsAppOrder; }
+function renderLangSheet(){ const root=$('#langSheet'); root.innerHTML=`<div class="between"><h3>${t('language')}</h3><button class="icon-btn" id="closeLang">✕</button></div><div class="stack"><button class="btn ${state.lang==='hinglish'?'':'secondary'}" data-langpick="hinglish">Hinglish</button><button class="btn ${state.lang==='en'?'':'secondary'}" data-langpick="en">English</button><button class="btn ${state.lang==='hi'?'':'secondary'}" data-langpick="hi">हिंदी</button></div>`; root.querySelector('#closeLang').onclick=closeSheets; root.querySelectorAll('[data-langpick]').forEach(b=>b.onclick=()=>{state.lang=b.dataset.langpick; saveLocal(); renderAll(); openSheet('lang');}); }
 
-  function showScreen(id){
-    ['homeScreen','cartScreen','accountScreen','supportScreen'].forEach(s=>$(s).classList.add('hidden'));
-    $(id).classList.remove('hidden');
-    document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.toggle('active', b.dataset.screen===id));
-  }
+function renderAll(){ renderI18n(); renderTop(); renderPromos(); renderCategories(); renderProducts(); renderCartBar(); renderSheets(); }
+function changeQty(id,delta){ const p=state.products.find(x=>x.id===id); if(!p) return; const ex=state.cart.find(i=>i.id===id); if(ex){ ex.qty+=delta; if(ex.qty<=0) state.cart=state.cart.filter(i=>i.id!==id); } else if(delta>0){ state.cart.push({id:p.id,name:p.name,price:Number(p.price),qty:1,category:p.category,subcategory:p.subcategory}); }
+ saveLocal(); renderAll(); }
+function openSheet(name){ closeSheets(); $('#sheetBackdrop').classList.remove('hidden'); $('#'+name+'Sheet').classList.remove('hidden'); }
+function closeSheets(){ $('#sheetBackdrop').classList.add('hidden'); ['category','help','profile','cart','lang'].forEach(n=>$('#'+n+'Sheet').classList.add('hidden')); }
+async function placeWhatsAppOrder(){ const sub=getSubtotal(); const min=Number(state.settings.minOrder||500); if(sub<min){ alert(`${t('addMore')}
+${t('minOrderText')}`); return; } const del=deliveryCharge(sub), total=sub+del; const u=state.user||{}; let map=u.mapLink||''; const lines=state.cart.map(i=>`• ${i.name} x ${i.qty} = ${inr(i.qty*i.price)}`).join('%0A'); const msg=`New Order%0A%0AName: ${encodeURIComponent(u.name||'Customer')}%0APhone: ${encodeURIComponent(u.phone||localStorage.getItem('mobile')||'')}%0AAddress: ${encodeURIComponent(u.address||'')}%0ALandmark: ${encodeURIComponent(u.landmark||'')}%0A${map?`Map: ${encodeURIComponent(map)}%0A`:''}%0AItems:%0A${lines}%0A%0ASubtotal: ${inr(sub)}%0ADelivery: ${inr(del)}%0ATotal: ${inr(total)}`;
+ try{await addDoc(collection(db,'orders'),{name:u.name||'Customer',phone:u.phone||localStorage.getItem('mobile')||'',address:u.address||'',landmark:u.landmark||'',mapLink:map||'',items:state.cart,subtotal:sub,delivery:del,total,status:'new',createdAt:Date.now()});}catch(e){console.log('order save fallback',e)}
+ window.open(`https://wa.me/91${FIXED_WHATSAPP}?text=${msg}`,'_blank'); state.cart=[]; saveLocal(); renderAll(); closeSheets(); }
+async function getCurrentLocation(){ const status=$('#locationStatus'); status.textContent='Getting location...'; navigator.geolocation.getCurrentPosition(pos=>{ const {latitude,longitude}=pos.coords; const link=`https://maps.google.com/?q=${latitude},${longitude}`; state.user={...(state.user||{}), phone:localStorage.getItem('mobile')||'', mapLink:link}; saveLocal(); status.textContent='Location captured successfully'; },()=>status.textContent='Could not fetch location'); }
+function voiceOrder(){ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){alert('Voice input not supported on this device'); return;} const rec=new SR(); rec.lang='en-IN'; rec.onresult=(e)=>{ const txt=e.results[0][0].transcript.toLowerCase(); $('#searchInput').value=txt; state.search=txt; const found=state.products.find(p=> (p.keywords||p.name).toLowerCase().includes(txt) || txt.includes(p.name.toLowerCase())); if(found) changeQty(found.id,1); renderAll(); alert('Voice matched: '+(found?found.name:txt));}; rec.start(); }
+function bindStatic(){ $$('.lang-btn').forEach(b=>b.onclick=()=>{state.lang=b.dataset.lang; saveLocal(); renderAll();}); $('#continueBtn').onclick=()=>{const p=($('#loginPhone').value||'').trim(); if(p.length<10) return alert('Enter valid mobile number'); $('#robotBox').classList.remove('hidden');}; $('#verifyBtn').onclick=()=>{const p=($('#loginPhone').value||'').trim(); if(p.length<10) return alert('Enter valid mobile number'); if(!$('#robotCheck').checked) return alert("Please verify you're not a robot"); localStorage.setItem('mobile',p); $('#addrPhone').value=p; $('#loginView').classList.add('hidden'); $('#addressView').classList.remove('hidden');}; $('#getLocationBtn').onclick=getCurrentLocation; $('#saveAddressBtn').onclick=()=>{state.user={phone:$('#addrPhone').value,name:$('#addrName').value,address:$('#addrLine').value,landmark:$('#addrLandmark').value,city:$('#addrCity').value,state:$('#addrState').value,pincode:$('#addrPincode').value,note:$('#addrNote').value,mapLink:(state.user&&state.user.mapLink)||''}; saveLocal(); $('#addressView').classList.add('hidden'); $('#mainView').classList.remove('hidden'); renderAll();}; $('#sheetBackdrop').onclick=closeSheets; $('#langToggleBtn').onclick=()=>openSheet('lang'); $('#micBtn').onclick=voiceOrder; $('#clearSearchBtn').onclick=()=>{$('#searchInput').value=''; state.search=''; renderAll();}; $('#searchInput').oninput=e=>{state.search=e.target.value; renderAll();}; $('#gridBtn').onclick=()=>{state.gridMode='grid'; saveLocal(); renderAll();}; $('#listBtn').onclick=()=>{state.gridMode='list'; saveLocal(); renderAll();}; $('#openCartBtn').onclick=()=>openSheet('cart'); $$('#bottomNav [data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open)); }
+function initSession(){ const mobile=localStorage.getItem('mobile'); if(mobile){ $('#loginView').classList.add('hidden'); $('#mainView').classList.remove('hidden'); state.user=JSON.parse(localStorage.getItem('userProfile')||'null')||{phone:mobile}; saveLocal(); } }
 
-  function renderAccount(){
-    const data = JSON.parse(localStorage.getItem('dm_address')||'{}');
-    $('accountData').innerHTML = `<div class="row"><div><div class="meta">Name</div><div>${data.name||'-'}</div></div><div><div class="meta">Mobile</div><div>${data.mobile||'-'}</div></div></div>
-    <div class="mt12"><div class="meta">Address</div><div>${data.fullAddress||'-'}</div></div>
-    <div class="row mt12"><div><div class="meta">City</div><div>${data.city||'-'}</div></div><div><div class="meta">State</div><div>${data.state||'-'}</div></div></div>
-    <div class="row mt12"><div><div class="meta">Pincode</div><div>${data.pincode||'-'}</div></div><div><div class="meta">Landmark</div><div>${data.landmark||'-'}</div></div></div>`;
-  }
-
-  function renderPromo(){
-    const active = promos.filter(x=>x.active!==false);
-    const wrap = $('promoWrap');
-    if(!active.length){ wrap.innerHTML=''; return; }
-    const promo = active[promoIndex % active.length];
-    const media = promo.type === 'video'
-      ? `<video class="promo-media" muted playsinline autoplay src="${promo.mediaUrl}"></video>`
-      : `<img class="promo-media" src="${promo.mediaUrl}" alt="promo">`;
-    wrap.innerHTML = `<div class="promo">${media}<div class="promo-content"><div style="font-weight:900;font-size:20px">${promo.title||''}</div><div>${promo.subtitle||''}</div></div></div>`;
-    clearTimeout(promoTimer);
-    promoTimer = setTimeout(()=>{ promoIndex=(promoIndex+1)%active.length; renderPromo(); }, Number(promo.duration||3000));
-  }
-
-  function chooseCategory(catId, sub=''){
-    currentCategory = catId || null;
-    currentSubcat = sub || null;
-    renderSubcats();
-    renderProducts();
-  }
-
-  function addToCart(id){
-    const p = products.find(x=>x.id===id); if(!p) return;
-    const existing = cart.find(x=>x.id===id);
-    if(existing) existing.qty += 1;
-    else cart.push({ id:p.id, name:p.name, price:Number(p.price), qty:1, categoryId:p.categoryId });
-    saveCart(); renderProducts(); renderCart();
-  }
-
-  function changeQty(id, delta){
-    const item = cart.find(x=>x.id===id); if(!item) return;
-    item.qty += delta; if(item.qty<=0) cart = cart.filter(x=>x.id!==id);
-    saveCart(); renderProducts(); renderCart();
-  }
-
-  function contactForCategory(categoryId){
-    const cat = categories.find(c=>c.id===categoryId); if(!cat) return;
-    if(cat.supportType==='call') window.location.href = 'tel:' + cat.supportValue;
-    else if(cat.supportType==='whatsapp') window.open('https://wa.me/' + cat.supportValue, '_blank');
-    else window.open(cat.supportValue, '_blank');
-  }
-
-  async function placeOrder(){
-    const subtotal = cartSubtotal();
-    if(subtotal < Number(settings.minOrder||500)) { renderCart(); return; }
-    const address = JSON.parse(localStorage.getItem('dm_address')||'{}');
-    const order = {
-      createdAt: new Date().toISOString(),
-      mobile: address.mobile || localStorage.getItem('dm_mobile') || '',
-      address,
-      items: cart,
-      subtotal,
-      delivery: getDelivery(subtotal),
-      total: cartTotal(),
-      status: 'pending'
-    };
-    await window.DMData.createOrder(order);
-    alert('Order placed successfully!');
-    cart = []; saveCart(); renderCart(); showScreen('homeScreen');
-  }
-
-  function openCategorySheet(){ $('categoryOverlay').classList.remove('hidden'); $('categorySheet').classList.remove('hidden'); }
-  function closeCategorySheet(){ $('categoryOverlay').classList.add('hidden'); $('categorySheet').classList.add('hidden'); }
-
-  function setupLoginFlow(){
-    const done = localStorage.getItem('dm_address_done') === '1';
-    if(done){ $('loginPage').classList.add('hidden'); $('captchaPage').classList.add('hidden'); $('addressPage').classList.add('hidden'); $('appPage').classList.remove('hidden'); return; }
-    $('continueBtn').onclick = ()=>{
-      const num = $('loginMobile').value.trim();
-      if(num.length < 10) return alert('Sahi mobile number daalo');
-      localStorage.setItem('dm_mobile', num);
-      $('loginPage').classList.add('hidden');
-      $('captchaPage').classList.remove('hidden');
-    };
-    $('verifyBtn').onclick = ()=>{
-      if(!$('robotCheck').checked) return alert("Please tick I'm not a robot");
-      $('captchaPage').classList.add('hidden');
-      $('addressPage').classList.remove('hidden');
-      $('addrMobile').value = localStorage.getItem('dm_mobile') || '';
-    };
-    $('saveAddressBtn').onclick = ()=>{
-      const address = {
-        name: $('addrName').value.trim(),
-        mobile: $('addrMobile').value.trim(),
-        fullAddress: $('addrFull').value.trim(),
-        city: $('addrCity').value.trim(),
-        state: $('addrState').value.trim(),
-        pincode: $('addrPincode').value.trim(),
-        landmark: $('addrLandmark').value.trim()
-      };
-      if(!address.name || !address.mobile || !address.fullAddress) return alert('Name, mobile aur address bharo');
-      localStorage.setItem('dm_address', JSON.stringify(address));
-      localStorage.setItem('dm_address_done', '1');
-      $('addressPage').classList.add('hidden');
-      $('appPage').classList.remove('hidden');
-      renderAccount();
-    };
-  }
-
-  $('viewToggle').onclick = ()=>{
-    currentView = currentView === 'grid' ? 'list' : 'grid';
-    localStorage.setItem('dm_view', currentView);
-    $('viewToggle').textContent = currentView === 'grid' ? 'List View' : 'Grid View';
-    renderProducts();
-  };
-  $('searchInput').oninput = renderProducts;
-  $('placeOrderBtn').onclick = placeOrder;
-  document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>btn.onclick=()=>showScreen(btn.dataset.screen));
-  $('categoryNavBtn').onclick = openCategorySheet;
-  $('categoryOverlay').onclick = closeCategorySheet;
-  $('closeCategorySheet').onclick = closeCategorySheet;
-
-  window.DMApp = { chooseCategory, addToCart, changeQty, contactForCategory, closeCategorySheet };
-  setupLoginFlow();
-  applyBrand();
-  renderTopCategories();
-  renderSubcats();
-  $('viewToggle').textContent = currentView === 'grid' ? 'List View' : 'Grid View';
-  renderProducts();
-  renderCart();
-  renderAccount();
-  renderPromo();
-})();
+bindStatic(); initSession(); renderAll(); loadData();

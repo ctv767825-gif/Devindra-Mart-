@@ -1,0 +1,1 @@
+Upload these files to your GitHub repo or Netlify-connected source. Customer app is index.html, admin panel is admin.html. Firestore must be enabled in test mode for first setup. WhatsApp number fixed to 7678256489.
