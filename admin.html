@@ -6,119 +6,53 @@
   <title>DevIndra Mart Admin</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-<div class="admin-layout">
-  <aside class="admin-side">
-    <h2 style="margin-top:0">Admin Panel</h2>
-    <div class="admin-nav">
-      <button class="active" data-tab="dashboardTab">Dashboard</button>
-      <button data-tab="settingsTab">Store Settings</button>
-      <button data-tab="categoriesTab">Categories</button>
-      <button data-tab="productsTab">Products</button>
-      <button data-tab="notificationTab">Notification</button>
-      <button data-tab="promoTab">Promo Slider</button>
-      <button data-tab="ordersTab">Orders</button>
-      <button data-tab="futureTab">Future Integrations</button>
+<body style="background:#eef1f7">
+  <div class="topbar">
+    <div class="brand-wrap">
+      <img src="logo.svg" class="header-logo" alt="logo" />
+      <div>
+        <div class="brand-name">Admin Panel</div>
+        <div class="brand-tagline">Simple control panel</div>
+      </div>
     </div>
-  </aside>
-  <main class="admin-main">
-    <section id="dashboardTab" class="admin-section">
-      <div class="admin-card">
-        <h3>Dashboard</h3>
-        <div class="row">
-          <div class="card"><div>Total Categories</div><div id="dashCategories" style="font-size:28px;font-weight:900">0</div></div>
-          <div class="card"><div>Total Products</div><div id="dashProducts" style="font-size:28px;font-weight:900">0</div></div>
-          <div class="card"><div>Total Orders</div><div id="dashOrders" style="font-size:28px;font-weight:900">0</div></div>
-        </div>
-      </div>
-    </section>
+  </div>
 
-    <section id="settingsTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Store Settings</h3>
-        <div class="row"><input id="setStoreName" class="input" placeholder="Store Name"><input id="setTagline" class="input" placeholder="Tagline"></div>
-        <input id="setSubtitle" class="input mt12" placeholder="Subtitle">
-        <div class="row mt12"><input id="setLogoUrl" class="input" placeholder="Logo URL"><input id="setSupportPhone" class="input" placeholder="Support Phone"></div>
-        <div class="row mt12"><input id="setWhatsapp" class="input" placeholder="WhatsApp number with country code"><input id="setMinOrder" class="input" type="number" placeholder="Minimum order"></div>
-        <input id="setNotificationText" class="input mt12" placeholder="Top notification text">
-        <div class="row mt12"><input id="setHelpHeading" class="input" placeholder="Help heading"><input id="setHelpText" class="input" placeholder="Help text"></div>
-        <h4 class="mt16">Delivery rules</h4>
-        <div class="row"><input id="rule1" class="input" placeholder="0-999=50"><input id="rule2" class="input" placeholder="1000-2999=30"></div>
-        <div class="row mt12"><input id="rule3" class="input" placeholder="3000-4999=20"><input id="rule4" class="input" placeholder="5000+=10"></div>
-        <button class="btn mt16" id="saveSettingsBtn">Save Settings</button>
-      </div>
-    </section>
+  <div class="card" style="margin:16px">
+    <h3>Store Settings</h3>
+    <input id="storeNameInput" placeholder="Store Name" />
+    <input id="taglineInput" placeholder="Tagline" />
+    <input id="supportPhoneInput" placeholder="Support Phone" />
+    <input id="supportWhatsAppInput" placeholder="Support WhatsApp" />
+    <input id="minOrderInput" type="number" placeholder="Min Order" />
+    <textarea id="notificationTextInput" placeholder="Notification text"></textarea>
+    <button id="saveSettingsBtn" class="primary-btn" type="button">Save Settings</button>
+  </div>
 
-    <section id="categoriesTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Add / Update Category</h3>
-        <input id="catId" class="input" placeholder="Category ID (leave blank for auto)">
-        <div class="row mt12"><input id="catName" class="input" placeholder="Category Name"><input id="catImage" class="input" placeholder="Image URL"></div>
-        <div class="row mt12"><input id="catOrder" class="input" placeholder="Order" type="number"><input id="catSubcats" class="input" placeholder="Subcategories comma separated"></div>
-        <div class="row mt12"><select id="catSupportType" class="select"><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="link">Link</option></select><input id="catSupportValue" class="input" placeholder="Support number/link"></div>
-        <button class="btn mt16" id="saveCategoryBtn">Save Category</button>
-      </div>
-      <div class="admin-card">
-        <h3>Category List</h3>
-        <div id="categoryTableWrap"></div>
-      </div>
-    </section>
+  <div class="card" style="margin:16px">
+    <h3>Add Category</h3>
+    <input id="catNameInput" placeholder="Category name" />
+    <input id="catSupportTypeInput" placeholder="Action type: call / whatsapp / link" />
+    <input id="catSupportValueInput" placeholder="Support value" />
+    <input id="catSubInput" placeholder="Subcategories comma separated" />
+    <button id="addCategoryBtn" class="primary-btn" type="button">Add Category</button>
+  </div>
 
-    <section id="productsTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Add / Update Product</h3>
-        <input id="prodId" class="input" placeholder="Product ID (leave blank for auto)">
-        <div class="row mt12"><input id="prodName" class="input" placeholder="Product Name"><input id="prodImage" class="input" placeholder="Image URL"></div>
-        <div class="row mt12"><input id="prodPrice" class="input" type="number" placeholder="Price"><input id="prodMrp" class="input" type="number" placeholder="MRP"></div>
-        <div class="row mt12"><select id="prodCategory" class="select"></select><input id="prodSubcategory" class="input" placeholder="Subcategory"></div>
-        <button class="btn mt16" id="saveProductBtn">Save Product</button>
-      </div>
-      <div class="admin-card">
-        <h3>Product List</h3>
-        <div id="productTableWrap"></div>
-      </div>
-    </section>
+  <div class="card" style="margin:16px">
+    <h3>Add Product</h3>
+    <input id="prodNameInput" placeholder="Product name" />
+    <input id="prodCategoryInput" placeholder="Category id (kirana/fruits/...)" />
+    <input id="prodSubCategoryInput" placeholder="Subcategory" />
+    <input id="prodPriceInput" type="number" placeholder="Price" />
+    <input id="prodImageInput" placeholder="Image URL" />
+    <button id="addProductBtn" class="primary-btn" type="button">Add Product</button>
+  </div>
 
-    <section id="notificationTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Notification</h3>
-        <input id="notifText" class="input" placeholder="Notification text">
-        <button class="btn mt16" id="saveNotifBtn">Save Notification</button>
-      </div>
-    </section>
+  <div class="card" style="margin:16px">
+    <h3>Orders</h3>
+    <div id="ordersList"></div>
+  </div>
 
-    <section id="promoTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Add / Update Promo</h3>
-        <input id="promoId" class="input" placeholder="Promo ID (leave blank for auto)">
-        <div class="row mt12"><input id="promoTitle" class="input" placeholder="Promo title"><input id="promoSubtitle" class="input" placeholder="Promo subtitle"></div>
-        <div class="row mt12"><select id="promoType" class="select"><option value="image">Image</option><option value="video">Video</option></select><input id="promoMedia" class="input" placeholder="Media URL"></div>
-        <div class="row mt12"><input id="promoOrder" class="input" type="number" placeholder="Order"><input id="promoDuration" class="input" type="number" placeholder="Duration ms"></div>
-        <button class="btn mt16" id="savePromoBtn">Save Promo</button>
-      </div>
-      <div class="admin-card"><div id="promoTableWrap"></div></div>
-    </section>
-
-    <section id="ordersTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Orders</h3>
-        <div id="ordersTableWrap"></div>
-      </div>
-    </section>
-
-    <section id="futureTab" class="admin-section hidden">
-      <div class="admin-card">
-        <h3>Future Integrations</h3>
-        <div class="row"><input id="futureRiderName" class="input" placeholder="Rider app name"><input id="futureRiderLink" class="input" placeholder="Rider app link"></div>
-        <div class="row mt12"><input id="futureBillingName" class="input" placeholder="Billing app name"><input id="futureBillingLink" class="input" placeholder="Billing app link"></div>
-        <div class="row mt12"><input id="futureReceiptPrefix" class="input" placeholder="Receipt prefix"><input id="futureReceiptTemplate" class="input" placeholder="Receipt template name"></div>
-        <button class="btn mt16" id="saveFutureBtn">Save Future Structure</button>
-      </div>
-    </section>
-  </main>
-</div>
-<script src="firebase-config.js"></script>
-<script src="data.js"></script>
-<script src="admin.js"></script>
+  <script src="data.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
