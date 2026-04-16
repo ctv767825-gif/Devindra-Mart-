@@ -1,439 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DevIndra Mart Admin</title>
-<link rel="icon" href="logo.svg">
-<style>
-:root{--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--primary:#111827;--soft:#f1f5f9;--green:#15803d;--red:#b91c1c;--amber:#a16207;--shadow:0 10px 30px rgba(15,23,42,.08);--radius:22px}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:var(--text)}
-.wrap{max-width:1180px;margin:0 auto;padding:20px 14px 80px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.brand{display:flex;align-items:center;gap:12px}.brand img{width:44px;height:44px;border-radius:14px;object-fit:cover;background:#fff;border:1px solid var(--border)}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}
-@media(max-width:900px){.span-8,.span-6,.span-4{grid-column:span 12}}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}.kpi{font-size:28px;font-weight:700}.small{font-size:13px;color:var(--muted)}
-.input,.textarea,.select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:#fff;font-size:14px}.textarea{min-height:94px;resize:vertical}
-.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1 1 220px}.between{display:flex;justify-content:space-between;align-items:center;gap:10px}.btn{padding:12px 14px;border:0;border-radius:16px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--border)}.btn.danger{background:#fee2e2;color:var(--red)}.btn.warn{background:#fef3c7;color:var(--amber)}
-section.block{border:1px solid var(--border);border-radius:18px;padding:14px;margin-top:12px;background:#fcfdff} details>summary{cursor:pointer;font-weight:700;list-style:none} details>summary::-webkit-details-marker{display:none}
-.list{display:flex;flex-direction:column;gap:10px}.item{padding:12px;border:1px solid var(--border);border-radius:16px;background:#fff}.badge{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:var(--green)} .badge.red{background:#fee2e2;color:var(--red)}
-.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top}
-.pill{display:inline-block;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:12px;font-weight:700}.hint{font-size:12px;color:var(--muted);margin-top:6px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>DevIndra Mart Admin</title>
+  <link rel="icon" href="logo.svg">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div class="brand"><img id="adminLogo" src="logo.svg" alt=""><div><div class="small">Simple Admin Panel</div><div id="adminBrand" style="font-weight:700;font-size:22px">DevIndra Mart</div></div></div>
-    <div class="row" style="flex:0 0 auto"><button class="btn secondary" onclick="window.open('index.html','_blank')">Open customer app</button><button class="btn warn" onclick="seedDemoData()">Load basic demo</button></div>
-  </div>
+  <div class="admin-app">
+    <div class="topbar"><div class="brand"><img src="logo.svg" alt="logo"><div><div class="tiny muted">ADMIN PANEL</div><div style="font-weight:700">DevIndra Mart Control</div></div></div><a class="btn secondary" style="width:auto;padding:10px 12px" href="index.html">Customer App</a></div>
+    <div class="admin-header"><div class="small muted">Simple form based control panel</div><h1 class="title" style="margin-top:6px">Admin Panel</h1></div>
+    <div class="admin-tabs" id="adminTabs"></div>
 
-  <div class="grid">
-    <div class="card span-4"><div class="small">Total products</div><div class="kpi" id="kpiProducts">0</div></div>
-    <div class="card span-4"><div class="small">Total categories</div><div class="kpi" id="kpiCategories">0</div></div>
-    <div class="card span-4"><div class="small">Total orders</div><div class="kpi" id="kpiOrders">0</div></div>
-
-    <div class="card span-6">
-      <div class="between"><h3 style="margin:0">Store / Branding / Notification</h3><span class="pill">Simple boxes</span></div>
-      <section class="block">
-        <div class="row">
-          <input id="storeName" class="input" placeholder="App / store name">
-          <input id="tagline" class="input" placeholder="Main line">
-        </div>
-        <div style="height:10px"></div>
-        <input id="subTagline" class="input" placeholder="Sub line">
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="logoUrl" class="input" placeholder="Logo image URL">
-          <input id="headerBannerUrl" class="input" placeholder="Top banner image URL (optional)">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="whatsappNumber" class="input" placeholder="WhatsApp number">
-          <input id="supportPhone" class="input" placeholder="Support / call number">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="minOrderValue" class="input" type="number" placeholder="Minimum order value">
-          <input id="helpTitle" class="input" placeholder="Help center title">
-        </div>
-        <div style="height:10px"></div>
-        <textarea id="notificationText" class="textarea" placeholder="Top notification / running text"></textarea>
-        <div style="height:10px"></div>
-        <div class="row">
-          <label class="small"><input id="notificationEnabled" type="checkbox"> Show top notification</label>
-          <label class="small"><input id="showHelpCenter" type="checkbox" checked> Show help center</label>
-        </div>
-        <div class="hint">Logo, app name, support, notification, minimum order yahin se update honge.</div>
-      </section>
-
-      <section class="block">
-        <div style="font-weight:700;margin-bottom:8px">Delivery charge rules</div>
-        <div class="row">
-          <input id="rule1" class="input" placeholder="0-999=50">
-          <input id="rule2" class="input" placeholder="1000-2999=30">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="rule3" class="input" placeholder="3000-4999=20">
-          <input id="rule4" class="input" placeholder="5000-999999=10">
-        </div>
-      </section>
-
-      <div style="height:12px"></div>
-      <button class="btn" onclick="saveSettings()">Save store settings</button>
-    </div>
-
-    <div class="card span-6">
-      <div class="between"><h3 style="margin:0">Future integrations / app connection</h3><span class="pill">Rider • Billing • Receipt</span></div>
-      <section class="block">
-        <div class="row">
-          <label class="small"><input id="riderEnabled" type="checkbox"> Rider app ready</label>
-          <label class="small"><input id="billingEnabled" type="checkbox"> Billing app ready</label>
-          <label class="small"><input id="receiptEnabled" type="checkbox"> Auto receipt ready</label>
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="riderAppName" class="input" placeholder="Rider app name">
-          <input id="riderAppLink" class="input" placeholder="Rider app link / URL / deep link">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="billingAppName" class="input" placeholder="Billing app name">
-          <input id="billingAppLink" class="input" placeholder="Billing app link / URL / API note">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="receiptPrefix" class="input" placeholder="Receipt prefix e.g. DMART">
-          <input id="receiptTemplateName" class="input" placeholder="Receipt / invoice template name">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <select id="orderPushMode" class="select">
-            <option value="manual">Manual for now</option>
-            <option value="rider_app">Send to rider app later</option>
-            <option value="billing_app">Send to billing app later</option>
-            <option value="both">Rider + billing later</option>
-          </select>
-          <input id="integrationNote" class="input" placeholder="Internal integration note (optional)">
-        </div>
-        <div class="hint">Ye section abhi structure ke liye hai. Future me rider app, billing app, receipt system jodoge to yahin se mapping aur settings ready milengi.</div>
-      </section>
-    </div>
-
-    <div class="card span-6">
-      <div class="between"><h3 style="margin:0">Promo slider / ads / media</h3><span class="pill">Video + banner</span></div>
-      <section class="block">
-        <div class="row">
-          <select id="promoType" class="select">
-            <option value="image">Banner image</option>
-            <option value="video">Video</option>
-          </select>
-          <input id="promoTitle" class="input" placeholder="Promo title">
-        </div>
-        <div style="height:10px"></div>
-        <input id="promoSubtitle" class="input" placeholder="Promo subtitle">
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="promoUrl" class="input" placeholder="Image or video URL">
-          <input id="promoThumb" class="input" placeholder="Preview image URL (optional for video)">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="promoOrder" class="input" type="number" placeholder="Slide order">
-          <input id="promoDuration" class="input" type="number" placeholder="Duration ms e.g. 5000">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="promoTargetLabel" class="input" placeholder="Button label / ad name">
-          <input id="promoTargetUrl" class="input" placeholder="Open link / external app link (optional)">
-        </div>
-        <div style="height:10px"></div>
-        <label class="small"><input id="promoActive" type="checkbox" checked> Active in customer app</label>
-        <div class="hint">Free use ke liye image/video URL based rakha gaya hai. Heavy file upload system nahi lagaya.</div>
-      </section>
-      <div style="height:12px"></div>
-      <button class="btn" onclick="addPromo()">Add promo / ad</button>
-      <div style="height:12px"></div>
-      <div id="promoList" class="list"></div>
-    </div>
-
-    <div class="card span-6">
-      <div class="between"><h3 style="margin:0">Add category</h3><span class="pill">Simple form</span></div>
-      <section class="block">
-        <div class="row">
-          <input id="catName" class="input" placeholder="Category name">
-          <input id="catOrder" class="input" type="number" placeholder="Category order">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="catImage" class="input" placeholder="Category image URL (optional)">
-          <input id="catButtonText" class="input" placeholder="Custom button text (optional)">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <select id="catSupportType" class="select">
-            <option value="whatsapp">WhatsApp</option>
-            <option value="call">Call</option>
-            <option value="link">Custom link</option>
-            <option value="disabled">Disabled</option>
-          </select>
-          <input id="catSupportValue" class="input" placeholder="Number or URL">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="catExternalApp" class="input" placeholder="Future app / external link (optional)">
-          <input id="catNote" class="input" placeholder="Internal note (optional)">
-        </div>
-        <div style="height:10px"></div>
-        <label class="small"><input id="catActive" type="checkbox" checked> Category active</label>
-        <div class="hint">Medicine, fruits, vegetables ke liye alag number ya link yahin se set hoga.</div>
-      </section>
-      <div style="height:12px"></div>
-      <button class="btn" onclick="addCategory()">Save category</button>
-      <div style="height:12px"></div>
-      <div id="categoryList" class="list"></div>
-    </div>
-
-    <div class="card span-6">
-      <div class="between"><h3 style="margin:0">Add product / item</h3><span class="pill">Category ke andar item</span></div>
-      <section class="block">
-        <div class="row">
-          <input id="pName" class="input" placeholder="Item name">
-          <input id="pBrand" class="input" placeholder="Brand">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="pSize" class="input" placeholder="Size">
-          <input id="pImage" class="input" placeholder="Image URL">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <input id="pPrice" class="input" type="number" placeholder="Price">
-          <input id="pMrp" class="input" type="number" placeholder="MRP">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <select id="pCategory" class="select"></select>
-          <input id="pAliases" class="input" placeholder="Search aliases comma separated">
-        </div>
-        <div style="height:10px"></div>
-        <div class="row">
-          <label class="small"><input id="pStock" type="checkbox" checked> In stock</label>
-          <label class="small"><input id="pFeatured" type="checkbox"> Featured</label>
-          <label class="small"><input id="pPopular" type="checkbox"> Popular</label>
-        </div>
-      </section>
-      <div style="height:12px"></div>
-      <button class="btn" onclick="addProduct()">Save product</button>
-      <div style="height:12px"></div>
-      <div id="productList" class="list"></div>
-    </div>
-
-    <div class="card span-12">
-      <div class="between"><h3 style="margin:0">Orders</h3><span class="pill">Customer orders</span></div>
-      <div style="overflow:auto;margin-top:10px">
-        <table class="table">
-          <thead><tr><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="ordersBody"></tbody>
-        </table>
+    <div id="tab-dashboard" class="section"></div>
+    <div id="tab-settings" class="section hidden">
+      <div class="card stack">
+        <input id="s_storeName" class="input" placeholder="App / Store Name">
+        <input id="s_heroTitle" class="input" placeholder="Hero line">
+        <input id="s_heroSub" class="input" placeholder="Sub line">
+        <input id="s_logoUrl" class="input" placeholder="Logo URL">
+        <input id="s_supportPhone" class="input" placeholder="Support Phone">
+        <input id="s_whatsappNumber" class="input" placeholder="WhatsApp Number with country code">
+        <input id="s_minOrderValue" class="input" type="number" placeholder="Minimum order value">
+        <textarea id="s_topNotice" class="textarea" placeholder="Top moving offer text"></textarea>
+        <label><input id="s_notificationEnabled" type="checkbox"> Notification enabled</label>
+        <textarea id="s_notificationText" class="textarea" placeholder="Notification text"></textarea>
+        <textarea id="s_helpText" class="textarea" placeholder="Help center text"></textarea>
+        <button class="btn" id="saveSettingsBtn">Save Settings</button>
+      </div>
+      <div class="card stack">
+        <div style="font-weight:700">Delivery Charges</div>
+        <div class="small muted">₹0–₹999 = ₹50 • ₹1000–₹2999 = ₹30 • ₹3000–₹4999 = ₹20 • ₹5000+ = ₹10</div>
       </div>
     </div>
+
+    <div id="tab-categories" class="section hidden">
+      <div class="card stack">
+        <input id="c_name" class="input" placeholder="Category Name">
+        <input id="c_image" class="input" placeholder="Category Image URL">
+        <input id="c_order" class="input" type="number" placeholder="Order">
+        <select id="c_supportType" class="select"><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="link">Link</option><option value="none">None</option></select>
+        <input id="c_supportValue" class="input" placeholder="Support number / link">
+        <button class="btn" id="saveCategoryBtn">Add Category</button>
+      </div>
+      <div id="categoriesList" class="list"></div>
+    </div>
+
+    <div id="tab-products" class="section hidden">
+      <div class="card stack">
+        <input id="p_name" class="input" placeholder="Item Name">
+        <input id="p_brand" class="input" placeholder="Brand">
+        <input id="p_size" class="input" placeholder="Size">
+        <input id="p_image" class="input" placeholder="Image URL">
+        <input id="p_price" class="input" type="number" placeholder="Price">
+        <input id="p_mrp" class="input" type="number" placeholder="MRP">
+        <select id="p_category" class="select"></select>
+        <label><input id="p_stock" type="checkbox" checked> In stock</label>
+        <button class="btn" id="saveProductBtn">Add Product</button>
+      </div>
+      <div id="productsList" class="list"></div>
+    </div>
+
+    <div id="tab-notification" class="section hidden">
+      <div class="card stack">
+        <textarea id="n_text" class="textarea" placeholder="Notification text"></textarea>
+        <label><input id="n_enabled" type="checkbox"> Show notification</label>
+        <button class="btn" id="saveNotificationBtn">Save Notification</button>
+      </div>
+      <div class="card stack">
+        <div style="font-weight:700">Promo Slider</div>
+        <select id="promo_type" class="select"><option value="image">Banner Image</option><option value="video">Video</option></select>
+        <input id="promo_url" class="input" placeholder="Image / Video URL">
+        <input id="promo_title" class="input" placeholder="Promo title">
+        <input id="promo_subtitle" class="input" placeholder="Promo subtitle">
+        <input id="promo_order" class="input" type="number" placeholder="Order">
+        <label><input id="promo_enabled" type="checkbox" checked> Active</label>
+        <button class="btn" id="savePromoBtn">Add Promo</button>
+      </div>
+      <div id="promosList" class="list"></div>
+    </div>
+
+    <div id="tab-orders" class="section hidden"><div id="ordersList" class="list"></div></div>
+
+    <div id="tab-future" class="section hidden">
+      <div class="card stack">
+        <div style="font-weight:700">Future Integrations Structure</div>
+        <label><input id="f_riderEnabled" type="checkbox"> Rider App Enabled</label>
+        <input id="f_riderAppName" class="input" placeholder="Rider App Name">
+        <input id="f_riderAppLink" class="input" placeholder="Rider App Link">
+        <label><input id="f_billingEnabled" type="checkbox"> Billing App Enabled</label>
+        <input id="f_billingAppName" class="input" placeholder="Billing App Name">
+        <input id="f_billingAppLink" class="input" placeholder="Billing App Link">
+        <label><input id="f_receiptEnabled" type="checkbox"> Receipt Enabled</label>
+        <input id="f_receiptPrefix" class="input" placeholder="Receipt Prefix">
+        <input id="f_receiptTemplate" class="input" placeholder="Receipt Template">
+        <button class="btn" id="saveFutureBtn">Save Future Structure</button>
+      </div>
+    </div>
+    <div class="footer-space"></div>
   </div>
-</div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script>
-let db = null;
-if (window.firebaseConfig && window.firebaseConfig.apiKey) {
-  firebase.initializeApp(window.firebaseConfig);
-  db = firebase.firestore();
-}
-const fallbackSettings = {
-  storeName:"DevIndra Mart",
-  tagline:"Ghar tak paaye bazaar jaise rate",
-  subTagline:"Fast ordering, easy checkout, smart kirana shopping.",
-  logo:"logo.svg",
-  headerBannerUrl:"",
-  whatsappNumber:"917678256489",
-  supportPhone:"917678256489",
-  helpTitle:"Help Center",
-  showHelpCenter:true,
-  minOrderValue:500,
-  deliveryRules:[{min:0,max:999,charge:50},{min:1000,max:2999,charge:30},{min:3000,max:4999,charge:20},{min:5000,max:999999,charge:10}],
-  notificationText:"",
-  notificationEnabled:false,
-  integrations:{
-    riderEnabled:false,
-    billingEnabled:false,
-    receiptEnabled:false,
-    riderAppName:"",
-    riderAppLink:"",
-    billingAppName:"",
-    billingAppLink:"",
-    receiptPrefix:"DMART",
-    receiptTemplateName:"Standard Receipt",
-    orderPushMode:"manual",
-    integrationNote:""
-  }
-};
-function show(msg){ alert(msg); }
-function parseRule(str){ const m = String(str||'').match(/(\d+)\s*-\s*(\d+)\s*=\s*(\d+)/); return m?{min:Number(m[1]),max:Number(m[2]),charge:Number(m[3])}:null; }
-
-async function saveSettings(){
-  if(!db) return show('firebase-config.js me config paste karo');
-  const rules=[parseRule(rule1.value),parseRule(rule2.value),parseRule(rule3.value),parseRule(rule4.value)].filter(Boolean);
-  await db.collection('settings').doc('store').set({
-    storeName:storeName.value.trim() || fallbackSettings.storeName,
-    tagline:tagline.value.trim() || fallbackSettings.tagline,
-    subTagline:subTagline.value.trim() || fallbackSettings.subTagline,
-    logo:logoUrl.value.trim() || 'logo.svg',
-    headerBannerUrl:headerBannerUrl.value.trim(),
-    whatsappNumber:whatsappNumber.value.trim() || fallbackSettings.whatsappNumber,
-    supportPhone:supportPhone.value.trim() || fallbackSettings.supportPhone,
-    helpTitle:helpTitle.value.trim() || fallbackSettings.helpTitle,
-    showHelpCenter:showHelpCenter.checked,
-    minOrderValue:Number(minOrderValue.value||500),
-    deliveryRules:rules.length?rules:fallbackSettings.deliveryRules,
-    notificationText:notificationText.value.trim(),
-    notificationEnabled:notificationEnabled.checked,
-    integrations:{
-      riderEnabled:riderEnabled.checked,
-      billingEnabled:billingEnabled.checked,
-      receiptEnabled:receiptEnabled.checked,
-      riderAppName:riderAppName.value.trim(),
-      riderAppLink:riderAppLink.value.trim(),
-      billingAppName:billingAppName.value.trim(),
-      billingAppLink:billingAppLink.value.trim(),
-      receiptPrefix:receiptPrefix.value.trim() || 'DMART',
-      receiptTemplateName:receiptTemplateName.value.trim() || 'Standard Receipt',
-      orderPushMode:orderPushMode.value,
-      integrationNote:integrationNote.value.trim()
-    }
-  }, {merge:true});
-  show('Store settings saved');
-  loadAll();
-}
-async function addPromo(){
-  if(!db) return show('firebase-config.js me config paste karo');
-  if(!promoUrl.value.trim()) return show('Image/video URL daalo');
-  await db.collection('promos').add({
-    type:promoType.value,
-    title:promoTitle.value.trim(),
-    subtitle:promoSubtitle.value.trim(),
-    url:promoUrl.value.trim(),
-    thumb:promoThumb.value.trim(),
-    order:Number(promoOrder.value||0),
-    durationMs:Number(promoDuration.value||5000),
-    active:promoActive.checked,
-    targetLabel:promoTargetLabel.value.trim(),
-    targetUrl:promoTargetUrl.value.trim(),
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  [promoTitle,promoSubtitle,promoUrl,promoThumb,promoOrder,promoDuration,promoTargetLabel,promoTargetUrl].forEach(el=>el.value='');
-  promoActive.checked=true; loadAll();
-}
-async function addCategory(){
-  if(!db) return show('firebase-config.js me config paste karo');
-  if(!catName.value.trim()) return show('Category name daalo');
-  await db.collection('categories').add({
-    name:catName.value.trim(),
-    order:Number(catOrder.value||0),
-    image:catImage.value.trim(),
-    buttonText:catButtonText.value.trim(),
-    supportType:catSupportType.value,
-    supportValue:catSupportValue.value.trim(),
-    externalApp:catExternalApp.value.trim(),
-    note:catNote.value.trim(),
-    active:catActive.checked,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  [catName,catOrder,catImage,catButtonText,catSupportValue,catExternalApp,catNote].forEach(el=>el.value='');
-  catSupportType.value='whatsapp'; catActive.checked=true; loadAll();
-}
-async function addProduct(){
-  if(!db) return show('firebase-config.js me config paste karo');
-  if(!pName.value.trim()) return show('Item name daalo');
-  await db.collection('products').add({
-    name:pName.value.trim(),
-    brand:pBrand.value.trim(),
-    size:pSize.value.trim(),
-    image:pImage.value.trim(),
-    price:Number(pPrice.value||0),
-    mrp:Number(pMrp.value||0),
-    cat:pCategory.value,
-    aliases:pAliases.value.split(',').map(x=>x.trim()).filter(Boolean),
-    inStock:pStock.checked,
-    featured:pFeatured.checked,
-    popular:pPopular.checked,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  [pName,pBrand,pSize,pImage,pPrice,pMrp,pAliases].forEach(el=>el.value='');
-  pStock.checked=true; pFeatured.checked=false; pPopular.checked=false; loadAll();
-}
-async function deleteDoc(col,id){ if(!db) return; await db.collection(col).doc(id).delete(); loadAll(); }
-async function updateOrderStatus(id,status){ if(!db) return; await db.collection('orders').doc(id).set({status},{merge:true}); loadAll(); }
-
-async function seedDemoData(){
-  if(!db) return show('firebase-config.js me config paste karo');
-  await db.collection('settings').doc('store').set(fallbackSettings,{merge:true});
-  const cats=[
-    {name:'Kirana',order:1,supportType:'whatsapp',supportValue:'917678256489',active:true},
-    {name:'Medical',order:2,supportType:'call',supportValue:'917678256489',active:true},
-    {name:'Fruits',order:3,supportType:'whatsapp',supportValue:'917678256489',active:true},
-    {name:'Vegetables',order:4,supportType:'whatsapp',supportValue:'917678256489',active:true},
-    {name:'Dairy',order:5,supportType:'whatsapp',supportValue:'917678256489',active:true}
-  ];
-  for (const c of cats) await db.collection('categories').add({...c,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  show('Basic demo added. Duplicate categories ho sakti hain agar bar bar dabaya.');
-  loadAll();
-}
-
-async function loadAll(){
-  if(!db) return;
-  const settingsDoc = await db.collection('settings').doc('store').get();
-  const settings = settingsDoc.exists ? settingsDoc.data() : fallbackSettings;
-  adminBrand.textContent = settings.storeName || 'DevIndra Mart';
-  adminLogo.src = settings.logo || 'logo.svg';
-  storeName.value=settings.storeName||''; tagline.value=settings.tagline||''; subTagline.value=settings.subTagline||'';
-  logoUrl.value=settings.logo||''; headerBannerUrl.value=settings.headerBannerUrl||''; whatsappNumber.value=settings.whatsappNumber||''; supportPhone.value=settings.supportPhone||'';
-  helpTitle.value=settings.helpTitle||'Help Center'; showHelpCenter.checked=settings.showHelpCenter!==false; minOrderValue.value=settings.minOrderValue||500;
-  notificationText.value=settings.notificationText||''; notificationEnabled.checked=!!settings.notificationEnabled;
-  const integrations=settings.integrations||fallbackSettings.integrations;
-  riderEnabled.checked=!!integrations.riderEnabled; billingEnabled.checked=!!integrations.billingEnabled; receiptEnabled.checked=!!integrations.receiptEnabled;
-  riderAppName.value=integrations.riderAppName||''; riderAppLink.value=integrations.riderAppLink||'';
-  billingAppName.value=integrations.billingAppName||''; billingAppLink.value=integrations.billingAppLink||'';
-  receiptPrefix.value=integrations.receiptPrefix||'DMART'; receiptTemplateName.value=integrations.receiptTemplateName||'Standard Receipt';
-  orderPushMode.value=integrations.orderPushMode||'manual'; integrationNote.value=integrations.integrationNote||'';
-  const rules=settings.deliveryRules||fallbackSettings.deliveryRules; [rule1,rule2,rule3,rule4].forEach((el,idx)=>{const r=rules[idx]; el.value=r?`${r.min}-${r.max}=${r.charge}`:'';});
-
-  const cats = await db.collection('categories').orderBy('order','asc').get();
-  const products = await db.collection('products').orderBy('createdAt','desc').get();
-  const promos = await db.collection('promos').orderBy('order','asc').get();
-  const orders = await db.collection('orders').orderBy('createdAt','desc').get();
-
-  kpiCategories.textContent=cats.size; kpiProducts.textContent=products.size; kpiOrders.textContent=orders.size;
-  pCategory.innerHTML = cats.docs.map(d=>`<option value="${d.data().name}">${d.data().name}</option>`).join('') || '<option value="">No category</option>';
-
-  categoryList.innerHTML = cats.docs.map(d=>{ const c=d.data();
-    return `<div class="item"><div class="between"><div><div style="font-weight:700">${c.name}</div><div class="small">${c.supportType} • ${c.supportValue||'-'}${c.externalApp?` • app: ${c.externalApp}`:''}</div></div><div class="${c.active?'badge':'badge red'}">${c.active?'Active':'Inactive'}</div></div><div class="hint">${c.buttonText||''}</div><div style="height:10px"></div><button class="btn danger" onclick="deleteDoc('categories','${d.id}')">Delete</button></div>`;
-  }).join('') || '<div class="small">No categories yet.</div>';
-
-  productList.innerHTML = products.docs.slice(0,30).map(d=>{ const p=d.data();
-    return `<div class="item"><div class="between"><div><div style="font-weight:700">${p.name}</div><div class="small">${p.cat||'-'} • ₹${p.price||0} • ${p.brand||''}</div></div><div class="${p.inStock?'badge':'badge red'}">${p.inStock?'In stock':'Out'}</div></div><div class="hint">${p.size||''}</div><div style="height:10px"></div><button class="btn danger" onclick="deleteDoc('products','${d.id}')">Delete</button></div>`;
-  }).join('') || '<div class="small">No products yet.</div>';
-
-  promoList.innerHTML = promos.docs.map(d=>{ const p=d.data();
-    return `<div class="item"><div class="between"><div><div style="font-weight:700">${p.title||'(No title)'}</div><div class="small">${p.type} • order ${p.order||0} • ${p.active?'active':'inactive'}</div></div><button class="btn danger" onclick="deleteDoc('promos','${d.id}')">Delete</button></div><div class="hint">${p.url||''}</div></div>`;
-  }).join('') || '<div class="small">No promos yet.</div>';
-
-  ordersBody.innerHTML = orders.docs.map(d=>{ const o=d.data(); const items=(o.items||[]).map(i=>`${i.name} x ${i.qty}`).join('<br>');
-    return `<tr><td>${o.customer?.name||'-'}<div class="small">${o.customer?.phone||''}<br>${o.customer?.address||''}</div></td><td>${items||'-'}</td><td>₹${o.total||0}</td><td>${o.status||'new'}</td><td><div class="row"><button class="btn secondary" onclick="updateOrderStatus('${d.id}','confirmed')">Confirm</button><button class="btn secondary" onclick="updateOrderStatus('${d.id}','delivered')">Delivered</button></div></td></tr>`;
-  }).join('') || '<tr><td colspan="5" class="small">No orders yet.</td></tr>';
-}
-loadAll();
-</script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="admin.js"></script>
 </body>
 </html>

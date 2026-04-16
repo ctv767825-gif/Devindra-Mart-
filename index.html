@@ -1,787 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DevIndra Mart</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="logo.svg">
-<meta name="theme-color" content="#0f172a">
-<style>
-:root{
-  --bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;
-  --primary:#111827;--soft:#f1f5f9;--green:#15803d;--red:#b91c1c;--amber:#a16207;
-  --shadow:0 10px 30px rgba(15,23,42,.08);--radius:22px;
-}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-.hidden{display:none!important}
-.app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:96px}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.brand{display:flex;align-items:center;gap:10px}
-.brand img{width:38px;height:38px;border-radius:12px;object-fit:cover}
-.tiny{font-size:12px}.small{font-size:13px}.muted{color:var(--muted)}
-.title{font-size:22px;font-weight:700;margin:0}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px}
-.hero{color:#fff;background:linear-gradient(135deg,#0f172a,#334155)}
-.row{display:flex;gap:10px}.between{display:flex;justify-content:space-between;align-items:center;gap:10px}.stack{display:flex;flex-direction:column;gap:8px}
-.btn,.chip,.lang-btn,.nav-btn,.icon-btn{border:0;cursor:pointer;transition:.2s}
-.btn{padding:12px 14px;border-radius:16px;background:var(--primary);color:#fff;font-weight:700;width:100%}
-.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--border)}
-.btn.warn{background:#fef3c7;color:var(--amber)}.btn.danger{background:#fee2e2;color:var(--red)}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.lang-btn{padding:8px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px}
-.lang-btn.active{background:var(--primary);color:#fff}
-.icon-btn{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid var(--border)}
-.input,.textarea,.select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:#fff;color:var(--text);font-size:14px}
-.textarea{min-height:88px;resize:vertical}
-.searchbar{display:flex;gap:8px;align-items:center;background:#fff;border-radius:18px;padding:10px 12px;box-shadow:var(--shadow);margin:14px}
-.searchbar input{border:0;outline:none;width:100%;background:transparent}
-.chips{display:flex;gap:8px;overflow:auto;padding:0 14px 4px}
-.chip{padding:9px 12px;border-radius:999px;background:#fff;border:1px solid var(--border);white-space:nowrap}
-.chip.active{background:#111827;color:#fff}
-.section{padding:0 14px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.grid.list{grid-template-columns:1fr}
-.product{background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
-.product img{width:100%;height:128px;object-fit:cover;background:#e2e8f0}
-.product video{width:100%;height:220px;object-fit:cover;background:#000;border-radius:18px}
-.pbody{padding:12px}
-.pname{font-size:14px;font-weight:700;margin:0}
-.psub{font-size:12px;color:var(--muted);margin-top:4px}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.badge{padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;font-weight:700}
-.badge.red{background:#fee2e2;color:var(--red)}
-.badge.green{background:#dcfce7;color:var(--green)}
-.price-row{display:flex;justify-content:space-between;align-items:end;gap:8px}
-.price{font-size:16px;font-weight:700}.strike{font-size:12px;color:#94a3b8;text-decoration:line-through}
-.qty{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:12px;padding:3px}
-.qty button{width:28px;height:28px;border:0;border-radius:8px;background:var(--soft);cursor:pointer}
-.product.listitem{display:grid;grid-template-columns:82px 1fr auto;align-items:center;gap:10px;padding:10px}
-.product.listitem img{width:82px;height:82px;border-radius:14px}
-.product.listitem .pbody{padding:0}
-.suggestion-box,.voice-box{margin:0 14px 12px;background:#fff;border-radius:18px;padding:12px;box-shadow:var(--shadow)}
-.voice-box{border:1px dashed var(--border)}
-.voice-box.active{background:#eef2ff;border-color:#111827}
-.suggestion-pill{display:inline-block;margin:4px;padding:8px 10px;border-radius:999px;background:var(--soft);font-size:12px;cursor:pointer}
-.summary-line{display:flex;justify-content:space-between;margin:8px 0;font-size:14px}
-.summary-line.bold{font-weight:700}.divider{height:1px;background:var(--border);margin:12px 0}
-.bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:8px;z-index:30}
-.nav-btn{padding:10px 6px;border-radius:16px;background:#fff;border:1px solid transparent;font-size:11px}
-.nav-btn.active{background:var(--soft);border-color:var(--border)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;background:#111827;color:#fff;padding:12px 16px;border-radius:999px;z-index:50;font-size:13px;max-width:92%;text-align:center}
-.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:end;z-index:40}
-.modal.show{display:flex}
-.modal-card{background:#fff;width:100%;max-width:480px;margin:0 auto;border-top-left-radius:28px;border-top-right-radius:28px;padding:16px;max-height:88vh;overflow:auto}
-.modal-card img{width:100%;height:220px;object-fit:cover;border-radius:20px;background:#e2e8f0}
-.login-screen{min-height:100vh;background:linear-gradient(135deg,#020617,#1e293b);color:#fff;padding:20px;display:flex;align-items:center}
-.login-wrap{max-width:460px;margin:0 auto;width:100%}
-.pill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pill-grid div{background:rgba(255,255,255,.08);padding:12px;border-radius:18px;text-align:center;font-size:12px}
-.offer-run{margin:0 14px 14px;background:#111827;color:#fff;border-radius:16px;padding:10px 12px;font-size:13px;white-space:nowrap;overflow:hidden}
-.offer-run span{display:inline-block;padding-left:100%;animation:marquee 14s linear infinite}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
-.chat-box{background:#f8fafc;border-radius:18px;padding:10px;max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px}
-.chat-msg{padding:10px 12px;border-radius:16px;font-size:13px;max-width:88%}
-.chat-msg.bot{background:#fff}.chat-msg.user{background:#111827;color:#fff;align-self:flex-end}
-.notice{margin:14px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;border-radius:16px;padding:10px 12px;font-size:13px}
-.slider{margin:0 14px 14px;background:#fff;border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
-.slide-media{position:relative;min-height:220px;background:#0f172a}
-.slide-media img,.slide-media video{width:100%;height:220px;object-fit:cover;display:block}
-.slide-overlay{position:absolute;left:0;right:0;bottom:0;padding:14px;background:linear-gradient(180deg,transparent,rgba(15,23,42,.9));color:#fff}
-.help-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.center-screen{min-height:100vh;display:flex;align-items:center;padding:20px;background:linear-gradient(135deg,#020617,#1e293b);color:#fff}
-.center-wrap{max-width:460px;margin:0 auto;width:100%}
-.link-btn{text-decoration:none;display:inline-block;text-align:center}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>DevIndra Mart</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="logo.svg">
+  <meta name="theme-color" content="#111827">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="loginScreen" class="login-screen">
-  <div class="login-wrap">
-    <div class="card" style="background:transparent;box-shadow:none;padding:0;margin-bottom:18px;color:white">
-      <div class="brand"><img id="loginLogo" src="logo.svg" alt="logo"><div><div class="tiny" style="opacity:.8" id="brandMini">DEVINDRA MART</div><h1 class="title" style="font-size:30px;color:white;margin-top:6px" id="loginHero">Ghar tak paaye bazaar jaise rate</h1></div></div>
-      <p class="small" style="opacity:.86" id="loginSub">Fast ordering, easy checkout, smart kirana shopping.</p>
-    </div>
-    <div class="card">
-      <div class="tiny muted">LOGIN FIRST</div>
-      <h2 style="margin:8px 0 6px">Quick Login</h2>
-      <div id="phoneStep">
+  <div id="loginScreen" class="login-screen">
+    <div class="login-wrap">
+      <div class="card" style="background:transparent;box-shadow:none;padding:0;margin-bottom:18px;color:white">
+        <div class="brand"><img id="loginLogo" src="logo.svg" alt="logo"><div><div class="tiny" style="opacity:.8">DEVINDRA MART</div><h1 class="title" style="font-size:30px;color:white;margin-top:6px" id="loginHero">Ghar tak paaye bazaar jaise rate</h1></div></div>
+        <p class="small" style="opacity:.86" id="loginSub">Fast ordering, easy checkout, smart kirana shopping.</p>
+      </div>
+      <div class="card">
+        <div class="tiny muted">LOGIN FIRST</div>
+        <h2 style="margin:8px 0 6px">Quick Login</h2>
         <input id="loginPhone" class="input" placeholder="Phone number">
         <div style="height:10px"></div>
-        <button class="btn" onclick="startLogin()">Continue</button>
+        <button class="btn" id="loginBtn">Continue</button>
       </div>
-      <div id="captchaStep" class="hidden">
-        <div class="card" style="margin:0;box-shadow:none;background:#f8fafc">
-          <div style="font-weight:700;margin-bottom:8px">Captcha Verification</div>
-          <div class="small muted" style="margin-bottom:10px">Tap karke verify karo, login automatic ho jayega.</div>
-          <button class="btn secondary" onclick="verifyLogin()">I'm not a robot</button>
+      <div class="pill-grid"><div>One-time login</div><div>Quick order</div><div>WhatsApp order</div></div>
+    </div>
+  </div>
+
+  <div id="addressScreen" class="login-screen hidden">
+    <div class="login-wrap">
+      <div class="card" style="margin-bottom:16px"><h2 style="margin-top:0">Address Details</h2><div class="small muted">Login ke baad address fill karke main page open hoga.</div></div>
+      <div class="card">
+        <input id="nameField" class="input" placeholder="Name">
+        <div style="height:10px"></div>
+        <input id="phoneField" class="input" readonly>
+        <div style="height:10px"></div>
+        <textarea id="addressField" class="textarea" placeholder="Full address"></textarea>
+        <div style="height:10px"></div>
+        <div class="row"><input id="cityField" class="input" placeholder="City"><input id="stateField" class="input" placeholder="State"></div>
+        <div style="height:10px"></div>
+        <div class="row"><input id="pincodeField" class="input" placeholder="Pincode"><input id="landmarkField" class="input" placeholder="Landmark"></div>
+        <div style="height:10px"></div>
+        <button class="btn" id="saveAddressBtn">Save & Open App</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appScreen" class="app hidden">
+    <div class="topbar">
+      <div class="brand"><img id="topLogo" src="logo.svg" alt="logo"><div><div class="tiny muted" id="brandNameTiny">DevIndra Mart</div><div style="font-weight:700" id="topHero">Ghar tak paaye bazaar jaise rate</div></div></div>
+      <a class="btn secondary" style="width:auto;padding:10px 12px" href="admin.html">Admin</a>
+    </div>
+
+    <div class="offer-run"><span id="offerRun">Today offer live hai.</span></div>
+    <div id="noticeBox" class="notice hidden"></div>
+    <div id="promoSlider" class="slider hidden"></div>
+
+    <div id="homeTab">
+      <div class="card hero">
+        <div class="badge">Offer Zone</div>
+        <h2 class="title" style="color:#fff;margin-top:10px" id="heroTitle">Ghar tak paaye bazaar jaise rate</h2>
+        <p class="small" style="opacity:.9" id="heroSub">Fast ordering, easy checkout, smart kirana shopping.</p>
+        <div class="row" style="margin-top:12px"><div class="badge" style="background:rgba(255,255,255,.12);color:#fff" id="minBadge">Min ₹500</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">COD</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">Support</div></div>
+      </div>
+      <div class="searchbar"><span>🔎</span><input id="searchInput" placeholder="Search item, brand ya category"><button class="icon-btn" id="supportQuickBtn">☎</button></div>
+      <div class="chips" id="categoryChips"></div>
+      <div class="section">
+        <div class="card" style="margin:0 0 14px">
+          <div class="between"><h3 id="listingTitle" style="margin:0">All Products</h3><button class="btn secondary" style="width:auto;padding:8px 12px" id="viewBtn">List View</button></div>
         </div>
+        <div id="productsGrid" class="grid"></div>
       </div>
     </div>
-    <div class="pill-grid"><div>One-time login</div><div>Quick order</div><div>WhatsApp order</div></div>
-  </div>
-</div>
 
-<div id="addressScreen" class="center-screen hidden">
-  <div class="center-wrap">
-    <div class="card" style="margin:0">
-      <div class="tiny muted">ADDRESS STEP</div>
-      <h2 style="margin:8px 0 6px">Fill delivery address</h2>
-      <div class="small muted">Login ke baad ye ek baar bharna hai. Iske baad main page open hoga.</div>
-      <div style="height:12px"></div>
-      <input id="setupName" class="input" placeholder="Name">
-      <div style="height:10px"></div>
-      <input id="setupPhone" class="input" readonly style="background:#f1f5f9">
-      <div style="height:10px"></div>
-      <textarea id="setupAddress" class="textarea" placeholder="Full address"></textarea>
-      <div style="height:10px"></div>
-      <div class="row"><input id="setupCity" class="input" placeholder="City"><input id="setupState" class="input" placeholder="State"></div>
-      <div style="height:10px"></div>
-      <div class="row"><input id="setupPincode" class="input" placeholder="Pincode"><input id="setupLandmark" class="input" placeholder="Landmark"></div>
-      <div style="height:12px"></div>
-      <button class="btn" onclick="saveAddressAndEnter()">Save & Open App</button>
-    </div>
-  </div>
-</div>
-
-<div id="appScreen" class="app hidden">
-  <div class="topbar">
-    <div class="brand"><img id="topLogo" src="logo.svg" alt="logo"><div><div class="tiny muted" id="topBrandName">DevIndra Mart</div><div style="font-weight:700" id="topHero">Ghar tak paaye bazaar jaise rate</div></div></div>
-    <div class="row">
-      <button class="lang-btn active" data-lang="hinglish" onclick="setLanguage('hinglish')">Hinglish</button>
-      <button class="lang-btn" data-lang="hindi" onclick="setLanguage('hindi')">हिंदी</button>
-      <button class="lang-btn" data-lang="english" onclick="setLanguage('english')">English</button>
-    </div>
-  </div>
-
-  <div class="offer-run"><span id="offerRun">Today offer: ₹699 par SAVE50, ₹999 par FIRST100, aur voice se bhi order karo.</span></div>
-  <div id="noticeBox" class="notice hidden"></div>
-  <div id="sliderWrap" class="slider hidden">
-    <div class="slide-media" id="slideMedia"></div>
-    <div class="slide-overlay">
-      <div id="slideTitle" style="font-weight:700"></div>
-      <div id="slideSub" class="small" style="opacity:.92;margin-top:4px"></div>
-    </div>
-  </div>
-
-  <div id="homeTab">
-    <div class="card hero">
-      <div class="badge">Offer Zone</div>
-      <h2 class="title" style="color:#fff;margin-top:10px" id="heroTitle">Ghar tak paaye bazaar jaise rate</h2>
-      <p class="small" style="opacity:.9" id="heroSub">Fast ordering, easy checkout, smart kirana shopping.</p>
-      <div class="row" style="margin-top:12px"><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">Min ₹500</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">COD</div><div class="badge" style="background:rgba(255,255,255,.12);color:#fff">Voice On</div></div>
-    </div>
-
-    <div class="searchbar"><span>🔎</span><input id="searchInput" placeholder="Search item, brand ya category" oninput="onSearch(this.value)"><button class="icon-btn" onclick="startVoice()">🎤</button></div>
-    <div id="voiceBox" class="voice-box hidden"><div style="font-weight:700" id="voiceTitle">Listening...</div><div class="small muted" id="voiceTranscript">Say: add atta, 2 milk, search rice</div></div>
-    <div id="suggestionBox" class="suggestion-box hidden"></div>
-    <div class="chips" id="categoryChips"></div>
-
-    <div class="section">
-      <div class="card" style="margin:0 0 14px">
-        <div class="between">
-          <h3 id="listingTitle" style="margin:0">All Products</h3>
-          <button class="btn secondary" style="width:auto;padding:8px 12px" id="viewBtn" onclick="toggleView()">List View</button>
-        </div>
-      </div>
-      <div id="productsGrid" class="grid"></div>
-    </div>
-  </div>
-
-  <div id="cartTab" class="hidden">
-    <div class="card"><h3 style="margin-top:0" id="checkoutTitle">Checkout</h3><div id="cartItems"></div></div>
-    <div class="card"><div class="small" id="deliverySlabText">₹0–₹999 = ₹50 • ₹1000–₹2999 = ₹30 • ₹3000–₹4999 = ₹20 • ₹5000+ = ₹10</div><div class="small muted" id="nextHint" style="margin-top:6px">Cart badhne par delivery auto kam ho jayega.</div></div>
-    <div class="card">
-      <div class="summary-line"><span id="subtotalLbl">Subtotal</span><span id="subtotalText">₹0</span></div>
-      <div class="summary-line"><span id="deliveryLbl">Delivery</span><span id="deliveryText">₹0</span></div>
-      <div class="summary-line"><span id="nextLbl">Next slab</span><span id="nextSlabText">-</span></div>
-      <div class="divider"></div>
-      <div class="summary-line bold"><span id="totalLbl">Total</span><span id="totalText">₹0</span></div>
-      <div style="height:10px"></div>
-      <div class="row"><button class="btn" onclick="placeOrder()" id="orderBtn">Order on WhatsApp</button><button class="btn danger" style="width:auto" onclick="clearCart()" id="clearBtn">Clear</button></div>
-    </div>
-  </div>
-
-  <div id="accountTab" class="hidden">
-    <div class="card">
-      <h3 style="margin-top:0" id="addressTitle">Address Form</h3>
-      <input id="nameField" class="input" placeholder="Name">
-      <div style="height:10px"></div>
-      <input id="phoneField" class="input" readonly style="background:#f1f5f9">
-      <div style="height:10px"></div>
-      <textarea id="addressField" class="textarea" placeholder="Address"></textarea>
-      <div style="height:10px"></div>
-      <div class="row"><input id="cityField" class="input" placeholder="City"><input id="stateField" class="input" placeholder="State"></div>
-      <div style="height:10px"></div>
-      <div class="row"><input id="pincodeField" class="input" placeholder="Pincode"><input id="landmarkField" class="input" placeholder="Landmark"></div>
-      <div style="height:10px"></div>
-      <div class="small muted" id="locationStatus">Current location not saved</div>
-      <div style="height:10px"></div>
-      <div class="row"><button class="btn" onclick="saveProfile()">Save Changes</button><button class="btn secondary" onclick="captureLocation()">Use Current Location</button></div>
-      <div style="height:10px"></div>
-      <button class="btn danger" onclick="logout()">Logout</button>
-    </div>
-  </div>
-
-  <div id="chatTab" class="hidden">
-    <div class="card">
-      <div class="between"><h3 style="margin-top:0" id="chatTitle">Smart Assistant</h3><button class="btn secondary" style="width:auto" onclick="seedSuggestions()">Tips</button></div>
-      <div id="chatMessages" class="chat-box"></div>
-      <div style="height:10px"></div>
-      <div class="row"><input id="chatInput" class="input" placeholder="Pucho kuch bhi..." style="flex:1"><button class="btn" style="width:auto" onclick="sendChat()">Send</button></div>
-    </div>
-  </div>
-
-  <div id="helpTab" class="hidden">
-    <div class="card">
-      <div class="between"><h3 style="margin-top:0">Help Center</h3><span class="badge">Support</span></div>
-      <p class="small muted" id="helpSubText">Need help? Call or WhatsApp support.</p>
-      <div class="help-actions">
-        <a id="helpCallBtn" class="btn link-btn" href="tel:917678256489">Call Now</a>
-        <a id="helpWaBtn" class="btn secondary link-btn" href="https://wa.me/917678256489" target="_blank">WhatsApp</a>
-      </div>
-      <div style="height:10px"></div>
-      <div class="card" style="margin:0;background:#f8fafc;box-shadow:none">
-        <div style="font-weight:700">Quick help</div>
-        <div class="small muted" style="margin-top:8px">Order issue, item problem, delivery delay, wrong address update, payment/help.</div>
+    <div id="cartTab" class="hidden">
+      <div class="card"><h3 style="margin-top:0">Checkout</h3><div id="cartItems"></div></div>
+      <div class="card"><div class="small" id="deliverySlabText"></div><div class="small muted" id="nextHint" style="margin-top:6px"></div></div>
+      <div class="card">
+        <div class="summary-line"><span>Subtotal</span><span id="subtotalText">₹0</span></div>
+        <div class="summary-line"><span>Delivery</span><span id="deliveryText">₹0</span></div>
+        <div class="summary-line"><span>Next slab</span><span id="nextSlabText">-</span></div>
+        <div class="divider"></div>
+        <div class="summary-line bold"><span>Total</span><span id="totalText">₹0</span></div>
+        <div style="height:10px"></div>
+        <div class="row"><button class="btn" id="orderBtn">Place Order</button><button class="btn danger" style="width:auto" id="clearBtn">Clear</button></div>
       </div>
     </div>
-  </div>
 
-  <div class="bottom-nav">
-    <button class="nav-btn active" id="navHome" onclick="switchTab('home')">🏠<br><span id="navHomeText">Home</span></button>
-    <button class="nav-btn" id="navCart" onclick="switchTab('cart')">🛒<br><span id="navCartText">Cart</span></button>
-    <button class="nav-btn" id="navAccount" onclick="switchTab('account')">👤<br><span id="navAccountText">Account</span></button>
-    <button class="nav-btn" id="navChat" onclick="switchTab('chat')">💬<br><span id="navChatText">Chat</span></button>
-    <button class="nav-btn" id="navCategory" onclick="openCategoryShortcut()">📂<br><span id="navCategoryText">Category</span></button>
-  </div>
-</div>
-
-<div id="productModal" class="modal" onclick="closeModal(event)">
-  <div class="modal-card">
-    <div class="between" style="margin-bottom:12px"><button class="icon-btn" onclick="hideModal()">←</button><div style="font-weight:700" id="modalTitle">Product Details</div><div style="width:42px"></div></div>
-    <img id="modalImg" src="" alt="">
-    <div style="height:12px"></div>
-    <h3 id="modalName" style="margin:0 0 4px"></h3>
-    <div id="modalSub" class="small muted"></div>
-    <div id="modalBadges" class="badges"></div>
-    <div class="between"><div><div id="modalPrice" class="price"></div><div id="modalMrp" class="strike"></div></div><div class="stack" style="width:150px"><button class="btn" onclick="modalAdd()">Add to Cart</button><button class="btn secondary" onclick="modalOrder()">Order Now</button></div></div>
-  </div>
-</div>
-
-<div id="toast" class="toast hidden"></div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script>
-const UI = {
-  hinglish:{ hero:"Ghar tak paaye bazaar jaise rate", sub:"Fast ordering, easy checkout, smart kirana shopping.", search:"Search item, brand ya category", all:"All Products", list:"List View", grid:"Grid View", home:"Home", cart:"Cart", account:"Account", chat:"Chat", category:"Category", checkout:"Checkout", order:"Order on WhatsApp", clear:"Clear", subtotal:"Subtotal", delivery:"Delivery", total:"Total", next:"Next slab", address:"Address Form", locationSaved:"Current location saved", locationNot:"Current location not saved", cartEmpty:"Cart empty hai.", voiceHint:"Say: add atta, 2 milk, search rice", voiceUnsupported:"Voice search supported nahi hai", voiceNoMatch:"Voice se item samajh nahi aaya", noResult:"No exact match. Try one of these.", chatTitle:"Smart Assistant"},
-  hindi:{ hero:"घर तक पाएँ बाजार जैसे रेट", sub:"फास्ट ऑर्डर, आसान चेकआउट, स्मार्ट किराना शॉपिंग।", search:"आइटम, ब्रांड या कैटेगरी खोजें", all:"सभी प्रोडक्ट", list:"लिस्ट व्यू", grid:"ग्रिड व्यू", home:"होम", cart:"कार्ट", account:"अकाउंट", chat:"चैट", category:"कैटेगरी", checkout:"चेकआउट", order:"व्हाट्सऐप पर ऑर्डर", clear:"साफ करें", subtotal:"सबटोटल", delivery:"डिलीवरी", total:"टोटल", next:"अगला स्लैब", address:"पता फॉर्म", locationSaved:"करंट लोकेशन सेव है", locationNot:"करंट लोकेशन सेव नहीं है", cartEmpty:"कार्ट खाली है।", voiceHint:"बोलें: add atta, 2 milk, search rice", voiceUnsupported:"वॉइस सर्च सपोर्ट नहीं है", voiceNoMatch:"वॉइस से आइटम नहीं मिला", noResult:"सटीक मैच नहीं मिला। ये देखें।", chatTitle:"स्मार्ट असिस्टेंट"},
-  english:{ hero:"Get market-like prices at your doorstep", sub:"Fast ordering, easy checkout, smart grocery shopping.", search:"Search item, brand or category", all:"All Products", list:"List View", grid:"Grid View", home:"Home", cart:"Cart", account:"Account", chat:"Chat", category:"Category", checkout:"Checkout", order:"Order on WhatsApp", clear:"Clear", subtotal:"Subtotal", delivery:"Delivery", total:"Total", next:"Next slab", address:"Address Form", locationSaved:"Current location saved", locationNot:"Current location not saved", cartEmpty:"Cart is empty.", voiceHint:"Say: add atta, 2 milk, search rice", voiceUnsupported:"Voice search not supported", voiceNoMatch:"Could not match any item from voice", noResult:"No exact match. Try one of these.", chatTitle:"Smart Assistant"}
-};
-
-const fallbackCategories = [
-  {name:"All", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Atta Rice Dal", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Oil Masala", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Snacks Biscuits", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Dairy Products", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Beverages", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Household Items", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Personal Care", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Baby Care", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Fruits Vegetables", active:true, supportType:"whatsapp", supportValue:"917678256489"},
-  {name:"Cleaning Items", active:true, supportType:"whatsapp", supportValue:"917678256489"}
-];
-
-const fallbackProducts = [
- {id:'1',cat:"Atta Rice Dal",name:"Aashirvaad Atta",brand:"Aashirvaad",size:"5 kg",price:289,mrp:320,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=1200&auto=format&fit=crop",aliases:["atta","aata","ata"]},
- {id:'2',cat:"Atta Rice Dal",name:"Fortune Atta",brand:"Fortune",size:"10 kg",price:520,mrp:570,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=1200&auto=format&fit=crop",aliases:["fortune atta","flour"]},
- {id:'3',cat:"Atta Rice Dal",name:"India Gate Rice",brand:"India Gate",size:"5 kg",price:569,mrp:610,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=1200&auto=format&fit=crop",aliases:["rice","chawal"]},
- {id:'4',cat:"Oil Masala",name:"Fortune Mustard Oil",brand:"Fortune",size:"1 litre",price:182,mrp:195,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=1200&auto=format&fit=crop",aliases:["oil","tel"]},
- {id:'5',cat:"Snacks Biscuits",name:"Parle-G Biscuits",brand:"Parle",size:"800 g",price:88,mrp:95,inStock:true,popular:false,featured:true,image:"https://images.unsplash.com/photo-1585238342024-78d387f4a707?q=80&w=1200&auto=format&fit=crop",aliases:["biscuit","parleg"]},
- {id:'6',cat:"Dairy Products",name:"Amul Milk",brand:"Amul",size:"1 litre",price:56,mrp:58,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=1200&auto=format&fit=crop",aliases:["milk","doodh"]},
- {id:'7',cat:"Fruits Vegetables",name:"Potato",brand:"Fresh",size:"1 kg",price:25,mrp:32,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=1200&auto=format&fit=crop",aliases:["potato","aloo"]},
- {id:'8',cat:"Household Items",name:"Surf Excel",brand:"Surf Excel",size:"1 kg",price:118,mrp:130,inStock:true,popular:true,featured:true,image:"https://images.unsplash.com/photo-1583947215259-38e31be8751f?q=80&w=1200&auto=format&fit=crop",aliases:["surf","detergent"]},
- {id:'9',cat:"Personal Care",name:"Colgate Toothpaste",brand:"Colgate",size:"200 g",price:95,mrp:110,inStock:true,popular:true,featured:false,image:"https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?q=80&w=1200&auto=format&fit=crop",aliases:["colgate","toothpaste"]},
- {id:'10',cat:"Cleaning Items",name:"Phenyl",brand:"Clean Home",size:"1 litre",price:80,mrp:95,inStock:true,popular:false,featured:false,image:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop",aliases:["phenyl","cleaner"]}
-];
-
-const fallbackSettings = {
-  storeName:"DevIndra Mart",
-  tagline:"Ghar tak paaye bazaar jaise rate",
-  subTagline:"Fast ordering, easy checkout, smart kirana shopping.",
-  logo:"logo.svg",
-  whatsappNumber:"917678256489",
-  supportPhone:"917678256489",
-  minOrderValue:500,
-  deliveryRules:[{min:0,max:999,charge:50},{min:1000,max:2999,charge:30},{min:3000,max:4999,charge:20},{min:5000,max:999999,charge:10}],
-  notificationText:"",
-  notificationEnabled:false
-};
-
-const fallbackPromos = [];
-
-const state = {
-  language: localStorage.getItem('dm_lang') || 'hinglish',
-  viewMode: localStorage.getItem('dm_view_mode') || 'grid',
-  category: 'All',
-  search: '',
-  cart: {},
-  profile: {name:'', phone:'', address:'', city:'', state:'', pincode:'', landmark:''},
-  locationLink: '',
-  selectedId: null,
-  chat: [{role:'bot', text:'Namaste 👋 Main stock, price, order, delivery aur setting me help kar sakta hoon.'}],
-  loginPhone: '',
-  categories:[...fallbackCategories],
-  products:[...fallbackProducts],
-  settings:{...fallbackSettings},
-  promos:[...fallbackPromos],
-  promoIndex:0,
-  promoTimer:null
-};
-
-let db = null;
-if (window.firebaseConfig && window.firebaseConfig.apiKey) {
-  firebase.initializeApp(window.firebaseConfig);
-  db = firebase.firestore();
-}
-
-function sessionPhone(){ try{return JSON.parse(localStorage.getItem('dm_session')||'{}').phone||'';}catch(e){return '';} }
-function key(name){ const p=sessionPhone(); return p?`dm_${name}_${p}`:null; }
-function saveScoped(name,v){ const k=key(name); if(k) localStorage.setItem(k, JSON.stringify(v)); }
-function loadScoped(name,fallback){ const k=key(name); if(!k) return fallback; const raw=localStorage.getItem(k); return raw?JSON.parse(raw):fallback; }
-function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.remove('hidden'); clearTimeout(window.tt); window.tt=setTimeout(()=>el.classList.add('hidden'),2200); }
-function normalize(s){ return String(s).toLowerCase().replace(/[^a-z0-9\u0900-\u097f]/g,''); }
-function productLabel(p){ return p.name || p.name?.hinglish || ''; }
-function categoryLabel(c){ return c; }
-function searchPool(p){ return [p.name,p.brand,p.cat,...(p.aliases||[])].join(' '); }
-function fuzzyIncludes(text, query){
-  text=normalize(text); query=normalize(query);
-  if(!query) return true;
-  if(text.includes(query)) return true;
-  let qi=0; for(let i=0;i<text.length && qi<query.length;i++){ if(text[i]===query[qi]) qi++; }
-  return qi===query.length;
-}
-function searchScore(p,q){
-  if(!q) return 1;
-  const pool=normalize(searchPool(p));
-  const nq=normalize(q);
-  if(pool.includes(nq)) return 100;
-  if(fuzzyIncludes(pool,q)) return 70;
-  const aliasHit=(p.aliases||[]).some(a=>fuzzyIncludes(a,q));
-  if(aliasHit) return 90;
-  return 0;
-}
-function filteredProducts(){
-  return state.products
-    .filter(p=>state.category==='All' || p.cat===state.category)
-    .map(p=>({...p, _score:searchScore(p,state.search)}))
-    .filter(p=>state.search? p._score>0 : true)
-    .sort((a,b)=>b._score-a._score || String(a.id).localeCompare(String(b.id)));
-}
-function suggestions(){
-  if(!state.search.trim()) return [];
-  return state.products.map(p=>({...p,_score:searchScore(p,state.search)})).filter(p=>p._score>0).sort((a,b)=>b._score-a._score).slice(0,5);
-}
-function formatINR(v){ return `₹${Number(v||0)}`; }
-function cartItems(){
-  return Object.entries(state.cart).map(([id,qty])=>{
-    const p=state.products.find(x=>String(x.id)===String(id));
-    return p ? {...p, qty, total:p.price*qty} : null;
-  }).filter(Boolean);
-}
-function deliveryCharge(sub){
-  const rules = state.settings.deliveryRules || fallbackSettings.deliveryRules;
-  const found = rules.find(r=>sub>=Number(r.min) && sub<=Number(r.max));
-  return found ? Number(found.charge) : 0;
-}
-function nextSlab(sub){
-  const rules = state.settings.deliveryRules || fallbackSettings.deliveryRules;
-  const next=rules.find(r=>sub<Number(r.min));
-  if(!next) return 'Lowest delivery reached';
-  return `${formatINR(next.min-sub)} more for delivery ${formatINR(next.charge)}`;
-}
-function persist(){
-  saveScoped('cart',state.cart); saveScoped('profile',state.profile); saveScoped('location_link',state.locationLink);
-  localStorage.setItem('dm_lang',state.language); localStorage.setItem('dm_view_mode',state.viewMode);
-}
-function renderLanguage(){
-  const t=UI[state.language];
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.language));
-  document.getElementById('searchInput').placeholder=t.search;
-  document.getElementById('listingTitle').textContent=t.all;
-  document.getElementById('viewBtn').textContent=state.viewMode==='grid'?t.list:t.grid;
-  document.getElementById('navHomeText').textContent=t.home;
-  document.getElementById('navCartText').textContent=t.cart;
-  document.getElementById('navAccountText').textContent=t.account;
-  document.getElementById('navChatText').textContent=t.chat;
-  document.getElementById('navCategoryText').textContent=t.category;
-  document.getElementById('checkoutTitle').textContent=t.checkout;
-  document.getElementById('orderBtn').textContent=t.order;
-  document.getElementById('clearBtn').textContent=t.clear;
-  document.getElementById('subtotalLbl').textContent=t.subtotal;
-  document.getElementById('deliveryLbl').textContent=t.delivery;
-  document.getElementById('totalLbl').textContent=t.total;
-  document.getElementById('nextLbl').textContent=t.next;
-  document.getElementById('addressTitle').textContent=t.address;
-  document.getElementById('chatTitle').textContent=t.chatTitle;
-  document.getElementById('voiceTranscript').textContent=t.voiceHint;
-}
-function applyBranding(){
-  const s=state.settings;
-  document.title = s.storeName || 'DevIndra Mart';
-  document.getElementById('brandMini').textContent = (s.storeName||'DEVINDRA MART').toUpperCase();
-  document.getElementById('topBrandName').textContent = s.storeName || 'DevIndra Mart';
-  document.getElementById('loginHero').textContent = s.tagline || fallbackSettings.tagline;
-  document.getElementById('loginSub').textContent = s.subTagline || fallbackSettings.subTagline;
-  document.getElementById('topHero').textContent = s.tagline || fallbackSettings.tagline;
-  document.getElementById('heroTitle').textContent = s.tagline || fallbackSettings.tagline;
-  document.getElementById('heroSub').textContent = s.subTagline || fallbackSettings.subTagline;
-  document.getElementById('offerRun').textContent = s.notificationText || 'Today offer: ₹699 par SAVE50, ₹999 par FIRST100, aur voice se bhi order karo.';
-  ['loginLogo','topLogo'].forEach(id=>document.getElementById(id).src = s.logo || 'logo.svg');
-  document.getElementById('helpCallBtn').href = `tel:${s.supportPhone || s.whatsappNumber}`;
-  document.getElementById('helpWaBtn').href = `https://wa.me/${s.whatsappNumber || s.supportPhone}`;
-}
-function renderNotice(){
-  const box=document.getElementById('noticeBox');
-  if(state.settings.notificationEnabled && state.settings.notificationText){
-    box.textContent = state.settings.notificationText;
-    box.classList.remove('hidden');
-  }else box.classList.add('hidden');
-}
-function renderPromo(){
-  clearTimeout(state.promoTimer);
-  const wrap=document.getElementById('sliderWrap');
-  const media=document.getElementById('slideMedia');
-  const title=document.getElementById('slideTitle');
-  const sub=document.getElementById('slideSub');
-  const promos=(state.promos||[]).filter(x=>x.active!==false);
-  if(!promos.length){ wrap.classList.add('hidden'); return; }
-  wrap.classList.remove('hidden');
-  if(state.promoIndex>=promos.length) state.promoIndex=0;
-  const item=promos[state.promoIndex];
-  title.textContent=item.title||'Featured Promo';
-  sub.textContent=item.subtitle||'Latest offer';
-  if(item.type==='video'){
-    media.innerHTML=`<video id="promoVideo" src="${item.url}" autoplay muted playsinline></video>`;
-    const v=document.getElementById('promoVideo');
-    v.onended=nextPromo;
-    state.promoTimer=setTimeout(nextPromo, Number(item.durationMs)||8000);
-  } else {
-    media.innerHTML=`<img src="${item.url}" alt="">`;
-    state.promoTimer=setTimeout(nextPromo, Number(item.durationMs)||5000);
-  }
-}
-function nextPromo(){ state.promoIndex=(state.promoIndex+1)%Math.max((state.promos||[]).filter(x=>x.active!==false).length,1); renderPromo(); }
-function renderCategories(){
-  const el=document.getElementById('categoryChips');
-  el.innerHTML='';
-  state.categories.filter(c=>c.active!==false).forEach(c=>{
-    const btn=document.createElement('button');
-    btn.className='chip'+(state.category===c.name?' active':'');
-    btn.textContent=c.name;
-    btn.onclick=()=>{ state.category=c.name; renderAll(); };
-    el.appendChild(btn);
-  });
-}
-function renderSuggestions(){
-  const box=document.getElementById('suggestionBox');
-  const list=suggestions();
-  box.classList.toggle('hidden', !list.length);
-  box.innerHTML=list.map(p=>`<span class="suggestion-pill" onclick="pickSuggestion('${String(p.id).replace(/'/g,'\\\'')}')">${p.name}</span>`).join('');
-}
-function pickSuggestion(id){
-  const p=state.products.find(x=>String(x.id)===String(id));
-  if(!p) return;
-  state.search=p.name;
-  document.getElementById('searchInput').value=p.name;
-  renderAll();
-}
-function productCard(p){
-  const disc=Math.max(0,Math.round(((p.mrp-p.price)/p.mrp)*100));
-  const qty=state.cart[p.id]||0;
-  if(state.viewMode==='list'){
-    return `<div class="product listitem">
-      <img src="${p.image}" alt="">
-      <div class="pbody" onclick="openProduct('${p.id}')">
-        <p class="pname">${p.name}</p>
-        <div class="psub">${p.brand} • ${p.size}</div>
-        <div class="badges">${disc?`<span class="badge">${disc}% OFF</span>`:''}${p.popular?`<span class="badge">Popular</span>`:''}${!p.inStock?`<span class="badge red">Out of Stock</span>`:'<span class="badge green">In Stock</span>'}</div>
-        <div class="price-row"><div><div class="price">${formatINR(p.price)}</div><div class="strike">${formatINR(p.mrp)}</div></div></div>
+    <div id="accountTab" class="hidden">
+      <div class="card">
+        <h3 style="margin-top:0">My Account</h3>
+        <div id="profileBox" class="stack small"></div>
+        <div style="height:10px"></div>
+        <button class="btn" id="editAddressBtn">Edit Address</button>
       </div>
-      <div>${qty?`<div class="qty"><button onclick="event.stopPropagation();decCart('${p.id}')">−</button><div>${qty}</div><button onclick="event.stopPropagation();addToCart('${p.id}')">+</button></div>`:`<button class="btn" style="width:auto;padding:10px 12px" onclick="addToCart('${p.id}')">Add</button>`}</div>
-    </div>`;
-  }
-  return `<div class="product">
-    <img src="${p.image}" alt="" onclick="openProduct('${p.id}')">
-    <div class="pbody">
-      <p class="pname" onclick="openProduct('${p.id}')">${p.name}</p>
-      <div class="psub">${p.brand} • ${p.size}</div>
-      <div class="badges">${disc?`<span class="badge">${disc}% OFF</span>`:''}${p.featured?`<span class="badge">Featured</span>`:''}${!p.inStock?`<span class="badge red">Out of Stock</span>`:'<span class="badge green">In Stock</span>'}</div>
-      <div class="price-row"><div><div class="price">${formatINR(p.price)}</div><div class="strike">${formatINR(p.mrp)}</div></div>${state.cart[p.id]?`<div class="qty"><button onclick="decCart('${p.id}')">−</button><div>${state.cart[p.id]}</div><button onclick="addToCart('${p.id}')">+</button></div>`:`<button class="btn" style="width:auto;padding:10px 12px" onclick="addToCart('${p.id}')">Add</button>`}</div>
     </div>
-  </div>`;
-}
-function renderProducts(){
-  const grid=document.getElementById('productsGrid');
-  grid.className='grid'+(state.viewMode==='list'?' list':'');
-  const list=filteredProducts();
-  grid.innerHTML=list.length ? list.map(productCard).join('') : `<div class="card">No products found.</div>`;
-}
-function renderCart(){
-  const items=cartItems();
-  const box=document.getElementById('cartItems');
-  if(!items.length){ box.innerHTML=`<div class="muted">${UI[state.language].cartEmpty}</div>`; }
-  else{
-    box.innerHTML=items.map(i=>`<div class="between" style="padding:10px 0;border-bottom:1px solid var(--border)">
-      <div><div style="font-weight:700">${i.name}</div><div class="small muted">${formatINR(i.price)} × ${i.qty}</div></div>
-      <div class="row" style="align-items:center"><div class="qty"><button onclick="decCart('${i.id}')">−</button><div>${i.qty}</div><button onclick="addToCart('${i.id}')">+</button></div><div style="min-width:56px;text-align:right;font-weight:700">${formatINR(i.total)}</div></div>
-    </div>`).join('');
-  }
-  const subtotal=items.reduce((a,b)=>a+b.total,0); const del=deliveryCharge(subtotal); const total=subtotal+del;
-  document.getElementById('subtotalText').textContent=formatINR(subtotal);
-  document.getElementById('deliveryText').textContent=formatINR(del);
-  document.getElementById('totalText').textContent=formatINR(total);
-  document.getElementById('nextSlabText').textContent=nextSlab(subtotal);
-}
-function renderProfile(){
-  document.getElementById('nameField').value=state.profile.name||'';
-  document.getElementById('phoneField').value=state.profile.phone||'';
-  document.getElementById('addressField').value=state.profile.address||'';
-  document.getElementById('cityField').value=state.profile.city||'';
-  document.getElementById('stateField').value=state.profile.state||'';
-  document.getElementById('pincodeField').value=state.profile.pincode||'';
-  document.getElementById('landmarkField').value=state.profile.landmark||'';
-  document.getElementById('locationStatus').textContent=state.locationLink?UI[state.language].locationSaved:UI[state.language].locationNot;
-}
-function renderChat(){
-  const box=document.getElementById('chatMessages');
-  box.innerHTML=state.chat.map(m=>`<div class="chat-msg ${m.role}">${m.text}</div>`).join('');
-  box.scrollTop=box.scrollHeight;
-}
-function renderAll(){ renderLanguage(); applyBranding(); renderNotice(); renderPromo(); renderCategories(); renderSuggestions(); renderProducts(); renderCart(); renderProfile(); renderChat(); persist(); }
 
-function onSearch(v){ state.search=v; renderAll(); }
-function setLanguage(lang){ state.language=lang; renderAll(); }
-function toggleView(){ state.viewMode=state.viewMode==='grid'?'list':'grid'; renderAll(); }
-function addToCart(id){ const p=state.products.find(x=>String(x.id)===String(id)); if(!p || !p.inStock) return showToast('Out of stock'); state.cart[id]=(state.cart[id]||0)+1; renderAll(); }
-function decCart(id){ state.cart[id]=(state.cart[id]||0)-1; if(state.cart[id]<=0) delete state.cart[id]; renderAll(); }
-function quickOrder(id){ addToCart(id); switchTab('cart'); showToast('Added to cart'); }
-function clearCart(){ state.cart={}; renderAll(); }
+    <div id="helpTab" class="hidden">
+      <div class="card">
+        <h3 style="margin-top:0" id="helpTitle">Help Center</h3>
+        <div class="small muted" id="helpText">Support ke liye contact karo.</div>
+        <div style="height:12px"></div>
+        <div class="row"><a id="callSupportBtn" class="btn" href="#">Call Support</a><a id="waSupportBtn" class="btn secondary" href="#">WhatsApp</a></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Category Support</h3>
+        <div id="categorySupportList" class="list"></div>
+      </div>
+    </div>
 
-function startLogin(){
-  const phone=(document.getElementById('loginPhone').value||'').replace(/\D/g,'');
-  if(phone.length!==10) return showToast('Valid phone number daalo');
-  state.loginPhone='+91'+phone;
-  document.getElementById('phoneStep').classList.add('hidden');
-  document.getElementById('captchaStep').classList.remove('hidden');
-}
-function verifyLogin(){
-  localStorage.setItem('dm_session', JSON.stringify({phone:state.loginPhone}));
-  loadUser();
-  document.getElementById('loginScreen').classList.add('hidden');
-  if(!state.profile.address){
-    document.getElementById('setupPhone').value=state.profile.phone||state.loginPhone;
-    document.getElementById('addressScreen').classList.remove('hidden');
-  }else{
-    document.getElementById('appScreen').classList.remove('hidden');
-    renderAll();
-  }
-  showToast('Login successful');
-}
-function loadUser(){
-  const phone=sessionPhone();
-  state.cart=loadScoped('cart',{});
-  state.profile=loadScoped('profile',{name:'',phone, address:'', city:'', state:'', pincode:'', landmark:''});
-  state.locationLink=loadScoped('location_link','');
-  state.profile.phone=phone;
-}
-function saveAddressAndEnter(){
-  state.profile.name=document.getElementById('setupName').value.trim();
-  state.profile.phone=document.getElementById('setupPhone').value.trim();
-  state.profile.address=document.getElementById('setupAddress').value.trim();
-  state.profile.city=document.getElementById('setupCity').value.trim();
-  state.profile.state=document.getElementById('setupState').value.trim();
-  state.profile.pincode=document.getElementById('setupPincode').value.trim();
-  state.profile.landmark=document.getElementById('setupLandmark').value.trim();
-  if(!state.profile.name || !state.profile.address) return showToast('Name aur address fill karo');
-  persist();
-  document.getElementById('addressScreen').classList.add('hidden');
-  document.getElementById('appScreen').classList.remove('hidden');
-  renderAll();
-}
-function saveProfile(){
-  state.profile.name=document.getElementById('nameField').value.trim();
-  state.profile.phone=document.getElementById('phoneField').value.trim();
-  state.profile.address=document.getElementById('addressField').value.trim();
-  state.profile.city=document.getElementById('cityField').value.trim();
-  state.profile.state=document.getElementById('stateField').value.trim();
-  state.profile.pincode=document.getElementById('pincodeField').value.trim();
-  state.profile.landmark=document.getElementById('landmarkField').value.trim();
-  renderAll(); showToast('Profile updated');
-}
-function captureLocation(){
-  if(!navigator.geolocation) return showToast('Location support nahi hai');
-  navigator.geolocation.getCurrentPosition((pos)=>{ state.locationLink=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`; renderAll(); showToast('Location saved'); }, ()=>showToast('Location permission denied'));
-}
-function logout(){
-  localStorage.removeItem('dm_session');
-  document.getElementById('appScreen').classList.add('hidden');
-  document.getElementById('addressScreen').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('phoneStep').classList.remove('hidden');
-  document.getElementById('captchaStep').classList.add('hidden');
-  showToast('Logged out');
-}
-async function placeOrder(){
-  const items=cartItems();
-  if(!items.length) return showToast('Cart empty hai');
-  if(!state.profile.name || !state.profile.address){ switchTab('account'); return showToast('Pehle naam aur address fill karo'); }
-  const subtotal=items.reduce((a,b)=>a+b.total,0);
-  const min=Number(state.settings.minOrderValue||500);
-  if(subtotal < min){
-    return showToast(`⚠️ Add more items to continue • Minimum order value is ₹${min}`);
-  }
-  const del=deliveryCharge(subtotal);
-  const total=subtotal+del;
-  const categoryConfig = state.categories.find(c=>c.name===state.category) || {};
-  const waNumber = (categoryConfig.supportType==='whatsapp' && categoryConfig.supportValue) ? String(categoryConfig.supportValue).replace(/\D/g,'') : String(state.settings.whatsappNumber||'917678256489').replace(/\D/g,'');
-  let msg=`🛒 *New Order - ${state.settings.storeName||'DevIndra Mart'}*%0A%0A👤 Name: ${state.profile.name}%0A📞 Phone: ${state.profile.phone}%0A📍 Address: ${state.profile.address}, ${state.profile.city}, ${state.profile.state} - ${state.profile.pincode}%0A`;
-  if(state.profile.landmark) msg+=`🏷 Landmark: ${state.profile.landmark}%0A`;
-  if(state.locationLink) msg+=`🗺 Map: ${state.locationLink}%0A`;
-  msg+=`%0A📦 *Items:*%0A`; items.forEach(i=>msg+=`- ${i.name} x ${i.qty} = ₹${i.total}%0A`);
-  msg+=`%0A💰 Subtotal: ₹${subtotal}%0A🚚 Delivery: ₹${del}%0A🔥 *Total: ₹${total}*`;
-  if(db){
-    try{
-      await db.collection('orders').add({
-        customer: state.profile,
-        items: items.map(i=>({id:i.id,name:i.name,qty:i.qty,price:i.price,total:i.total,category:i.cat})),
-        subtotal, delivery:del, total, status:'new',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }catch(e){ console.error(e); }
-  }
-  window.open(`https://wa.me/${waNumber}?text=${msg}`,'_blank');
-}
-function switchTab(name){
-  ['home','cart','account','chat','help'].forEach(t=>{
-    const tab=document.getElementById(t+'Tab'); if(tab) tab.classList.add('hidden');
-    const nav=document.getElementById('nav'+t.charAt(0).toUpperCase()+t.slice(1)); if(nav) nav.classList.remove('active');
-  });
-  const tab=document.getElementById(name+'Tab'); if(tab) tab.classList.remove('hidden');
-  const nav=document.getElementById('nav'+name.charAt(0).toUpperCase()+name.slice(1)); if(nav) nav.classList.add('active');
-}
-function openCategoryShortcut(){
-  switchTab('home');
-  document.getElementById('categoryChips').scrollIntoView({behavior:'smooth', block:'center'});
-  showToast('Category section opened');
-}
-function openProduct(id){
-  state.selectedId=id; const p=state.products.find(x=>String(x.id)===String(id)); if(!p) return;
-  document.getElementById('modalImg').src=p.image;
-  document.getElementById('modalName').textContent=p.name;
-  document.getElementById('modalSub').textContent=`${categoryLabel(p.cat)} • ${p.size}`;
-  document.getElementById('modalPrice').textContent=formatINR(p.price);
-  document.getElementById('modalMrp').textContent=formatINR(p.mrp);
-  const disc=Math.max(0,Math.round(((p.mrp-p.price)/p.mrp)*100));
-  document.getElementById('modalBadges').innerHTML=`${disc?`<span class="badge">${disc}% OFF</span>`:''}${p.popular?`<span class="badge">Popular</span>`:''}${!p.inStock?`<span class="badge red">Out of Stock</span>`:'<span class="badge green">In Stock</span>'}`;
-  document.getElementById('productModal').classList.add('show');
-}
-function hideModal(){ document.getElementById('productModal').classList.remove('show'); }
-function closeModal(e){ if(e.target.id==='productModal') hideModal(); }
-function modalAdd(){ if(state.selectedId!=null) addToCart(state.selectedId); }
-function modalOrder(){ if(state.selectedId!=null){ quickOrder(state.selectedId); hideModal(); } }
-function botReply(q){
-  const text=q.toLowerCase();
-  if(text.includes('support') || text.includes('help')) return 'Support ke liye Help Center kholo ya bottom se category choose karke order karo.';
-  if(text.includes('delivery')) return document.getElementById('deliverySlabText').textContent;
-  if(text.includes('category')) return 'Upar category panel se ya bottom Category button se category open karo.';
-  if(text.includes('order')) return 'Item add karo, cart me jao, minimum order complete karo, phir WhatsApp order dabao.';
-  const p=state.products.find(x=>searchScore(x,q)>0);
-  if(p) return `${p.name} ${formatINR(p.price)} me available hai${p.inStock?' aur stock me hai.':' lekin abhi out of stock hai.'}`;
-  return 'Main stock, price, order, delivery, category aur support me help kar sakta hoon.';
-}
-function sendChat(){
-  const input=document.getElementById('chatInput'); const q=input.value.trim(); if(!q) return;
-  state.chat.push({role:'user', text:q}); state.chat.push({role:'bot', text:botReply(q)}); input.value=''; renderChat();
-}
-function seedSuggestions(){ state.chat.push({role:'bot', text:'Try asking: atta ka price kya hai, delivery charge kya hai, category kaise open karu, support number kya hai.'}); renderChat(); }
+    <div class="bottom-nav">
+      <button class="nav-btn active" data-tab="home">🏠<br><span>Home</span></button>
+      <button class="nav-btn" data-tab="cart">🛒<br><span>Cart</span></button>
+      <button class="nav-btn" data-tab="account">👤<br><span>Account</span></button>
+      <button class="nav-btn" data-tab="help">💬<br><span>Support</span></button>
+      <button class="nav-btn" id="navCategoryBtn">📂<br><span>Category</span></button>
+    </div>
+  </div>
 
-function voiceUI(show,title,text){
-  const box=document.getElementById('voiceBox');
-  box.classList.toggle('hidden',!show);
-  box.classList.toggle('active',show);
-  document.getElementById('voiceTitle').textContent=title||'Listening...';
-  document.getElementById('voiceTranscript').textContent=text||UI[state.language].voiceHint;
-}
-function parseMultiAdd(spoken){
-  const txt=spoken.toLowerCase();
-  let hits=[];
-  state.products.forEach(p=>{ const score=searchScore(p,txt); if(score>0) hits.push({p,score}); });
-  hits=hits.sort((a,b)=>b.score-a.score);
-  return hits.slice(0,3).map(x=>x.p);
-}
-function voiceCommand(spoken){
-  const low=spoken.toLowerCase();
-  const qtyMatch=low.match(/(\d+)/); const qty=qtyMatch?parseInt(qtyMatch[1],10):1;
-  const items=parseMultiAdd(low);
-  if(!items.length) return showToast(UI[state.language].voiceNoMatch);
-  if(low.includes('search')||low.includes('find')){
-    state.search=items[0].name; document.getElementById('searchInput').value=items[0].name; renderAll(); return;
-  }
-  if(low.includes('+') || low.includes(' and ') || low.includes(' aur ')){
-    items.forEach((p,i)=>{ const c=i===0?qty:1; for(let k=0;k<c;k++) addToCart(p.id); });
-    return showToast('Multiple items added');
-  }
-  for(let k=0;k<qty;k++) addToCart(items[0].id);
-}
-function startVoice(){
-  if(navigator.vibrate) navigator.vibrate(80);
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR) return showToast(UI[state.language].voiceUnsupported);
-  const rec=new SR(); rec.lang='en-IN'; rec.interimResults=true; rec.continuous=false;
-  voiceUI(true,'Listening...',UI[state.language].voiceHint);
-  rec.onresult=e=>{
-    const spoken=Array.from(e.results).map(r=>r[0].transcript).join(' ');
-    voiceUI(true,'Processing...',spoken);
-    if(e.results[e.results.length-1].isFinal) setTimeout(()=>{ voiceCommand(spoken); voiceUI(false); },350);
-  };
-  rec.onerror=()=>{ voiceUI(false); showToast(UI[state.language].voiceUnsupported); };
-  rec.onend=()=>setTimeout(()=>voiceUI(false),500);
-  rec.start();
-}
+  <div id="toast" class="toast hidden"></div>
 
-async function loadRemoteData(){
-  if(!db){ renderAll(); return; }
-  try{
-    const settingsDoc = await db.collection('settings').doc('store').get();
-    if(settingsDoc.exists) state.settings = {...fallbackSettings, ...settingsDoc.data()};
-    const catSnap = await db.collection('categories').orderBy('order','asc').get();
-    if(!catSnap.empty) state.categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
-    const productSnap = await db.collection('products').orderBy('createdAt','asc').get();
-    if(!productSnap.empty) state.products = productSnap.docs.map(d=>({id:d.id,...d.data()}));
-    const promoSnap = await db.collection('promos').orderBy('order','asc').get();
-    if(!promoSnap.empty) state.promos = promoSnap.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){ console.error(e); }
-  renderAll();
-}
-
-(function init(){
-  const phone=sessionPhone();
-  if(phone){
-    loadUser();
-    if(!state.profile.address){
-      document.getElementById('setupPhone').value=state.profile.phone||phone;
-      document.getElementById('addressScreen').classList.remove('hidden');
-    }else{
-      document.getElementById('appScreen').classList.remove('hidden');
-    }
-    document.getElementById('loginScreen').classList.add('hidden');
-  }
-  loadRemoteData();
-  renderAll();
-})();
-</script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
