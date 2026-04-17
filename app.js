@@ -536,4 +536,23 @@ function renderEverything(){
 function startPromoLoop(){
   setInterval(()=>{
     if (!promos.length) return;
-    promoIndex=(promoIndex+1)
+    promoIndex = (promoIndex + 1) % promos.length;
+    renderPromos();
+  }, 3500);
+}
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  try {
+    setTimeout(()=>hide($('splash')), 1200);
+
+    await initFirebase();
+
+    bindAuth();
+    renderEverything();
+    startPromoLoop();
+
+  } catch (e) {
+    console.error('App init error:', e);
+    setTimeout(()=>hide($('splash')), 1200);
+  }
+});
