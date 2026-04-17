@@ -1,0 +1,13 @@
+
+.login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(180deg,#101834,#1d2f63)}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.admin-list{display:grid;gap:10px}
+.entity-row{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#f9fbff;padding:12px;border-radius:16px;border:1px solid #dce8ff}
+.entity-left{display:flex;gap:10px;align-items:center}
+.entity-preview{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#eef3ff}
+.entity-actions{display:flex;gap:8px;flex-wrap:wrap}
+.small-btn{padding:10px 12px;border-radius:12px;border:none;font-weight:700;cursor:pointer}
+.small-edit{background:#eef4ff;color:#17356f}
+.small-delete{background:#ffe7e7;color:#9f1010}
+@media (max-width:900px){.admin-grid{grid-template-columns:1fr}}

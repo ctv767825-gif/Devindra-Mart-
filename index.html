@@ -62,7 +62,8 @@
           </div>
         </div>
         <div class="header-actions">
-          <button id="langBtn" class="icon-btn">🌐</button>
+          <button id="notifBtn" class="icon-btn" aria-label="Notifications">🔔</button>
+          <button id="langBtn" class="icon-btn" aria-label="Language">🌐</button>
         </div>
       </div>
     </header>
@@ -200,11 +201,52 @@
     </div>
   </div>
 
+
+  <div id="notificationSheet" class="sheet hidden">
+    <div class="sheet-card small-sheet">
+      <div class="sheet-head">
+        <h3>Notifications</h3>
+        <button class="close-btn" data-close="notificationSheet">✕</button>
+      </div>
+      <div id="notificationPanelBody" class="helper-bot">
+        <div class="bot-title">Latest Update</div>
+        <div class="bot-messages">
+          <div class="bot-msg" id="notificationPanelText">Fresh deals today • Minimum order ₹500 • Fast delivery</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="loader-ring"></div>
     <div class="loading-text">Loading your premium store...</div>
   </div>
 
   <div id="successToast" class="success-toast hidden">Order sent successfully ✅</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var notifBtn = document.getElementById('notifBtn');
+      var notificationSheet = document.getElementById('notificationSheet');
+      var notificationPanelText = document.getElementById('notificationPanelText');
+      var noticeBar = document.getElementById('noticeBar');
+
+      function syncNotificationPanel() {
+        if (notificationPanelText && noticeBar) {
+          notificationPanelText.textContent = noticeBar.textContent || 'Fresh deals today • Minimum order ₹500 • Fast delivery';
+        }
+      }
+
+      if (notifBtn && notificationSheet) {
+        notifBtn.addEventListener('click', function () {
+          syncNotificationPanel();
+          notificationSheet.classList.remove('hidden');
+        });
+      }
+
+      setTimeout(syncNotificationPanel, 1800);
+    });
+  </script>
+
 </body>
 </html>
