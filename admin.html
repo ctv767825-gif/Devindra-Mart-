@@ -1,91 +1,171 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Devindra Mart Admin</title>
-  <link rel="stylesheet" href="./style.css" />
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f7fb;margin:0}
-    .wrap{max-width:980px;margin:0 auto;padding:20px}
-    .card{background:#fff;border-radius:20px;padding:18px;margin-bottom:18px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#eef1f7;margin:0;padding:20px;color:#0f172a}
+    .wrap{max-width:900px;margin:0 auto}
+    .card{background:#fff;border-radius:22px;padding:20px;box-shadow:0 10px 30px rgba(15,23,42,.08);margin-bottom:18px}
     h1,h2{margin:0 0 14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    input,textarea{width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid #dfe5f0;border-radius:14px}
-    button{background:#1e3a8a;color:#fff;border:none;border-radius:14px;padding:12px 16px;font-weight:700}
-    .danger{background:#b91c1c}
-    .small{padding:8px 12px;border-radius:10px}
-    .row-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;border:1px solid #eef2f7;border-radius:14px;margin-top:10px}
-    .meta{font-size:12px;color:#64748b;margin-top:4px}
-    @media (max-width:700px){.grid,.grid-3{grid-template-columns:1fr}}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    input,button{width:100%;box-sizing:border-box;padding:15px 16px;border-radius:16px;border:1px solid #dbe2ea;font-size:16px}
+    button{background:#1e3a8a;color:#fff;border:none;font-weight:700}
+    .muted{color:#64748b;font-size:14px}
+    #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 16px;border-radius:14px;display:none;z-index:9999;max-width:90%}
+    #toast.error{background:#b91c1c}
+    #toast.success{background:#065f46}
+    .list{margin-top:14px}
+    .item{padding:12px 14px;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:10px;background:#f8fafc}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <h1>Admin Panel</h1>
-      <div class="meta">Firestore save fix patch</div>
-    </div>
-
-    <div class="card">
-      <h2>Store Settings</h2>
-      <div class="grid">
-        <input id="storeName" placeholder="Store name" />
-        <input id="tagline" placeholder="Tagline" />
-        <input id="noticeText" placeholder="Notification text" />
-        <input id="whatsappNumber" placeholder="WhatsApp number" value="7678256489" />
-        <input id="supportNumber" placeholder="Support number" value="7678256489" />
-        <input id="minOrder" placeholder="Min order" type="number" value="500" />
-        <input id="delivery0to999" placeholder="0-999 delivery" type="number" value="50" />
-        <input id="delivery1000to2999" placeholder="1000-2999 delivery" type="number" value="30" />
-        <input id="delivery3000to4999" placeholder="3000-4999 delivery" type="number" value="20" />
-        <input id="delivery5000plus" placeholder="5000+ delivery" type="number" value="10" />
-        <input id="storeMapLink" placeholder="Store map link / current location link" />
-      </div>
-      <div style="margin-top:12px"><button id="saveSettingsBtn">Save Settings</button></div>
+      <div class="muted">Category save test + popup status</div>
     </div>
 
     <div class="card">
       <h2>Add Category</h2>
       <div class="grid">
         <input id="catName" placeholder="Category name" />
-        <input id="catSubcategory" placeholder="Subcategory (optional)" />
+        <input id="catSubcategory" placeholder="Subcategory" />
         <input id="catSupport" placeholder="Support number" value="7678256489" />
         <input id="catImage" placeholder="Image URL" />
-        <input id="catAction" placeholder="Action type (whatsapp/call/link)" value="whatsapp" />
+        <input id="catAction" placeholder="Action type" value="whatsapp" />
+        <button id="addCategoryBtn">Add Category</button>
       </div>
-      <div style="margin-top:12px"><button id="addCategoryBtn">Add Category</button></div>
-      <div id="categoriesList"></div>
+      <div id="categoriesList" class="list"></div>
     </div>
+  </div>
 
-    <div class="card">
-      <h2>Add Product</h2>
-      <div class="grid">
-        <input id="prodName" placeholder="Product name" />
-        <input id="prodCategory" placeholder="Category" />
-        <input id="prodSubcategory" placeholder="Subcategory" />
-        <input id="prodPrice" placeholder="Price" type="number" />
-        <input id="prodImage" placeholder="Image URL" />
-        <input id="prodStock" placeholder="Stock label" value="In Stock" />
-      </div>
-      <div style="margin-top:12px"><button id="addProductBtn">Add Product</button></div>
-      <div id="productsList"></div>
-    </div>
-  
-    <div class="card">
-      <h2>Add Promo</h2>
-      <div class="grid">
-        <input id="promoTitle" placeholder="Promo title" />
-        <input id="promoText" placeholder="Promo text" />
-        <input id="promoMedia" placeholder="Promo image / video URL" />
-      </div>
-      <div style="margin-top:12px"><button id="addPromoBtn">Add Promo</button></div>
-      <div id="promosList"></div>
-    </div>
-</div>
+  <div id="toast"></div>
 
-  <script src="./firebase-config.js"></script>
-  <script type="module" src="./admin.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      orderBy,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkFnUnVgcc8WzougbBjC7x_PXrb0xKBTA",
+      authDomain: "devindra-mart.firebaseapp.com",
+      projectId: "devindra-mart",
+      storageBucket: "devindra-mart.firebasestorage.app",
+      messagingSenderId: "394816688594",
+      appId: "1:394816688594:web:77577dbcade5f19942b80b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const els = {
+      catName: document.getElementById("catName"),
+      catSubcategory: document.getElementById("catSubcategory"),
+      catSupport: document.getElementById("catSupport"),
+      catImage: document.getElementById("catImage"),
+      catAction: document.getElementById("catAction"),
+      addCategoryBtn: document.getElementById("addCategoryBtn"),
+      categoriesList: document.getElementById("categoriesList"),
+      toast: document.getElementById("toast")
+    };
+
+    function showToast(msg, type="success") {
+      els.toast.textContent = msg;
+      els.toast.className = type === "error" ? "error" : "success";
+      els.toast.style.display = "block";
+      setTimeout(() => { els.toast.style.display = "none"; }, 2600);
+    }
+
+    function renderCategories(rows) {
+      if (!rows.length) {
+        els.categoriesList.innerHTML = '<div class="muted">Abhi koi category save nahi hui.</div>';
+        return;
+      }
+      els.categoriesList.innerHTML = rows.map(r => `
+        <div class="item">
+          <div><strong>${r.name || "-"}</strong></div>
+          <div class="muted">Subcategory: ${r.subcategory || "-"}</div>
+          <div class="muted">Support: ${r.support || "-"}</div>
+          <div class="muted">Action: ${r.action || "-"}</div>
+        </div>
+      `).join("");
+    }
+
+    async function loadCategories() {
+      try {
+        const snap = await getDocs(query(collection(db, "categories"), orderBy("createdAt", "desc")));
+        const rows = [];
+        snap.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
+        renderCategories(rows);
+      } catch (e) {
+        console.error("Load error:", e);
+        // orderBy fail ho to simple fetch
+        try {
+          const snap = await getDocs(collection(db, "categories"));
+          const rows = [];
+          snap.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
+          renderCategories(rows);
+        } catch (e2) {
+          console.error("Fallback load error:", e2);
+          showToast("Categories load nahi hui ❌", "error");
+        }
+      }
+    }
+
+    async function addCategory() {
+      const name = els.catName.value.trim();
+      const subcategory = els.catSubcategory.value.trim();
+      const support = els.catSupport.value.trim() || "7678256489";
+      const image = els.catImage.value.trim() || "https://via.placeholder.com/300";
+      const action = els.catAction.value.trim() || "whatsapp";
+
+      if (!name) {
+        showToast("Category name daalo ❌", "error");
+        return;
+      }
+
+      els.addCategoryBtn.disabled = true;
+      els.addCategoryBtn.textContent = "Saving...";
+
+      try {
+        await addDoc(collection(db, "categories"), {
+          name,
+          subcategory,
+          support,
+          image,
+          action,
+          createdAt: serverTimestamp()
+        });
+
+        showToast("Category save ho gayi ✅", "success");
+
+        els.catName.value = "";
+        els.catSubcategory.value = "";
+        els.catSupport.value = "7678256489";
+        els.catImage.value = "";
+        els.catAction.value = "whatsapp";
+
+        await loadCategories();
+      } catch (e) {
+        console.error("Save error:", e);
+        showToast("Save nahi hui ❌ Rules ya Firebase issue", "error");
+      } finally {
+        els.addCategoryBtn.disabled = false;
+        els.addCategoryBtn.textContent = "Add Category";
+      }
+    }
+
+    els.addCategoryBtn.addEventListener("click", addCategory);
+    loadCategories();
+  </script>
 </body>
 </html>
