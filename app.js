@@ -286,7 +286,13 @@ function addToCart(id){
 function persistCart(){ localStorage.setItem(LS.cart, JSON.stringify(cart)); }
 
 function deliveryCharge(subtotal){
-  const r = settings.deliveryRules.find(r=>subtotal>=r.min && subtotal<=r.max);
+  const rules = Array.isArray(settings.deliveryRules) ? settings.deliveryRules : [
+    {min:0,max:999,charge:50},
+    {min:1000,max:2999,charge:30},
+    {min:3000,max:4999,charge:20},
+    {min:5000,max:999999,charge:10}
+  ];
+  const r = rules.find(r=>subtotal>=r.min && subtotal<=r.max);
   return r ? r.charge : 0;
 }
 
@@ -497,7 +503,7 @@ function bindCheckout(){
     const profile = safeProfile();
     if(!cart.length) return alert('Cart is empty');
     const { subtotal, delivery, total } = totals();
-    if(total < settings.minOrder) return alert(t('minOrder'));
+    if(total < (settings.minOrder || 500)) return alert(t('minOrder'));
     const lines = cart.map(i=>`• ${getName(i)} x${i.qty} = ₹${i.qty*i.price}`).join('%0A');
     const map = encodeURIComponent(profile.locationLink || settings.storeMapLink || '');
     const text = `New Order%0A%0AName: ${encodeURIComponent(profile.name||'')}%0APhone: ${encodeURIComponent(profile.phone||'')}%0AAddress: ${encodeURIComponent(profile.address||'')}%0ALandmark: ${encodeURIComponent(profile.landmark||'')}%0AMap: ${map}%0A%0AItems:%0A${lines}%0A%0ASubtotal: ₹${subtotal}%0ADelivery: ₹${delivery}%0ATotal: ₹${total}`;
@@ -530,14 +536,4 @@ function renderEverything(){
 function startPromoLoop(){
   setInterval(()=>{
     if (!promos.length) return;
-    promoIndex=(promoIndex+1)%promos.length;
-    renderPromos();
-  }, 3500);
-}
-
-window.addEventListener('DOMContentLoaded', async ()=>{
-  try {
-    setTimeout(()=>hide($('splash')), 1200);
-    await initFirebase();
-    bindAuth();
-    renderEvery
+    promoIndex=(promoIndex+1)
