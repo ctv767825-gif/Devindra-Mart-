@@ -3,6 +3,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getFirestore,
   collection,
+  getDocs,
   addDoc,
   doc,
   getDoc,
@@ -22,20 +23,11 @@ const LANG = {
   hinglish: { allProducts:'All Products', search:'Products search karein', minOrder:'Minimum order value ₹500 hai', add:'Cart me add karein', support:'Support', category:'Category', orderSuccess:'Order successfully bhej diya gaya ✅' }
 };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAkFnUnVgcc8WzougbBjC7x_PXrb0xKBTA",
-  authDomain: "devindra-mart.firebaseapp.com",
-  projectId: "devindra-mart",
-  storageBucket: "devindra-mart.firebasestorage.app",
-  messagingSenderId: "394816688594",
-  appId: "1:394816688594:web:77577dbcade5f19942b80b"
-};
-
 let appDb = null;
 let settings = structuredClone(sampleSettings);
-let categories = structuredClone(sampleCategories);
-let products = structuredClone(sampleProducts);
-let promos = structuredClone(samplePromos);
+let categories = [...sampleCategories];
+let products = [...sampleProducts];
+let promos = [...samplePromos];
 let cart = JSON.parse(localStorage.getItem(LS.cart) || '[]');
 let currentLang = localStorage.getItem(LS.lang) || 'hinglish';
 let selectedCategory = null;
@@ -55,156 +47,145 @@ function safeProfile(){
   return JSON.parse(localStorage.getItem(LS.profile) || '{"name":"Aditya jha ब्राह्मण","phone":"","address":"","landmark":"","city":"","state":"","pincode":"","locationLink":""}');
 }
 
-function persistCart(){ localStorage.setItem(LS.cart, JSON.stringify(cart)); }
-
-function clone(v){
-  try { return structuredClone(v); }
-  catch(e){ return JSON.parse(JSON.stringify(v)); }
-}
-
-function mergeByNameOrId(baseArr, liveArr) {
-  const merged = [...clone(baseArr)];
+function mergeByName(baseArr, liveArr, getKey) {
+  const merged = [...baseArr];
   liveArr.forEach(item => {
-    const idx = merged.findIndex(x =>
-      (x.id && item.id && normalize(x.id) === normalize(item.id)) ||
-      (x.name && item.name && normalize(x.name) === normalize(item.name)) ||
-      (getName(x) && item.name && normalize(getName(x)) === normalize(item.name))
-    );
-    if (idx >= 0) merged[idx] = { ...merged[idx], ...item };
+    const key = getKey(item);
+    const i = merged.findIndex(x => getKey(x) === key);
+    if (i >= 0) merged[i] = { ...merged[i], ...item };
     else merged.push(item);
   });
   return merged;
 }
 
-function toSubcategoryArray(value){
-  if (Array.isArray(value)) {
-    return value.map(s => typeof s === 'string' ? s : (s?.name || '')).filter(Boolean);
-  }
-  if (typeof value === 'string') {
-    return value.split(',').map(s => s.trim()).filter(Boolean);
-  }
-  return [];
-}
-
-function mapLiveCategory(item){
-  const displayName = item.name || item.name_en || item.name_hinglish || item.name_hi || 'Category';
-  return {
-    id: item.id || displayName.toLowerCase().replace(/\s+/g, '-'),
-    name: displayName,
-    name_en: item.name_en || displayName,
-    name_hi: item.name_hi || displayName,
-    name_hinglish: item.name_hinglish || displayName,
-    image: item.image || 'https://via.placeholder.com/300',
-    support: item.support || '7678256489',
-    action: item.action || 'whatsapp',
-    subcategories: toSubcategoryArray(item.subcategory || item.subcategories)
-  };
-}
-
-function mapLiveProduct(item){
-  const displayName = item.name || item.name_en || item.name_hinglish || item.name_hi || 'Product';
-  return {
-    id: item.id || displayName.toLowerCase().replace(/\s+/g, '-'),
-    name: displayName,
-    name_en: item.name_en || displayName,
-    name_hi: item.name_hi || displayName,
-    name_hinglish: item.name_hinglish || displayName,
-    category: item.category || '',
-    subcategory: item.subcategory || '',
-    price: Number(item.price || 0),
-    image: item.image || 'https://via.placeholder.com/300',
-    badge: item.badge || 'Featured',
-    stock: item.stock || 'In Stock',
-    support: item.support || '7678256489'
-  };
-}
-
-function mapLivePromo(item){
-  return {
-    id: item.id || String(Date.now()),
-    title: item.title || '',
-    text: item.text || '',
-    media: item.media || '',
-    type: item.type || 'image'
-  };
-}
-
-function rerenderAfterLiveSync(){
+function rerenderLive() {
   try {
     seedUI();
     renderPromos();
     renderTopCategories();
     renderProducts();
     renderCartBar();
-    if (!$('categorySheet')?.classList.contains('hidden')) renderCategorySheet();
-    if (!$('cartSheet')?.classList.contains('hidden')) renderCartSheet();
-  } catch(e) {
-    console.warn('rerender failed', e);
+    if ($('categorySheet') && !$('categorySheet').classList.contains('hidden')) renderCategorySheet();
+    if ($('cartSheet') && !$('cartSheet').classList.contains('hidden')) renderCartSheet();
+  } catch (e) {
+    console.warn('rerenderLive failed', e);
   }
 }
 
 async function initFirebase(){
   try {
-    const app = initializeApp(firebaseConfig);
+    const fallbackConfig = {
+      apiKey: "AIzaSyAkFnUnVgcc8WzougbBjC7x_PXrb0xKBTA",
+      authDomain: "devindra-mart.firebaseapp.com",
+      projectId: "devindra-mart",
+      storageBucket: "devindra-mart.firebasestorage.app",
+      messagingSenderId: "394816688594",
+      appId: "1:394816688594:web:77577dbcade5f19942b80b"
+    };
+
+    const cfg = (window.firebaseConfig && window.firebaseConfig.apiKey)
+      ? window.firebaseConfig
+      : fallbackConfig;
+
+    const app = initializeApp(cfg);
     appDb = getFirestore(app);
-
-    // store settings live
-    onSnapshot(doc(appDb, 'settings', 'store'), (snap) => {
-      if (snap.exists()) {
-        settings = { ...settings, ...snap.data() };
-        rerenderAfterLiveSync();
-      }
-    });
-
-    // categories live
-    onSnapshot(collection(appDb, 'categories'), (snap) => {
-      const liveCategories = snap.docs.map(d => mapLiveCategory({ id: d.id, ...d.data() }));
-      if (liveCategories.length) {
-        categories = mergeByNameOrId(sampleCategories, liveCategories);
-        if (!selectedCategory && categories[0]) selectedCategory = categories[0].id;
-        rerenderAfterLiveSync();
-      }
-    });
-
-    // products live
-    onSnapshot(collection(appDb, 'products'), (snap) => {
-      const liveProducts = snap.docs.map(d => mapLiveProduct({ id: d.id, ...d.data() }));
-      if (liveProducts.length) {
-        products = mergeByNameOrId(sampleProducts, liveProducts);
-        rerenderAfterLiveSync();
-      }
-    });
-
-    // promos live
-    onSnapshot(collection(appDb, 'promos'), (snap) => {
-      const livePromos = snap.docs.map(d => mapLivePromo({ id: d.id, ...d.data() }));
-      if (livePromos.length) {
-        promos = livePromos;
-        promoIndex = 0;
-        rerenderAfterLiveSync();
-      }
-    });
-
-    // initial settings fallback
-    try {
-      const sRef = doc(appDb, 'settings', 'store');
-      const sSnap = await getDoc(sRef);
-      if (sSnap.exists()) settings = { ...settings, ...sSnap.data() };
-    } catch(e){ console.warn(e); }
-
+    await loadRemoteData();
+    bindLiveData();
   } catch(e){
     console.warn('Firestore fallback', e);
   }
 }
 
+async function loadRemoteData(){
+  try {
+    const sRef = doc(appDb, 'settings', 'store');
+    const sSnap = await getDoc(sRef);
+    if (sSnap.exists()) settings = { ...settings, ...sSnap.data() };
+
+    const [catSnap, prodSnap, promoSnap] = await Promise.all([
+      getDocs(collection(appDb,'categories')),
+      getDocs(collection(appDb,'products')),
+      getDocs(collection(appDb,'promos'))
+    ]);
+
+    if (!catSnap.empty) {
+      const liveCats = catSnap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          subcategories: Array.isArray(data.subcategories)
+            ? data.subcategories
+            : String(data.subcategory || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean)
+        };
+      });
+      categories = mergeByName(sampleCategories, liveCats, x => normalize(x.name || getName(x) || x.id));
+    }
+
+    if (!prodSnap.empty) {
+      const liveProducts = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      products = mergeByName(sampleProducts, liveProducts, x => normalize(x.name || getName(x) || x.id));
+    }
+
+    if (!promoSnap.empty) promos = promoSnap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e){
+    console.warn(e);
+  }
+}
+
+function bindLiveData(){
+  if (!appDb) return;
+
+  onSnapshot(collection(appDb, 'categories'), (snap) => {
+    const liveCats = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        subcategories: Array.isArray(data.subcategories)
+          ? data.subcategories
+          : String(data.subcategory || '')
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean)
+      };
+    });
+    categories = mergeByName(sampleCategories, liveCats, x => normalize(x.name || getName(x) || x.id));
+    rerenderLive();
+  });
+
+  onSnapshot(collection(appDb, 'products'), (snap) => {
+    const liveProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    products = mergeByName(sampleProducts, liveProducts, x => normalize(x.name || getName(x) || x.id));
+    rerenderLive();
+  });
+
+  onSnapshot(collection(appDb, 'promos'), (snap) => {
+    const livePromos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    promos = livePromos.length ? livePromos : [...samplePromos];
+    promoIndex = 0;
+    rerenderLive();
+  });
+
+  onSnapshot(doc(appDb, 'settings', 'store'), (sSnap) => {
+    if (sSnap.exists()) {
+      settings = { ...settings, ...sSnap.data() };
+      rerenderLive();
+    }
+  });
+}
+
 function seedUI(){
-  if ($('storeName')) $('storeName').textContent = settings.storeName || 'Devindra Mart';
-  if ($('storeTagline')) $('storeTagline').textContent = settings.tagline || 'Ab ghar tak paaye bazaar jaise rate';
-  if ($('noticeBar')) $('noticeBar').textContent = settings.noticeText || 'Fresh deals today • Minimum order ₹500 • Fast delivery';
+  if ($('storeName')) $('storeName').textContent = settings.storeName;
+  if ($('storeTagline')) $('storeTagline').textContent = settings.tagline;
+  if ($('noticeBar')) $('noticeBar').textContent = settings.noticeText;
   if ($('allProductsTitle')) $('allProductsTitle').textContent = t('allProducts');
   if ($('searchInput')) $('searchInput').placeholder = t('search');
-  if ($('helpCall')) $('helpCall').href = `tel:${settings.supportNumber || '7678256489'}`;
-  if ($('helpWhatsApp')) $('helpWhatsApp').href = `https://wa.me/91${settings.whatsappNumber || '7678256489'}`;
+  if ($('helpCall')) $('helpCall').href = `tel:${settings.supportNumber}`;
+  if ($('helpWhatsApp')) $('helpWhatsApp').href = `https://wa.me/91${settings.whatsappNumber}`;
 }
 
 function renderPromos(){
@@ -215,21 +196,12 @@ function renderPromos(){
     return;
   }
   const p = promos[promoIndex % promos.length];
-  root.innerHTML = `
-    <div class="promo-slide">
-      <img src="${p.media}" alt="promo" class="promo-media">
-      <div class="promo-overlay">
-        <h2>${p.title || ''}</h2>
-        <p>${p.text || ''}</p>
-      </div>
-    </div>
-  `;
+  root.innerHTML = `<div class="promo-slide"><img src="${p.media}" alt="promo" class="promo-media"><div class="promo-overlay"><h2>${p.title||''}</h2><p>${p.text||''}</p></div></div>`;
 }
 
 function renderTopCategories(){
-  const top = $('topCategories');
-  if (!top) return;
-  top.innerHTML = categories.map(c=>`<button class="chip" data-cat="${c.id}">${getName(c)}</button>`).join('');
+  if (!$('topCategories')) return;
+  $('topCategories').innerHTML = categories.map(c=>`<button class="chip" data-cat="${c.id}">${getName(c)}</button>`).join('');
   document.querySelectorAll('.chip').forEach(btn => btn.onclick = ()=>{
     selectedCategory = btn.dataset.cat;
     selectedSubcategory = null;
@@ -238,18 +210,9 @@ function renderTopCategories(){
 }
 
 function renderCategorySheet(){
-  const mainList = $('mainCategoryList');
-  const subList = $('subCategoryList');
-  if (!mainList || !subList) return;
+  if (!$('mainCategoryList') || !$('subCategoryList')) return;
 
-  if (!selectedCategory && categories[0]) selectedCategory = categories[0].id;
-
-  mainList.innerHTML = categories.map(c=>`
-    <button class="main-cat-btn ${selectedCategory===c.id?'active':''}" data-cat="${c.id}">
-      ${getName(c)}
-    </button>
-  `).join('');
-
+  $('mainCategoryList').innerHTML = categories.map(c=>`<button class="main-cat-btn ${selectedCategory===c.id?'active':''}" data-cat="${c.id}">${getName(c)}</button>`).join('');
   document.querySelectorAll('.main-cat-btn').forEach(btn=>btn.onclick=()=>{
     selectedCategory = btn.dataset.cat;
     selectedSubcategory = null;
@@ -259,10 +222,7 @@ function renderCategorySheet(){
 
   const cat = categories.find(c=>c.id===selectedCategory) || categories[0];
   const subs = Array.isArray(cat?.subcategories) ? cat.subcategories : [];
-  subList.innerHTML = subs.map(s=>`
-    <button class="sub-chip ${selectedSubcategory===s?'active':''}" data-sub="${s}">${s}</button>
-  `).join('');
-
+  $('subCategoryList').innerHTML = subs.map(s=>`<button class="sub-chip ${selectedSubcategory===s?'active':''}" data-sub="${s}">${s}</button>`).join('');
   document.querySelectorAll('.sub-chip').forEach(btn=>btn.onclick=()=>{
     selectedSubcategory = btn.dataset.sub;
     hide($('categorySheet'));
@@ -281,16 +241,9 @@ function filteredProducts(){
       normalize(p.category) === normalize(selectedCategory) ||
       normalize(p.category) === normalize(selectedCatObj.name);
 
-    const subOk =
-      !selectedSubcategory ||
-      normalize(p.subcategory) === normalize(selectedSubcategory);
-
+    const subOk = !selectedSubcategory || normalize(p.subcategory)===normalize(selectedSubcategory);
     const q = ($('searchInput')?.value || '').trim().toLowerCase();
-    const searchOk = !q || [
-      p.name_en, p.name_hi, p.name_hinglish, p.name,
-      p.category, p.subcategory
-    ].join(' ').toLowerCase().includes(q);
-
+    const searchOk = !q || [p.name_en,p.name_hi,p.name_hinglish,p.name,p.category,p.subcategory].join(' ').toLowerCase().includes(q);
     return catOk && subOk && searchOk;
   });
 }
@@ -298,62 +251,42 @@ function filteredProducts(){
 function renderProducts(){
   const root = $('productsGrid');
   if (!root) return;
-
   root.className = viewMode==='grid' ? 'products-grid' : 'products-list';
   const list = filteredProducts();
-
   root.innerHTML = list.map(p=>`
     <article class="product-card ${viewMode}">
       <img class="product-img" src="${p.image}" alt="${getName(p)}">
       <div class="product-body">
         <div class="badge">${p.badge || 'Featured'}</div>
         <h4>${getName(p)}</h4>
-        <div class="meta">${p.category || ''} • ${p.subcategory || ''}</div>
-        <div class="price-row">
-          <strong>₹${p.price}</strong>
-          <button class="add-btn" data-id="${p.id}">${t('add')}</button>
-        </div>
+        <div class="meta">${p.category} • ${p.subcategory || ''}</div>
+        <div class="price-row"><strong>₹${p.price}</strong><button class="add-btn" data-id="${p.id}">${t('add')}</button></div>
       </div>
     </article>
   `).join('');
-
   document.querySelectorAll('.add-btn').forEach(btn=>btn.onclick=()=>addToCart(btn.dataset.id));
 
   const active = [];
-  if (selectedCategory){
-    const c = categories.find(x=>x.id===selectedCategory);
-    if(c) active.push(getName(c));
-  }
+  if (selectedCategory){ const c=categories.find(x=>x.id===selectedCategory); if(c) active.push(getName(c)); }
   if (selectedSubcategory) active.push(selectedSubcategory);
-
   if ($('activeFilterBar')) {
     if (active.length){
       $('activeFilterBar').innerHTML = active.map(a=>`<span class="filter-pill">${a}</span>`).join('');
       show($('activeFilterBar'));
-    } else {
-      hide($('activeFilterBar'));
-    }
+    } else hide($('activeFilterBar'));
   }
 }
 
 function addToCart(id){
-  const item = products.find(p=>p.id===id);
-  if(!item) return;
+  const item = products.find(p=>p.id===id); if(!item) return;
   const found = cart.find(c=>c.id===id);
-  if(found) found.qty += 1;
-  else cart.push({...item, qty:1});
-  persistCart();
-  renderCartBar();
+  if(found) found.qty += 1; else cart.push({...item, qty:1});
+  persistCart(); renderCartBar();
 }
+function persistCart(){ localStorage.setItem(LS.cart, JSON.stringify(cart)); }
 
 function deliveryCharge(subtotal){
-  const rules = settings.deliveryRules || [
-    { min: 0, max: 999, charge: 50 },
-    { min: 1000, max: 2999, charge: 30 },
-    { min: 3000, max: 4999, charge: 20 },
-    { min: 5000, max: 999999, charge: 10 }
-  ];
-  const r = rules.find(r=>subtotal>=r.min && subtotal<=r.max);
+  const r = settings.deliveryRules.find(r=>subtotal>=r.min && subtotal<=r.max);
   return r ? r.charge : 0;
 }
 
@@ -364,10 +297,7 @@ function totals(){
 }
 
 function renderCartBar(){
-  if(!cart.length){
-    hide($('cartBar'));
-    return;
-  }
+  if(!cart.length){ hide($('cartBar')); return; }
   const {total} = totals();
   if ($('cartCountText')) $('cartCountText').textContent = `${cart.reduce((s,i)=>s+i.qty,0)} items`;
   if ($('cartTotalText')) $('cartTotalText').textContent = `₹${total}`;
@@ -378,23 +308,11 @@ function renderCartSheet(){
   const root = $('cartItems');
   if (!root) return;
 
-  if(!cart.length){
-    root.innerHTML = '<p class="muted">Cart is empty</p>';
-  } else {
-    root.innerHTML = cart.map(i=>`
-      <div class="cart-item">
-        <img src="${i.image}">
-        <div>
-          <strong>${getName(i)}</strong>
-          <div>${i.qty} x ₹${i.price}</div>
-        </div>
-        <button class="qty-btn" data-id="${i.id}">Remove</button>
-      </div>
-    `).join('');
-  }
+  if(!cart.length){ root.innerHTML = '<p class="muted">Cart is empty</p>'; }
+  else root.innerHTML = cart.map(i=>`<div class="cart-item"><img src="${i.image}"><div><strong>${getName(i)}</strong><div>${i.qty} x ₹${i.price}</div></div><button class="qty-btn" data-id="${i.id}">Remove</button></div>`).join('');
 
   document.querySelectorAll('.qty-btn').forEach(btn=>btn.onclick=()=>{
-    cart = cart.filter(i=>i.id!==btn.dataset.id);
+    cart=cart.filter(i=>i.id!==btn.dataset.id);
     persistCart();
     renderCartSheet();
     renderCartBar();
@@ -408,7 +326,6 @@ function renderCartSheet(){
 
 function bindSheets(){
   document.querySelectorAll('[data-close]').forEach(btn=>btn.onclick=()=>hide($(btn.dataset.close)));
-
   if ($('supportBtn')) $('supportBtn').onclick=()=>show($('supportSheet'));
   if ($('categoryBtn')) $('categoryBtn').onclick=()=>{
     show($('categorySheet'));
@@ -514,7 +431,8 @@ function captureLocation(targetId, hintId, forProfile=false){
     const mapLink = `https://maps.google.com/?q=${latitude},${longitude}`;
     if(targetId && $(targetId)) $(targetId).value = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
     if(hintId && $(hintId)) $(hintId).textContent = 'Location added successfully';
-    saveProfile({ locationLink: mapLink });
+    if(forProfile) saveProfile({ locationLink: mapLink });
+    else saveProfile({ locationLink: mapLink });
   }, ()=>alert('Unable to fetch current location'));
 }
 
@@ -564,7 +482,7 @@ function bindHelperBot(){
     if(type==='stock') msg='Stock available for top categories. Open Category to browse current items.';
     if(type==='delivery') msg='Delivery charges: ₹50 up to ₹999, ₹30 up to ₹2999, ₹20 up to ₹4999, ₹10 above ₹5000.';
     if(type==='minimum') msg='Minimum order is ₹500.';
-    if(type==='support') msg=`Support & WhatsApp: ${settings.supportNumber || '7678256489'}`;
+    if(type==='support') msg=`Support & WhatsApp: ${settings.supportNumber}`;
     const div = document.createElement('div');
     div.className='bot-msg';
     div.textContent=msg;
@@ -578,8 +496,48 @@ function bindCheckout(){
   $('checkoutBtn').onclick = async ()=>{
     const profile = safeProfile();
     if(!cart.length) return alert('Cart is empty');
-
     const { subtotal, delivery, total } = totals();
-    if(total < (settings.minOrder || 500)) return alert(t('minOrder'));
+    if(total < settings.minOrder) return alert(t('minOrder'));
+    const lines = cart.map(i=>`• ${getName(i)} x${i.qty} = ₹${i.qty*i.price}`).join('%0A');
+    const map = encodeURIComponent(profile.locationLink || settings.storeMapLink || '');
+    const text = `New Order%0A%0AName: ${encodeURIComponent(profile.name||'')}%0APhone: ${encodeURIComponent(profile.phone||'')}%0AAddress: ${encodeURIComponent(profile.address||'')}%0ALandmark: ${encodeURIComponent(profile.landmark||'')}%0AMap: ${map}%0A%0AItems:%0A${lines}%0A%0ASubtotal: ₹${subtotal}%0ADelivery: ₹${delivery}%0ATotal: ₹${total}`;
+    window.open(`https://wa.me/91${settings.whatsappNumber}?text=${text}`, '_blank');
+    try { if(appDb) await addDoc(collection(appDb,'orders'), { profile, cart, subtotal, delivery, total, createdAt: Date.now() }); } catch(e){}
+    cart=[]; persistCart(); renderCartBar(); renderCartSheet();
+    if ($('successToast')) {
+      $('successToast').textContent = t('orderSuccess');
+      show($('successToast'));
+      setTimeout(()=>hide($('successToast')), 2500);
+    }
+    hide($('cartSheet'));
+  };
+}
 
-    const lines = cart.map(i=>`• ${getName(i)} x${i.qty} = ₹${i.qty*i.price}`)
+function renderEverything(){
+  seedUI();
+  renderPromos();
+  renderTopCategories();
+  renderProducts();
+  renderCartBar();
+  bindSheets();
+  bindProfile();
+  bindLanguage();
+  bindSearchAndView();
+  bindHelperBot();
+  bindCheckout();
+}
+
+function startPromoLoop(){
+  setInterval(()=>{
+    if (!promos.length) return;
+    promoIndex=(promoIndex+1)%promos.length;
+    renderPromos();
+  }, 3500);
+}
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  try {
+    setTimeout(()=>hide($('splash')), 1200);
+    await initFirebase();
+    bindAuth();
+    renderEvery
