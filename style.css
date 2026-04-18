@@ -13,3 +13,41 @@
 
 .header-actions{display:flex;gap:10px;align-items:center}
 #notificationPanelBody .bot-msg{font-size:14px;line-height:1.45}
+/* 🙎 Owner name */
+.owner-badge {
+  font-size: 11px;
+  color: #17356f;
+  font-weight: 700;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+/* 🔔 Notification highlight */
+#notifBtn {
+  box-shadow: 0 0 0 2px #1f7fff33;
+}
+
+/* 🔍 Search spacing */
+.search-row {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+/* 📭 Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 10px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* ✨ Smooth toast */
+.success-toast {
+  transition: all 0.3s ease;
+  transform: translateX(-50%) translateY(-10px);
+  opacity: 0;
+}
+.success-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
