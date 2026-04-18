@@ -1,16 +1,61 @@
-:root{--bg:#0b1020;--bg2:#121937;--card:#ffffff;--muted:#6b7280;--primary:#12265a;--accent:#1f7fff;--soft:#eef3ff;--line:#e5e7eb;--danger:#d33b3b}
-*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff,#eef4ff);color:#111827} .hidden{display:none!important}
-.splash-screen{position:fixed;inset:0;background:linear-gradient(180deg,#0b1020,#18254f);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:50;opacity:0;pointer-events:none;transition:.35s}.splash-screen.active{opacity:1;pointer-events:auto}.splash-logo{width:92px;height:92px}.splash-title{font-size:28px;font-weight:800;margin-top:14px}.splash-sub{opacity:.8;margin-top:6px}
-.screen{min-height:100vh}.login-screen,.auth-gradient{display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(180deg,#101834,#1d2f63)}.auth-card{width:min(100%,430px);padding:22px}.glass-card{background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-radius:28px;box-shadow:0 24px 60px rgba(25,45,95,.18)}.auth-logo{width:84px;height:84px;display:block;margin:0 auto 8px}.auth-card h1,.auth-card h2{margin:6px 0 8px}.muted{color:var(--muted)}.small{font-size:12px}.field-label{display:block;margin:12px 0 8px;font-weight:700}.input{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:#fff;outline:none;font-size:16px;margin-top:10px}.textarea{min-height:96px;resize:vertical}.primary-btn,.secondary-btn,.danger-btn,.icon-btn,.voice-btn,.view-btn,.add-btn,.chip,.pill-btn,.lang-opt,.help-card,.nav-btn,.close-btn{cursor:pointer;border:none}.primary-btn{background:linear-gradient(135deg,#10204f,#2049ad);color:#fff;border-radius:18px;padding:14px 18px;font-weight:800}.secondary-btn{background:#edf4ff;color:#17356f;border-radius:18px;padding:14px 18px;font-weight:700}.danger-btn{background:#ffe7e7;color:#9f1010;border-radius:18px;padding:14px 18px;font-weight:700;margin-top:14px;width:100%}.full{width:100%}.small-btn{padding:10px 14px;border-radius:14px}.robot-box{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:18px;background:#f9fbff}.robot-row{display:flex;gap:10px;align-items:center;font-weight:600}.double-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.hint{margin-top:10px;font-size:13px;color:#19448f}
-.topbar{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#f8fbff 80%,rgba(248,251,255,.7))}.notice-bar{background:#10204f;color:#fff;padding:10px 14px;text-align:center;font-size:13px;font-weight:700}.brand-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px}.brand-left{display:flex;gap:12px;align-items:center}.brand-logo{width:48px;height:48px}.brand-name{font-weight:800;font-size:20px}.brand-sub{font-size:12px;color:#50607f}.icon-btn{background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 10px 20px rgba(17,24,39,.08)}
-.main-content{padding:12px 16px 100px}.hero-slider{overflow:hidden;padding:0;margin-bottom:16px}.promo-slide{position:relative;min-height:190px}.promo-media{display:block;width:100%;height:220px;object-fit:cover}.promo-overlay{position:absolute;left:0;right:0;bottom:0;padding:20px;color:#fff;background:linear-gradient(180deg,transparent,rgba(0,0,0,.7))}.promo-overlay h2{margin:0 0 6px}.top-categories{display:flex;gap:10px;overflow:auto;padding-bottom:8px;margin-bottom:16px}.chip{background:#fff;border:1px solid #dde7ff;color:#18346f;padding:10px 14px;border-radius:999px;white-space:nowrap;font-weight:700}.section-head{display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px}.view-switch{display:flex;gap:8px}.view-btn{padding:10px 14px;border-radius:14px;background:#fff;border:1px solid var(--line)}.view-btn.active{background:#12265a;color:#fff}.search-row{display:flex;gap:10px;align-items:center}.search-input{margin-top:0}.voice-btn{width:50px;height:50px;border-radius:18px;background:#12265a;color:#fff;font-size:20px}.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.filter-pill{background:#dce8ff;color:#17356f;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:700}
-.products-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.products-list{display:grid;grid-template-columns:1fr;gap:12px}.product-card{background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 16px 30px rgba(17,24,39,.08)}.product-card.list{display:grid;grid-template-columns:120px 1fr}.product-img{width:100%;height:160px;object-fit:cover;background:#f3f4f6}.product-card.list .product-img{height:100%}.product-body{padding:14px}.badge{display:inline-block;background:#eef4ff;color:#16356f;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;margin-bottom:8px}.product-body h4{margin:2px 0 4px;font-size:17px}.meta{font-size:12px;color:#667085;margin-bottom:12px}.price-row{display:flex;justify-content:space-between;align-items:center}.add-btn{background:#12265a;color:#fff;padding:10px 14px;border-radius:14px;font-weight:800}
-.cart-bar{position:fixed;left:14px;right:14px;bottom:78px;background:#12265a;color:#fff;padding:14px 16px;border-radius:20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 16px 30px rgba(18,38,90,.35)}.bottom-nav{position:fixed;left:10px;right:10px;bottom:10px;background:#fff;border-radius:22px;display:flex;justify-content:space-around;padding:10px;box-shadow:0 20px 40px rgba(17,24,39,.12)}.nav-btn{background:transparent;display:flex;flex-direction:column;gap:4px;align-items:center;color:#46516b;font-size:13px}.nav-btn.active{color:#10204f;font-weight:800}
-.sheet{position:fixed;inset:0;background:rgba(10,15,30,.45);display:flex;align-items:flex-end;z-index:20}.sheet-card{background:#fff;border-radius:28px 28px 0 0;padding:18px;width:100%;max-height:84vh;overflow:auto}.large-sheet{min-height:55vh}.small-sheet{min-height:22vh}.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.close-btn{background:#eff3ff;border-radius:12px;padding:10px 12px}.help-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}.help-card{display:block;text-align:center;background:#f8fbff;border:1px solid #dce8ff;border-radius:20px;padding:18px 12px;color:#16356f;font-weight:800;text-decoration:none}.helper-bot{margin-top:16px;background:#f8fbff;border:1px solid #dce8ff;border-radius:20px;padding:14px}.bot-title{font-weight:800;margin-bottom:8px}.bot-messages{display:grid;gap:8px}.bot-msg{background:#fff;border-radius:14px;padding:10px 12px;border:1px solid #e6ebff}.bot-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.pill-btn{background:#10204f;color:#fff;border-radius:999px;padding:8px 12px}.category-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px}.main-cat-list,.sub-cat-list,.admin-list{display:grid;gap:10px}.main-cat-btn,.sub-chip{padding:12px 14px;background:#f8fbff;border:1px solid #dce8ff;border-radius:16px;text-align:left}.main-cat-btn.active,.sub-chip.active{background:#12265a;color:#fff}.sub-head{font-weight:800;margin-bottom:8px}.cart-items{display:grid;gap:10px}.cart-item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:#f9fbff;padding:10px;border-radius:16px}.cart-item img{width:64px;height:64px;object-fit:cover;border-radius:14px}.bill-box{background:#f8fbff;border-radius:18px;padding:14px;margin:12px 0;display:grid;gap:10px}.bill-box>div{display:flex;justify-content:space-between}.total-row{font-size:18px}.lang-options{display:grid;gap:10px}.lang-opt{padding:14px;border-radius:16px;background:#f8fbff;border:1px solid #dce8ff;font-weight:700}
-.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30}.loader-ring{width:52px;height:52px;border:5px solid #d8e3ff;border-top-color:#2049ad;border-radius:50%;animation:spin 1s linear infinite}.loading-text{margin-top:12px;color:#17356f;font-weight:700}.success-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#17a34a;color:#fff;padding:12px 16px;border-radius:14px;z-index:40;box-shadow:0 10px 24px rgba(0,0,0,.14)}@keyframes spin{to{transform:rotate(360deg)}}
-.admin-body{background:linear-gradient(180deg,#eef4ff,#f8fbff)}.admin-wrap{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:18px;min-height:100vh}.admin-sidebar{padding:18px;position:sticky;top:18px;height:calc(100vh - 36px)}.admin-logo{width:72px;height:72px}.admin-title{font-size:22px;font-weight:800;margin:12px 0 18px}.admin-menu{display:grid;gap:10px}.admin-menu-btn{background:#f8fbff;border:1px solid #dce8ff;border-radius:16px;padding:12px 14px;text-align:left;font-weight:700}.admin-menu-btn.active{background:#12265a;color:#fff}.admin-main{display:grid;gap:18px}.admin-tab{display:none;padding:20px}.admin-tab.active{display:block}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.admin-item{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f8fbff;border:1px solid #dce8ff;padding:12px 14px;border-radius:16px} .admin-item button{background:#ffe7e7;border:none;color:#9f1010;padding:8px 10px;border-radius:12px}
-@media (max-width:900px){.admin-wrap{grid-template-columns:1fr}.admin-sidebar{position:static;height:auto}.products-grid{grid-template-columns:1fr 1fr}.category-layout,.help-options,.admin-grid,.double-actions{grid-template-columns:1fr}} 
+/* 🔥 FIX: Search + Grid layout improve */
+.section-head {
+  margin-bottom: 6px;
+}
+.search-row {
+  margin-bottom: 12px;
+}
 
+/* 🔥 FIX: Header icon alignment better */
+.icon-btn {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.header-actions{display:flex;gap:10px;align-items:center}
-#notificationPanelBody .bot-msg{font-size:14px;line-height:1.45}
+/* 🔥 FIX: Notification bell highlight */
+#notifBtn {
+  position: relative;
+}
+
+/* 🔥 NEW: Owner name styling */
+.owner-badge {
+  font-size: 11px;
+  color: #17356f;
+  font-weight: 700;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+/* 🔥 FIX: Better category scroll */
+.top-categories {
+  scrollbar-width: none;
+}
+.top-categories::-webkit-scrollbar {
+  display: none;
+}
+
+/* 🔥 FIX: Product empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 10px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* 🔥 FIX: Toast smoother */
+.success-toast {
+  transition: all 0.3s ease;
+}
+
+/* 🔥 FIX: Improve touch buttons */
+.add-btn {
+  min-width: 90px;
+  text-align: center;
+}
+
+/* 🔥 FIX: Notification panel better spacing */
+#notificationPanelBody {
+  padding-top: 6px;
+}
