@@ -1,40 +1,44 @@
-/* ---- FIX: Layout + Icons ---- */
-.section-head { margin-bottom: 6px; }
-.search-row { margin-bottom: 12px; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef4ff;
+}
+
+.hidden { display: none !important; }
+
+.topbar { background: white; }
+
+.brand-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  align-items: center;
+}
+
+.brand-logo { width: 45px; }
 
 .icon-btn {
-  font-size: 18px;
+  padding: 10px;
+  border-radius: 10px;
+  background: white;
+}
+
+.main-content { padding: 10px; }
+
+.search-row {
+  margin-top: 10px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 10px;
 }
 
-/* ---- FIX: Owner badge ---- */
-.owner-badge {
-  font-size: 11px;
-  color: #17356f;
-  font-weight: 700;
-  margin-top: 2px;
-  opacity: 0.85;
+.products-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-/* ---- FIX: Hide scrollbars for categories ---- */
-.top-categories { scrollbar-width: none; }
-.top-categories::-webkit-scrollbar { display: none; }
-
-/* ---- FIX: Empty state ---- */
-.empty-state {
-  text-align: center;
-  padding: 40px 10px;
-  color: #6b7280;
-  font-weight: 600;
+.product-card {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
 }
-
-/* ---- FIX: Toast ---- */
-.success-toast { transition: all 0.3s ease; }
-
-/* ---- FIX: Buttons ---- */
-.add-btn { min-width: 90px; text-align: center; }
-
-/* ---- FIX: Notification panel ---- */
-#notificationPanelBody { padding-top: 6px; }
