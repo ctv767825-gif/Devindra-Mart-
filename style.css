@@ -1,12 +1,7 @@
-/* 🔥 FIX: Search + Grid layout improve */
-.section-head {
-  margin-bottom: 6px;
-}
-.search-row {
-  margin-bottom: 12px;
-}
+/* ---- FIX: Layout + Icons ---- */
+.section-head { margin-bottom: 6px; }
+.search-row { margin-bottom: 12px; }
 
-/* 🔥 FIX: Header icon alignment better */
 .icon-btn {
   font-size: 18px;
   display: flex;
@@ -14,12 +9,7 @@
   justify-content: center;
 }
 
-/* 🔥 FIX: Notification bell highlight */
-#notifBtn {
-  position: relative;
-}
-
-/* 🔥 NEW: Owner name styling */
+/* ---- FIX: Owner badge ---- */
 .owner-badge {
   font-size: 11px;
   color: #17356f;
@@ -28,15 +18,11 @@
   opacity: 0.85;
 }
 
-/* 🔥 FIX: Better category scroll */
-.top-categories {
-  scrollbar-width: none;
-}
-.top-categories::-webkit-scrollbar {
-  display: none;
-}
+/* ---- FIX: Hide scrollbars for categories ---- */
+.top-categories { scrollbar-width: none; }
+.top-categories::-webkit-scrollbar { display: none; }
 
-/* 🔥 FIX: Product empty state */
+/* ---- FIX: Empty state ---- */
 .empty-state {
   text-align: center;
   padding: 40px 10px;
@@ -44,18 +30,11 @@
   font-weight: 600;
 }
 
-/* 🔥 FIX: Toast smoother */
-.success-toast {
-  transition: all 0.3s ease;
-}
+/* ---- FIX: Toast ---- */
+.success-toast { transition: all 0.3s ease; }
 
-/* 🔥 FIX: Improve touch buttons */
-.add-btn {
-  min-width: 90px;
-  text-align: center;
-}
+/* ---- FIX: Buttons ---- */
+.add-btn { min-width: 90px; text-align: center; }
 
-/* 🔥 FIX: Notification panel better spacing */
-#notificationPanelBody {
-  padding-top: 6px;
-}
+/* ---- FIX: Notification panel ---- */
+#notificationPanelBody { padding-top: 6px; }
