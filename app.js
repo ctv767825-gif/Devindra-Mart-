@@ -473,21 +473,7 @@ document.querySelectorAll('.minus').forEach(btn=>{
     removeFromCart(btn.dataset.id);
   };
 });
-      </select>
-
-      <!-- BULK -->
-      ${p.bulkPrice ? `<div class="bulk">Carton: ₹${p.bulkPrice}</div>`:''}
-
-      <!-- QTY -->
-      <div class="qty-box">
-        <button onclick="removeFromCart('${p.id}')">-</button>
-        ${getQty(p.id)}
-        <button onclick="addToCart('${p.id}')">+</button>
-      </div>
-
-    </article>
-  `).join('');
-}
+      
   
 // 🔥 NEW ADD TO CART (FINAL)
 function addToCart(id){
