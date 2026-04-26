@@ -473,7 +473,7 @@ document.querySelectorAll('.minus').forEach(btn=>{
     removeFromCart(btn.dataset.id);
   };
 });
-      
+}      
   
 // 🔥 NEW ADD TO CART (FINAL)
 function addToCart(id){
@@ -585,7 +585,7 @@ function renderCartSheet() {
       persistCart();
       renderCartSheet();
       renderCartBar();
-    };
+    }
   });
 
   const { subtotal, delivery, total } = totals();
