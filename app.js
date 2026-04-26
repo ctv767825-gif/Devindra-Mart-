@@ -424,73 +424,83 @@ function filteredProducts() {
   return list;
 }
 
+// 2️⃣ FINAL B2B PRODUCT SYSTEM
 function renderProducts() {
   const root = $('productsGrid');
   if (!root) return;
 
-  root.className = viewMode === 'grid' ? 'products-grid' : 'products-list';
   const list = filteredProducts();
 
-  if (!list.length) {
-    root.innerHTML = `<div class="empty-state">${t('noItems')}</div>`;
-    if ($('activeFilterBar')) hide($('activeFilterBar'));
-    return;
-  }
+  root.innerHTML = list.map(p => `
+    <article class="product-card">
 
-  root.innerHTML = list
-    .map(
-      (p) => `
-      <article class="product-card ${viewMode}">
-        <img class="product-img" src="${p.image}" alt="${getName(p)}" onerror="this.src='logo.svg'">
-        <div class="product-body">
-          <div class="badge">${p.badge || 'Featured'}</div>
-          <h4>${getName(p)}</h4>
-          <div class="meta">${p.category} • ${p.subcategory || ''}</div>
-          <div class="price-row">
-            <strong>₹${p.price}</strong>
-            <button class="add-btn" data-id="${p.id}">${t('add')}</button>
-          </div>
-        </div>
-      </article>
-    `
-    )
-    .join('');
+      <img src="${p.image}" onerror="this.src='logo.svg'">
 
-  document.querySelectorAll('.add-btn').forEach((btn) => {
-    btn.onclick = () => addToCart(btn.dataset.id);
-  });
+      <h4>${getName(p)}</h4>
 
-  const active = [];
-  if (selectedCategory) {
-    const c = categories.find((x) => x.id === selectedCategory);
-    if (c) active.push(getName(c));
-  }
-  if (selectedSubcategory) active.push(selectedSubcategory);
+      <!-- VARIANT -->
+      <select data-id="${p.id}">
+        ${(p.variants || [p]).map(v=>`
+          <option value="${v.price}">
+            ${v.label || `₹${v.price} Pack`}
+          </option>
+        `).join('')}
+      </select>
 
-  if ($('activeFilterBar')) {
-    if (active.length) {
-      $('activeFilterBar').innerHTML = active
-        .map((a) => `<span class="filter-pill">${a}</span>`)
-        .join('');
-      show($('activeFilterBar'));
-    } else {
-      hide($('activeFilterBar'));
-    }
-  }
+      <!-- BULK -->
+      ${p.bulkPrice ? `<div class="bulk">Carton: ₹${p.bulkPrice}</div>`:''}
+
+      <!-- QTY -->
+      <div class="qty-box">
+        <button onclick="removeFromCart('${p.id}')">-</button>
+        ${getQty(p.id)}
+        <button onclick="addToCart('${p.id}')">+</button>
+      </div>
+
+    </article>
+  `).join('');
 }
+  
+// 🔥 NEW ADD TO CART (FINAL)
+function addToCart(id){
+  const product = products.find(p=>p.id===id);
+  if(!product) return;
 
-function addToCart(id) {
-  const item = products.find((p) => p.id === id);
-  if (!item) return;
+  const select = document.querySelector(`select[data-id='${id}']`);
+  const price = select ? Number(select.value) : Number(product.price || 0);
 
-  const found = cart.find((c) => c.id === id);
-  if (found) found.qty += 1;
-  else cart.push({ ...item, qty: 1 });
+  const found = cart.find(i=>i.id===id);
+
+  if(found){
+    found.qty += 1;
+  }else{
+    cart.push({...product, price, qty:1});
+  }
 
   persistCart();
   renderCartBar();
+  renderProducts();
+}
+// 🔥 QTY CONTROL
+function getQty(id){
+  const item = cart.find(i=>i.id===id);
+  return item ? item.qty : 0;
 }
 
+function removeFromCart(id){
+  const item = cart.find(i=>i.id===id);
+  if(!item) return;
+
+  item.qty--;
+
+  if(item.qty<=0){
+    cart = cart.filter(i=>i.id!==id);
+  }
+
+  persistCart();
+  renderCartBar();
+  renderProducts();
+}
 function persistCart() {
   localStorage.setItem(LS.cart, JSON.stringify(cart));
 }
@@ -786,7 +796,12 @@ function bindCheckout(){
 
   $('checkoutBtn').onclick = async ()=>{
     const profile = safeProfile();
-    if(!cart.length) return alert('Cart is empty');
+    // 🔥 Aadhaar verification check
+if(!profile.aadharVerified || !profile.aadharLast4){
+  alert("Aadhaar verify karo pehle");
+  return;
+}
+if(!cart.length) return alert('Cart is empty');
 
     if (!profile.locationLink || profile.locationLink === '') {
       alert(t('addLocation'));
@@ -802,21 +817,54 @@ function bindCheckout(){
 
     window.open(`https://wa.me/91${settings.whatsappNumber}?text=${text}`, '_blank');
 
-    try {
-      if(appDb) {
-        await addDoc(collection(appDb,'orders'), { profile, cart, subtotal, delivery, total, createdAt: Date.now() });
-      }
-    } catch(e){}
+ try {
+  if(appDb) {
+    await addDoc(collection(appDb,'orders'), {
+      name: profile.name || '',
+      phone: profile.phone || '',
+      address: profile.address || '',
+      landmark: profile.landmark || '',
+      location: profile.locationLink || '',
 
-    cart=[];
-    persistCart();
-    renderCartBar();
-    renderCartSheet();
-    showToast(t('orderSuccess'));
-    hide($('cartSheet'));
+      // Aadhaar / KYC
+      aadharLast4: profile.aadharLast4 || '',
+      aadharVerified: profile.aadharVerified || false,
+      kycStatus: profile.kycStatus || 'Pending',
+
+      // Billing / Khata
+      subtotal,
+      delivery,
+      total,
+      paymentStatus: 'unpaid',
+      khataType: 'udhaar',
+
+      // Order
+      items: cart,
+      status: 'pending',
+      source: 'customer_app',
+      createdAt: Date.now()
+    });
+  }
+} catch(e){}   
+// 🔥 Local Khata Entry
+let khata = JSON.parse(localStorage.getItem('dm_khata') || '[]');
+
+khata.push({
+  amount: total,
+  type: 'udhaar',
+  status: 'unpaid',
+  date: new Date().toLocaleString()
+});
+
+localStorage.setItem('dm_khata', JSON.stringify(khata));
+cart = [];
+persistCart();
+renderCartBar();
+renderCartSheet();
+showToast(t('orderSuccess'));
+hide($('cartSheet'));
   };
 }
-
 function renderEverything(){
   seedUI();
   renderPromos();
@@ -851,3 +899,40 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     setTimeout(()=>hide($('splash')), 1200);
   }
 });
+});
+  
+// 🔥 Aadhaar Upload + KYC Helpers
+function uploadAadhaar(file){
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    const base64 = e.target.result;
+    const p = safeProfile();
+
+    p.aadhaarImage = base64;
+    p.kycStatus = "Pending";
+    p.aadharVerified = false;
+
+    localStorage.setItem(LS.profile, JSON.stringify(p));
+    showToast("Aadhaar uploaded. Verification pending.");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function saveAadhaarLast4(last4){
+  const clean = String(last4 || "").replace(/\D/g, "");
+
+  if(clean.length !== 4){
+    alert("Aadhaar ke last 4 digit sahi daalo");
+    return;
+  }
+
+  const p = safeProfile();
+  p.aadharLast4 = clean;
+  p.kycStatus = "Pending";
+  p.aadharVerified = false;
+
+  localStorage.setItem(LS.profile, JSON.stringify(p));
+  showToast("Aadhaar last 4 saved");
+    }
