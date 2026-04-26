@@ -918,10 +918,23 @@ function startPromoLoop(){
 window.addEventListener('DOMContentLoaded', async ()=>{
   try {
     setTimeout(()=>hide($('splash')), 1200);
-    await initFirebase();
-    bindAuth();
+
+    // 🔥 SAFE INIT
+    try {
+      await initFirebase();
+    } catch(e){
+      console.log("Firebase error ignore:", e);
+    }
+
+    try {
+      bindAuth();
+    } catch(e){
+      console.log("Auth error ignore:", e);
+    }
+
     renderEverything();
     startPromoLoop();
+
   } catch (e) {
     console.error('App init error:', e);
     setTimeout(()=>hide($('splash')), 1200);
