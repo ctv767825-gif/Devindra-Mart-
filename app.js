@@ -779,7 +779,7 @@ function bindSearchAndView(){
 
   if ($('voiceBtn')) $('voiceBtn').onclick = ()=>{
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR) return alert('Voice search not supported on this device');
+    if(!SR) return showToast('Voice search not supported on this device');
     const rec = new SR();
     rec.lang='en-IN';
     rec.onresult=(e)=>{
@@ -793,7 +793,12 @@ function bindSearchAndView(){
 function bindHelperBot(){
   document.querySelectorAll('[data-bot]').forEach(btn=>btn.onclick=()=>{
     const type = btn.dataset.bot;
+  const user = safeProfile();
+const customerName = user.name ? user.name.split(" ")[0] : "Customer";
     let msg='';
+    if(!type){
+  msg = `Hi ${customerName} 👋 Ask me about stock, delivery charges, minimum order, or products.`;
+    }
     if(type==='stock') msg='Stock available for top categories. Open Category to browse current items.';
     if(type==='delivery') msg='Delivery charges: ₹50 up to ₹999, ₹30 up to ₹2999, ₹20 up to ₹4999, ₹10 above ₹5000.';
     if(type==='minimum') msg='Minimum order is ₹500.';
@@ -812,7 +817,7 @@ function bindCheckout(){
     const profile = safeProfile();
     // 🔥 Aadhaar verification check
 if(!profile.aadharVerified || !profile.aadharLast4){
-  alert("Aadhaar verify karo pehle");
+  showToast("Aadhaar verify karo pehle");
   return;
 }
 if(!cart.length) return alert('Cart is empty');
