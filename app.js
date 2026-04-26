@@ -480,7 +480,7 @@ function addToCart(id){
   const product = products.find(p=>p.id===id);
   if(!product) return;
 
-  const select = document.querySelector(`select[data-id='${id}']`);
+  const select = document.querySelector(`.variant-select[data-id="${id}"]`);
   const price = select ? Number(select.value) : Number(product.price || 0);
 
   const found = cart.find(i=>i.id===id);
