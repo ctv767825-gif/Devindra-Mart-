@@ -432,19 +432,47 @@ function renderProducts() {
   const list = filteredProducts();
 
   root.innerHTML = list.map(p => `
-    <article class="product-card">
+  <article class="product-card ${viewMode}">
+    
+    <img class="product-img" src="${p.image}" alt="${getName(p)}" onerror="this.src='logo.svg'">
 
-      <img src="${p.image}" onerror="this.src='logo.svg'">
-
+    <div class="product-body">
       <h4>${getName(p)}</h4>
 
-      <!-- VARIANT -->
-      <select data-id="${p.id}">
-        ${(p.variants || [p]).map(v=>`
+      <div class="meta">${p.category} • ${p.subcategory || ''}</div>
+
+      <select class="variant-select" data-id="${p.id}">
+        ${(p.variants || [p]).map(v => `
           <option value="${v.price}">
             ${v.label || `₹${v.price} Pack`}
           </option>
         `).join('')}
+      </select>
+
+      <div class="price-row">
+        <strong>₹${p.price}</strong>
+
+        <div class="qty-box">
+          <button class="minus" data-id="${p.id}">-</button>
+          <span>${getQty(p.id)}</span>
+          <button class="plus" data-id="${p.id}">+</button>
+        </div>
+      </div>
+
+    </div>
+  </article>
+`).join('');
+  document.querySelectorAll('.plus').forEach(btn=>{
+  btn.onclick = ()=>{
+    addToCart(btn.dataset.id);
+  };
+});
+
+document.querySelectorAll('.minus').forEach(btn=>{
+  btn.onclick = ()=>{
+    removeFromCart(btn.dataset.id);
+  };
+});
       </select>
 
       <!-- BULK -->
