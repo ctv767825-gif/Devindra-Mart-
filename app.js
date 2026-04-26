@@ -927,18 +927,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     setTimeout(()=>hide($('splash')), 1200);
   }
 });
-window.addEventListener('DOMContentLoaded', async ()=>{
-  try {
-    setTimeout(()=>hide($('splash')), 1200);
-    await initFirebase();
-    bindAuth();
-    renderEverything();
-    startPromoLoop();
-  } catch (e) {
-    console.error('App init error:', e);
-    setTimeout(()=>hide($('splash')), 1200);
-  }
-});
+
   
 // 🔥 Aadhaar Upload + KYC Helpers
 function uploadAadhaar(file){
