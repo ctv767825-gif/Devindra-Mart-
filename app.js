@@ -1249,7 +1249,7 @@ function startVoiceOrder(){
   rec.onerror = ()=> showToast("Voice error");
   rec.start();
 }
-}
+
 // 2) Basic AI scan: uploaded parcha name/text se item detect
 function scanParchaToItems(text){
   const q = normalize(text || "");
