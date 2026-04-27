@@ -1100,12 +1100,12 @@ function bindAdvancedFeatures(){
 
   if(voiceOrderBtn){
     voiceOrderBtn.onclick = ()=> startVoiceOrder();
-  }
-}
+  
 1105 if($('paidBtn')){
 1106   $('paidBtn').onclick = ()=> submitPayment();
 1107 }
-// ===== PAYMENT RESET SYSTEM =====
+  }
+    // ===== PAYMENT RESET SYSTEM =====
 
 async function submitPayment(){
   const utrEl = document.getElementById("utrInput");
