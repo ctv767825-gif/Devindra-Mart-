@@ -1102,3 +1102,243 @@ function bindAdvancedFeatures(){
     voiceOrderBtn.onclick = ()=> startVoiceOrder();
   }
 }
+1105 if($('paidBtn')){
+1106   $('paidBtn').onclick = ()=> submitPayment();
+1107 }
+// ===== PAYMENT RESET SYSTEM =====
+
+async function submitPayment(){
+  const utrEl = document.getElementById("utrInput");
+  if(!utrEl) return showToast("UTR input missing");
+
+  const utr = utrEl.value.trim();
+  if(!utr) return showToast("UTR daalo");
+
+  if(!/^[0-9]{10,25}$/.test(utr)){
+    return showToast("Invalid UTR");
+  }
+
+  if(!appDb) return showToast("DB not ready");
+
+  const snap = await getDocs(collection(appDb, "orders"));
+  let duplicate = false;
+
+  snap.forEach(d=>{
+    if(d.data().utr === utr) duplicate = true;
+  });
+
+  if(duplicate) return showToast("UTR already used ❌");
+
+  const { subtotal, delivery, total } = totals();
+  const orderId = "ORD_" + Date.now();
+
+  await addDoc(collection(appDb, "orders"), {
+    id: orderId,
+    items: cart,
+    subtotal,
+    delivery,
+    total,
+    utr,
+    paymentStatus: "pending",
+    source: "customer_app_payment",
+    createdAt: Date.now()
+  });
+
+  showToast("Payment submitted ✅");
+}
+
+function getPaymentBadge(order){
+  if(order.paymentStatus === "paid") return "🟢 PAID";
+  if(order.paymentStatus === "rejected") return "❌ REJECTED";
+  return "🟠 PENDING";
+}
+
+async function markOrderPaid(orderId){
+  if(!appDb) return;
+
+  const refDoc = doc(appDb, "orders", orderId);
+
+  await updateDoc(refDoc, {
+    paymentStatus: "paid",
+    paidAt: Date.now()
+  });
+
+  showToast("Order marked PAID");
+}
+
+async function getAllOrders(){
+  if(!appDb) return [];
+
+  const snap = await getDocs(collection(appDb, "orders"));
+  const orders = [];
+
+  snap.forEach(d=>{
+    orders.push({ id: d.id, ...d.data() });
+  });
+
+  return orders;
+}
+
+async function verifyOrder(orderId){
+  if(!appDb) return;
+
+  const refDoc = doc(appDb, "orders", orderId);
+
+  await updateDoc(refDoc, {
+    paymentStatus: "paid",
+    verifiedAt: Date.now()
+  });
+
+  showToast("✅ Order verified PAID");
+}
+
+async function rejectOrder(orderId){
+  if(!appDb) return;
+
+  const refDoc = doc(appDb, "orders", orderId);
+
+  await updateDoc(refDoc, {
+    paymentStatus: "rejected",
+    verifiedAt: Date.now()
+  });
+
+  showToast("Order rejected ❌");
+    }
+// ===== ADVANCED SMART FEATURES PACK =====
+
+// 1) Smart text/voice order: qty + product detect
+function parseQty(text){
+  const q = normalize(text || "");
+  const map = { ek:1, one:1, do:2, two:2, teen:3, three:3, char:4, four:4, paanch:5, five:5 };
+  const num = q.match(/\d+/);
+  if(num) return Number(num[0]);
+  for(const k in map) if(q.includes(k)) return map[k];
+  return 1;
+}
+
+function addItemsFromText(text){
+  const q = normalize(text || "");
+  const qty = parseQty(q);
+  let added = 0;
+
+  products.forEach(p=>{
+    const name = normalize(getName(p));
+    const first = name.split(" ")[0];
+    if(q.includes(name) || q.includes(first)){
+      for(let i=0;i<qty;i++) addToCart(p.id);
+      added++;
+    }
+  });
+
+  return added;
+}
+
+function startVoiceOrder(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return showToast("Voice supported nahi hai");
+
+  const rec = new SR();
+  rec.lang = "hi-IN";
+
+  rec.onresult = (e)=>{
+    const text = e.results[0][0].transcript;
+    const added = addItemsFromText(text);
+    showToast(added ? `✅ ${added} item add hua` : "Item match nahi hua");
+  };
+
+  rec.onerror = ()=> showToast("Voice error");
+  rec.start();
+}
+
+// 2) Basic AI scan: uploaded parcha name/text se item detect
+function scanParchaToItems(text){
+  const q = normalize(text || "");
+  return products.filter(p=>{
+    const name = normalize(getName(p));
+    return q.includes(name) || q.includes(name.split(" ")[0]);
+  }).slice(0,20).map(p=>({
+    id:p.id,
+    name:getName(p),
+    price:p.price || 0,
+    qty:1
+  }));
+}
+
+// 3) Recommendations
+function getRecommendations(){
+  if(!cart.length) return products.slice(0,6);
+  const cats = cart.map(i=>normalize(i.category));
+  return products
+    .filter(p=>!cart.find(c=>c.id===p.id))
+    .filter(p=>cats.includes(normalize(p.category)))
+    .slice(0,6);
+}
+
+// 4) Substitute items
+function getSubstitutes(productId){
+  const product = products.find(p=>p.id===productId);
+  if(!product) return [];
+  return products
+    .filter(p=>p.id!==productId)
+    .filter(p=>normalize(p.category)===normalize(product.category))
+    .slice(0,5);
+}
+
+// 5) Combo / scheme discount
+function applySchemes(subtotal){
+  const schemes = settings.schemes || [];
+  let discount = 0;
+  schemes.forEach(s=>{
+    if(subtotal >= Number(s.minAmount || 0)){
+      discount += Number(s.discount || 0);
+    }
+  });
+  return discount;
+}
+
+// 6) Loyalty coins
+function getDevindraCoins(){
+  return Number(localStorage.getItem("dm_coins") || 0);
+}
+
+function addDevindraCoins(total){
+  const coins = Math.floor(Number(total || 0) / 1000) * 10;
+  localStorage.setItem("dm_coins", String(getDevindraCoins() + coins));
+  return coins;
+}
+
+// 7) Price alert request
+async function savePriceAlert(productId){
+  if(!appDb) return showToast("DB not ready");
+  const p = safeProfile();
+
+  await addDoc(collection(appDb, "priceAlerts"), {
+    productId,
+    customerName:p.name || "",
+    customerPhone:p.phone || "",
+    createdAt:Date.now()
+  });
+
+  showToast("Price alert set ✅");
+}
+
+// 8) PWA install
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+async function installApp(){
+  if(!deferredInstallPrompt) return showToast("Install option abhi available nahi");
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt = null;
+}
+
+// 9) Notification permission
+async function enableNotifications(){
+  if(!("Notification" in window)) return showToast("Notification support nahi hai");
+  const permission = await Notification.requestPermission();
+  showToast(permission === "granted" ? "Notifications enabled ✅" : "Notifications blocked");
+}
