@@ -1104,7 +1104,7 @@ function bindAdvancedFeatures(){
  if($('paidBtn')){
    $('paidBtn').onclick = ()=> submitPayment();
  }
-  
+  }
     // ===== PAYMENT RESET SYSTEM =====
 
 async function submitPayment(){
