@@ -1101,9 +1101,9 @@ function bindAdvancedFeatures(){
   if(voiceOrderBtn){
     voiceOrderBtn.onclick = ()=> startVoiceOrder();
   
-1105 if($('paidBtn')){
-1106   $('paidBtn').onclick = ()=> submitPayment();
-1107 }
+ if($('paidBtn')){
+   $('paidBtn').onclick = ()=> submitPayment();
+ }
   }
     // ===== PAYMENT RESET SYSTEM =====
 
