@@ -8,8 +8,15 @@ import {
   doc,
   getDoc,
   onSnapshot
+setDoc,
+updateDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 const LS = {
   profile: 'dm_profile',
   cart: 'dm_cart',
@@ -60,6 +67,7 @@ const LANG = {
 };
 
 let appDb = null;
+let appStorage = null;
 let settings = structuredClone(sampleSettings);
 let categories = [...sampleCategories];
 let products = [...sampleProducts];
@@ -159,6 +167,7 @@ async function initFirebase() {
 
     const app = initializeApp(cfg);
     appDb = getFirestore(app);
+    appStorage = getStorage(app);
     await loadRemoteData();
     bindLiveData();
   } catch (e) {
@@ -896,6 +905,7 @@ function renderEverything(){
   bindSearchAndView();
   bindHelperBot();
   bindCheckout();
+bindAdvancedFeatures();
 }
 
 function startPromoLoop(){
@@ -968,3 +978,127 @@ function saveAadhaarLast4(last4){
   localStorage.setItem(LS.profile, JSON.stringify(p));
   showToast("Aadhaar last 4 saved");
     }
+// ===== ADVANCED CUSTOMER FEATURES =====
+
+// Parcha Upload + Firestore Draft
+async function uploadParcha(file){
+  if(!file) return showToast("Parcha file select karo");
+
+  try{
+    if(!appStorage) return showToast("Storage not ready");
+    if(!appDb) return showToast("Database not ready");
+
+    const profile = safeProfile();
+    const safeName = String(file.name || "parcha.jpg").replace(/\s+/g, "_");
+    const fileName = `parcha/${profile.phone || "guest"}_${Date.now()}_${safeName}`;
+    const storageRef = ref(appStorage, fileName);
+
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    await addDoc(collection(appDb, "parchaDrafts"), {
+      customerName: profile.name || "",
+      customerPhone: profile.phone || "",
+      customerAddress: profile.address || "",
+      image: url,
+      items: [],
+      status: "draft",
+      source: "customer_app",
+      createdAt: Date.now()
+    });
+
+    showToast("✅ Parcha uploaded. Admin verify karega.");
+    return url;
+
+  }catch(e){
+    console.error("Parcha upload failed:", e);
+    showToast("❌ Parcha upload failed");
+  }
+}
+
+// Voice Order → Cart Add
+function startVoiceOrder(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return showToast("Voice not supported");
+
+  const rec = new SR();
+  rec.lang = "hi-IN";
+
+  rec.onresult = (e)=>{
+    const text = e.results[0][0].transcript.toLowerCase();
+    let added = 0;
+
+    products.forEach(p=>{
+      const name = getName(p).toLowerCase();
+      const firstWord = name.split(" ")[0];
+
+      if(text.includes(name) || text.includes(firstWord)){
+        addToCart(p.id);
+        added++;
+      }
+    });
+
+    showToast(added ? `✅ ${added} item cart me add hua` : "Item match nahi hua");
+  };
+
+  rec.onerror = ()=>{
+    showToast("Voice error, dobara try karo");
+  };
+
+  rec.start();
+}
+
+// Notify Me / Back in Stock
+async function notifyMe(productId){
+  try{
+    if(!appDb) return showToast("Database not ready");
+
+    const profile = safeProfile();
+
+    await addDoc(collection(appDb, "notifyRequests"), {
+      productId,
+      customerName: profile.name || "",
+      customerPhone: profile.phone || "",
+      createdAt: Date.now()
+    });
+
+    showToast("✅ Stock aate hi notify karenge");
+
+  }catch(e){
+    console.error("Notify failed:", e);
+    showToast("Notify request failed");
+  }
+}
+
+// UPI Pay Now
+function payNowUPI(amount){
+  const upiId = settings.upiId || "upi@upi";
+  const store = encodeURIComponent(settings.storeName || "Devindra Mart");
+  const payAmount = Number(amount || 0);
+
+  if(!payAmount) return showToast("Amount missing");
+
+  window.location.href = `upi://pay?pa=${upiId}&pn=${store}&am=${payAmount}&cu=INR`;
+}
+
+// Bind Advanced Buttons
+function bindAdvancedFeatures(){
+  const parchaInput = $("parchaInput");
+  const parchaBtn = $("parchaBtn");
+  const voiceOrderBtn = $("voiceOrderBtn");
+
+  if(parchaBtn && parchaInput){
+    parchaBtn.onclick = ()=> parchaInput.click();
+  }
+
+  if(parchaInput){
+    parchaInput.onchange = (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(file) uploadParcha(file);
+    };
+  }
+
+  if(voiceOrderBtn){
+    voiceOrderBtn.onclick = ()=> startVoiceOrder();
+  }
+}
