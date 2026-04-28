@@ -927,6 +927,16 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     // UI render
     renderEverything();
     startPromoLoop();
+    setTimeout(() => {
+  document.getElementById("splash")?.classList.add("hidden");
+  document.getElementById("splash")?.style.setProperty("display", "none", "important");
+
+  document.getElementById("loginScreen")?.classList.remove("hidden");
+  document.getElementById("loginScreen")?.style.setProperty("display", "block", "important");
+
+  document.getElementById("appScreen")?.classList.remove("hidden");
+  document.getElementById("appScreen")?.style.setProperty("display", "block", "important");
+}, 1000);
 
   } catch(e){
     console.error("App init error:", e);
@@ -940,17 +950,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     splash.style.display = 'none';
   }
 
-  // Screen control
-  const loggedIn = localStorage.getItem(LS.loggedIn) === 'yes';
-
-  if(loggedIn){
-    hide($('loginScreen'));
-    hide($('addressScreen'));
-    show($('appScreen'));
-  } else {
-    show($('loginScreen'));
-  }
-});
+  
 
 // 🔥 Aadhaar Upload + KYC Helpers
 function uploadAadhaar(file){
