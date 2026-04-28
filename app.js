@@ -918,7 +918,12 @@ function startPromoLoop(){
 
 window.addEventListener('DOMContentLoaded', async ()=>{
   try {
-    hide($('splash'));
+    const splash = $('splash');
+if(splash){
+  splash.classList.remove('active');
+  splash.classList.add('hidden');
+  splash.style.display = 'none';
+}
 
     // 🔥 SAFE INIT
     try {
@@ -938,11 +943,14 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
   } catch (e) {
     console.error('App init error:', e);
-    hide($('splash'));
-  }
+    const splash = $('splash');
+if(splash){
+  splash.classList.remove('active');
+  splash.classList.add('hidden');
+  splash.style.display = 'none';
+ }
 });
 
-  
 // 🔥 Aadhaar Upload + KYC Helpers
 function uploadAadhaar(file){
   const reader = new FileReader();
