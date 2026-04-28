@@ -918,7 +918,7 @@ function startPromoLoop(){
 
 window.addEventListener('DOMContentLoaded', async ()=>{
   try {
-    setTimeout(()=>hide($('splash')), 1200);
+    hide($('splash'));
 
     // 🔥 SAFE INIT
     try {
@@ -938,7 +938,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
   } catch (e) {
     console.error('App init error:', e);
-    setTimeout(()=>hide($('splash')), 1200);
+    hide($('splash'));
   }
 });
 
