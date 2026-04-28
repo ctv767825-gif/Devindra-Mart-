@@ -918,37 +918,38 @@ function startPromoLoop(){
 
 window.addEventListener('DOMContentLoaded', async ()=>{
   try {
-    const splash = $('splash');
-if(splash){
-  splash.classList.remove('active');
-  splash.classList.add('hidden');
-  splash.style.display = 'none';
-}
+    // Firebase init
+    try { await initFirebase(); } catch(e){ console.log("Firebase ignored", e); }
 
-    // 🔥 SAFE INIT
-    try {
-      await initFirebase();
-    } catch(e){
-      console.log("Firebase error ignore:", e);
-    }
+    // Auth bind
+    try { bindAuth(); } catch(e){ console.log("Auth ignored", e); }
 
-    try {
-      bindAuth();
-    } catch(e){
-      console.log("Auth error ignore:", e);
-    }
-
+    // UI render
     renderEverything();
     startPromoLoop();
 
-  } catch (e) {
-    console.error('App init error:', e);
-    const splash = $('splash');
-if(splash){
-  splash.classList.remove('active');
-  splash.classList.add('hidden');
-  splash.style.display = 'none';
- }
+  } catch(e){
+    console.error("App init error:", e);
+  }
+
+  // Splash fix (force hide)
+  const splash = $('splash');
+  if(splash){
+    splash.classList.remove('active');
+    splash.classList.add('hidden');
+    splash.style.display = 'none';
+  }
+
+  // Screen control
+  const loggedIn = localStorage.getItem(LS.loggedIn) === 'yes';
+
+  if(loggedIn){
+    hide($('loginScreen'));
+    hide($('addressScreen'));
+    show($('appScreen'));
+  } else {
+    show($('loginScreen'));
+  }
 });
 
 // 🔥 Aadhaar Upload + KYC Helpers
