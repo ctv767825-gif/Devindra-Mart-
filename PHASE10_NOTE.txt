@@ -1,0 +1,7 @@
+Phase 10 update: About / More Information link attached to Customer, Admin, Billing, and Rider apps.
+GitHub deploy paths:
+/ -> Customer
+/admin/ -> Admin
+/billing/ -> Billing
+/rider/ -> Rider
+/about/ -> About

@@ -1,0 +1,1 @@
+VAPID public key has been added to shared/notifications.js
