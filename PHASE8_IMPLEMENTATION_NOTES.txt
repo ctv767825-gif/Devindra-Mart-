@@ -1,6 +1,0 @@
-Console setup still needed:
-1. FCM: Firebase Console -> Project Settings -> Cloud Messaging -> generate Web Push certificate key; replace VAPID key in shared/notifications.js.
-2. Firebase Auth without OTP: use Email/Password for admin/billing/staff if you want real server-enforced security.
-3. Scheduled backups: use Firebase scheduled Cloud Function or manual Admin exportBackup().
-4. Thermal printer: browser print works; silent auto-print needs local POS print bridge/printer app.
-5. XLSX upload: add SheetJS CDN in admin page for .xlsx parsing. CSV already works.
