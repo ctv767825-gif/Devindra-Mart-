@@ -1,13 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2049ad"/>
-      <stop offset="100%" stop-color="#10204f"/>
-    </linearGradient>
-  </defs>
-  <rect width="120" height="120" rx="28" fill="url(#g)"/>
-  <path d="M28 42h64l-5 34H33z" fill="#fff" opacity=".95"/>
-  <circle cx="44" cy="84" r="8" fill="#fff"/>
-  <circle cx="78" cy="84" r="8" fill="#fff"/>
-  <path d="M34 32h10l6 18" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" rx="110" fill="#0f172a"/><text x="50%" y="54%" text-anchor="middle" font-size="130" font-family="Arial" font-weight="900" fill="white">DM</text></svg>
