@@ -1,1 +1,27 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Devindra Rider</title><link rel="stylesheet" href="style.css"><script src="firebase-config.js"></script><script src="data.js"></script><script src="rider.js" defer></script></head><body><header class="topbar"><div class="brand"><div class="logo">RD</div><div><b>Rider App</b><small>QR/Pickup unlock only</small></div></div><a class="btn secondary" href="billing.html">Billing</a></header><main class="app"><section class="hero"><div><h1>Rider Secure Flow</h1><p>Zero orders by default. Only pickup code/QR unlock. COD exact settlement.</p></div><div class="heroIcon">🛵</div></section><section class="card"><h2>Unlock Order</h2><input id="riderId" placeholder="Rider ID"><input id="pickupCode" placeholder="Pickup Code e.g. DMQ-123456"><button onclick="unlock()">Unlock Order</button></section><div class="grid2"><section class="card"><h2>Unlocked Orders</h2><div id="unlockedBox"></div></section><section class="card"><h2>Cash Settlement</h2><div id="settlementBox"></div></section></div></main></body></html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Devindra Rider</title><link rel="stylesheet" href="style.css"><script src="firebase-config.js"></script><script src="data.js"></script><script src="rider.js" defer></script></head><body>
+<header class="topbar"><div class="brand"><div class="logo">RD</div><div><b>Rider App</b><small>Secure delivery partner portal</small></div></div><span class="locked">ZERO orders by default</span></header>
+<main class="app">
+<section class="hero"><div><h1>Rider Secure Flow</h1><p>Login, verification, QR/pickup unlock, COD settlement, delivery proof and earnings.</p></div><div class="heroIcon">🛵</div></section>
+
+<section class="card"><h2>Rider Login / Profile</h2><div class="formGrid">
+<input id="riderId" placeholder="Pre-created Rider ID" value="RIDER-001">
+<input placeholder="Registered mobile number">
+<select><option>Delivery Type: Retail</option><option>Delivery Type: Wholesale</option><option>Delivery Type: Both</option></select>
+<select><option>Status: Offline</option><option>Status: Online after face verify</option></select>
+</div><button onclick="toast('Face verification hook ready')">Face Verify + Go Online</button></section>
+
+<section class="card"><h2>KYC + Agreement</h2><div class="moduleGrid">
+<div class="module"><h3>Aadhaar / PAN</h3><input placeholder="Aadhaar number"><input placeholder="PAN number"><button>Submit KYC</button></div>
+<div class="module"><h3>Selfie Verification</h3><div class="signatureBox">Selfie / Face Scan Hook</div><button>Capture Selfie</button></div>
+<div class="module"><h3>Parent/Guardian Proof</h3><input placeholder="Parent/Guardian name"><input placeholder="Relation"><div class="signatureBox">Parent Signature</div><button>Save Signature</button></div>
+<div class="module"><h3>Legal Agreement</h3><label><input type="checkbox"> Agreement accepted</label><p class="muted">Admin can approve/reject/suspend rider.</p></div>
+</div></section>
+
+<section class="card"><h2>Unlock Orders</h2><div class="warnBox">Home pe koi order visible nahi. Date + pickup code / QR scan ke baad hi order unlock hoga.</div><div class="formGrid"><input id="pickupCode" placeholder="Pickup Code e.g. DMQ-123456"><input type="date"><button onclick="unlock()">Unlock Order</button><button onclick="toast('QR scanner hook ready')">Scan QR</button></div></section>
+
+<div class="grid2"><section class="card"><h2>Unlocked Orders</h2><div id="unlockedBox"></div></section><section class="card"><h2>Cash Settlement</h2><div id="settlementBox"></div></section></div>
+
+<section class="card"><h2>Delivery Proof</h2><div class="formGrid"><select><option>Delivered</option><option>Return</option><option>Customer unavailable</option></select><input placeholder="Customer OTP / note"><div class="signatureBox">Customer Digital Signature</div><button onclick="toast('Delivery proof saved locally; backend hook ready')">Submit Proof</button></div></section>
+
+<section class="card"><h2>Earnings + Lead Form</h2><div class="moduleGrid"><div class="kpi"><b>₹0</b><p>Today incentive</p></div><div class="kpi"><b>0</b><p>New customer leads</p></div><div class="module"><input placeholder="New shop/customer name"><input placeholder="Mobile"><textarea placeholder="Address / note"></textarea><button>Submit Lead</button></div></div></section>
+</main><div class="cleanFooter">Rider App • Orders visible only after valid pickup code/QR</div></body></html>

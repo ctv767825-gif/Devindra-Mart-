@@ -29,17 +29,11 @@ function canCancel(o){return ['Placed','Accepted','Pending'].includes(o.status)}
 function setStatus(id,status){let o=state.orders.find(x=>x.id===id); if(o){o.status=status; save(); renderAll&&renderAll(); toast('Status updated: '+status)}}
 function cancelOrder(id){let o=state.orders.find(x=>x.id===id); if(!o)return; if(!canCancel(o))return toast('Cancel not allowed now'); o.status='CancelledByCustomer'; o.refundStatus=o.paymentMethod==='Pay Online'?'refund_pending':'not_required'; save(); renderAll&&renderAll(); toast('Order cancelled')}
 function orderTimeline(o){const steps=['Placed','Accepted','Ready','Picked','On The Way','Delivered'];let idx=steps.indexOf(o.status);return `<div class="timeline">${steps.map((s,i)=>`<div class="${i<=idx?'done':''}">${i<=idx?'✅':'⬜'} ${s}</div>`).join('')}</div>`}
-function nav(active){return `<nav class="bottomNav">
-<a href="index.html" class="${active==='customer'?'active':''}">🛒<br>Customer</a>
-<a href="admin.html">👑<br>Admin</a>
-<a href="billing.html">🧾<br>Billing</a>
-<a href="rider.html">🛵<br>Rider</a>
-<button onclick="toast('PWA install/offline structure ready')">📲<br>PWA</button>
-</nav>`}
+function nav(active){return ''}
 async function tryFirebaseSave(collection, data){ /* backend hook ready; localStorage fallback active */ return {ok:false,mode:'local'}; }
 
 function init(){
-  document.body.insertAdjacentHTML('beforeend',nav('customer'));
+  
   if(state.profile.phone){qs('loginScreen').classList.add('hidden');qs('appScreen').classList.remove('hidden')}
   renderAll();
 }
@@ -90,7 +84,7 @@ function changeQty(sku,d){let i=state.cart.find(x=>x.sku===sku); if(!i)return; i
 function renderCart(){
   let c=cartTotal();
   qs('cartSummary').innerHTML=state.cart.length?state.cart.map(i=>`<div class="rowBox"><b>${i.name}</b><p>${i.variant||''} • ${money(i.price)} x ${i.qty}</p><div class="qty"><button onclick="changeQty('${i.sku}',-1)">−</button><b>${i.qty}</b><button onclick="changeQty('${i.sku}',1)">+</button></div></div>`).join(''):'Cart empty';
-  qs('cartTotal').innerHTML=`Subtotal ${money(c.subtotal)} ${selectedStore().type==='wholesale'?' + Delivery '+money(c.delivery):' + Delivery hidden'} = <b>${money(c.total)}</b>`;
+  qs('cartTotal').innerHTML=state.cart.length?`Subtotal ${money(c.subtotal)} ${selectedStore().type==='wholesale'?' + Delivery '+money(c.delivery):' + Delivery included'} = <b>${money(c.total)}</b>`:'Cart empty';
   qs('payMethod').innerHTML=(selectedStore().type==='wholesale'?['COD','Pay Online','Khata']:['COD','Pay Online']).map(x=>`<option>${x}</option>`).join('');
 }
 function placeOrder(){
@@ -101,6 +95,6 @@ function placeOrder(){
 function renderOrders(){
   qs('ordersBox').innerHTML=state.orders.map(o=>`<div class="order"><b>${o.storeName}</b><p>${o.id}<br>${money(o.total)} • ${o.paymentMethod}<br><span class="status ${o.status}">${o.status}</span></p>${orderTimeline(o)}${canCancel(o)?`<button class="red" onclick="cancelOrder('${o.id}')">Cancel Order</button>`:''}</div>`).join('')||'<p class="muted">No orders yet</p>';
 }
-function renderProfile(){qs('profileView').innerHTML=`<b>${state.profile.name||'Customer'}</b><br>${state.profile.phone||''}<br>${state.profile.address||''}<br><span class="badge green">Khata wholesale only</span>`}
+function renderProfile(){qs('profileView').innerHTML=`<b>${state.profile.name||'Customer'}</b><br>${state.profile.phone||''}<br>${state.profile.address||'Address not saved'}<br><span class="badge green">Khata wholesale only</span>`}
 function logout(){localStorage.removeItem('dm_profile');location.reload()}
 document.addEventListener('DOMContentLoaded',init);

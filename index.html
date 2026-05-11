@@ -1,13 +1,20 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Devindra Mart Customer</title><link rel="stylesheet" href="style.css"><script src="firebase-config.js"></script><script src="data.js"></script><script src="app.js" defer></script></head><body>
-<header class="topbar"><div class="brand"><div class="logo">DM</div><div><b>Devindra Mart</b><small>Customer App • Wholesale + Retail</small></div></div><span class="badge gold">A-Z Build</span></header>
+<header class="topbar"><div class="brand"><div class="logo">DM</div><div><b>Devindra Mart</b><small>Wholesale + Retail</small></div></div></header>
 <main class="app">
 <section id="loginScreen" class="card"><h1>Welcome Back</h1><p class="muted">Fast order. Premium experience.</p><input id="loginPhone" value="7678256488" placeholder="Mobile Number"><label><input id="robotCheck" type="checkbox" checked> I'm not a robot</label><br><button onclick="login()">Verify & Continue</button></section>
 <section id="addressScreen" class="card hidden"><h2>Delivery Address</h2><input id="profileName" placeholder="Full Name"><input id="profilePhone" disabled><textarea id="profileAddress" placeholder="Full address"></textarea><select id="area"><option>Warisnagar</option><option>Samastipur</option><option>Gurgaon</option></select><select id="shoppingMode"><option value="both">Both / दोनों</option><option value="wholesale">Wholesale / होलसेल</option><option value="retail">Retail / रिटेल</option></select><button onclick="saveAddress()">Save & Open App</button></section>
-<section id="appScreen" class="hidden"><section class="hero"><div><span class="badge gold">Default priority</span><h1 id="storeTitle">Devindra Mart Wholesale</h1><p>Customer ko Devindra Mart har area me visible. Retail shops area/mode ke according.</p></div><div class="heroIcon">🛒</div></section>
+<section id="appScreen" class="hidden"><section class="hero"><div><h1 id="storeTitle">Devindra Mart Wholesale</h1><p>Wholesale aur retail orders simple tarike se karein.</p></div><div class="heroIcon">🛒</div></section>
 <div class="sectionTitle"><h2>Stores</h2><span class="badge">Excel products: <b id="excelCount"></b></span></div><div id="storesBox" class="grid"></div>
 <div class="sectionTitle"><h2>Categories</h2></div><div id="categoryTabs" class="tabs"></div>
 <input id="searchInput" placeholder="Search product/category/brand" oninput="renderProducts()">
 <div class="sectionTitle"><h2>Products</h2></div><div id="productsBox" class="grid"></div>
 <section class="card"><h2>Cart & Checkout</h2><div id="cartSummary"></div><p id="cartTotal"></p><select id="payMethod"></select><button class="green" onclick="placeOrder()">Place Order</button></section>
 <section class="card"><h2>My Orders</h2><div id="ordersBox"></div></section>
-<section class="card"><h2>Profile / Khata</h2><div id="profileView"></div><button class="red" onclick="logout()">Logout</button></section></section></main><script>document.addEventListener('DOMContentLoaded',()=>{document.getElementById('excelCount').textContent=(window.DM_STATS||{}).products||0})</script></body></html>
+<section class="card"><h2>Profile / Khata</h2><div id="profileView"></div><button class="red" onclick="logout()">Logout</button></section></section></main><script>document.addEventListener('DOMContentLoaded',()=>{document.getElementById('excelCount').textContent=(window.DM_STATS||{}).products||0})</script>
+<div class="cleanFooter customerFooter">
+  <button onclick="document.getElementById('storesBox')?.scrollIntoView({behavior:'smooth'})">🏪 Stores</button>
+  <button onclick="document.getElementById('productsBox')?.scrollIntoView({behavior:'smooth'})">📦 Products</button>
+  <button onclick="document.getElementById('cartSummary')?.scrollIntoView({behavior:'smooth'})">🛒 Cart</button>
+  <button onclick="document.getElementById('ordersBox')?.scrollIntoView({behavior:'smooth'})">📋 Orders</button>
+</div>
+</body></html>

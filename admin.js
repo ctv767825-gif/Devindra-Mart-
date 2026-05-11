@@ -29,13 +29,7 @@ function canCancel(o){return ['Placed','Accepted','Pending'].includes(o.status)}
 function setStatus(id,status){let o=state.orders.find(x=>x.id===id); if(o){o.status=status; save(); renderAll&&renderAll(); toast('Status updated: '+status)}}
 function cancelOrder(id){let o=state.orders.find(x=>x.id===id); if(!o)return; if(!canCancel(o))return toast('Cancel not allowed now'); o.status='CancelledByCustomer'; o.refundStatus=o.paymentMethod==='Pay Online'?'refund_pending':'not_required'; save(); renderAll&&renderAll(); toast('Order cancelled')}
 function orderTimeline(o){const steps=['Placed','Accepted','Ready','Picked','On The Way','Delivered'];let idx=steps.indexOf(o.status);return `<div class="timeline">${steps.map((s,i)=>`<div class="${i<=idx?'done':''}">${i<=idx?'✅':'⬜'} ${s}</div>`).join('')}</div>`}
-function nav(active){return `<nav class="bottomNav">
-<a href="index.html" class="${active==='customer'?'active':''}">🛒<br>Customer</a>
-<a href="admin.html">👑<br>Admin</a>
-<a href="billing.html">🧾<br>Billing</a>
-<a href="rider.html">🛵<br>Rider</a>
-<button onclick="toast('PWA install/offline structure ready')">📲<br>PWA</button>
-</nav>`}
+function nav(active){return ''}
 async function tryFirebaseSave(collection, data){ /* backend hook ready; localStorage fallback active */ return {ok:false,mode:'local'}; }
 
 function init(){document.body.insertAdjacentHTML('beforeend',nav('admin'));renderAll();}
