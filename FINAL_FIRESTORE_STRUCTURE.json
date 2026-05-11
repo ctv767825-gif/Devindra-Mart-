@@ -1,0 +1,10 @@
+{
+  "users": "roles + store mapping",
+  "stores/platform/orders": "all orders",
+  "stores/platform/logs": "audit logs",
+  "stores/platform/backups": "backup markers",
+  "stores/platform/fcmTokens": "notification tokens",
+  "stores/platform/riderLocations": "gps structure",
+  "stores/platform/notifications": "notification center",
+  "stores/platform/storeSettings": "shop settings"
+}
