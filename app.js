@@ -1,100 +1,30 @@
 
-const P = window.DM_PRODUCTS || [];
-const STATS = window.DM_STATS || {};
-const stores = [
-  {id:'devindra-wholesale',name:'Devindra Mart Wholesale',type:'wholesale',emoji:'🏆',area:'All Areas',desc:'Bulk kirana, carton, loose/patta rate, khata available',priority:true,minOrder:500},
-  {id:'hungry-point',name:'Hungry Point',type:'retail',emoji:'🍔',area:'Warisnagar',desc:'Food retail shop',priority:false,minOrder:0},
-  {id:'glow-cosmetic',name:'Glow Cosmetic',type:'retail',emoji:'💄',area:'Samastipur',desc:'Cosmetic retail shop',priority:false,minOrder:0},
-  {id:'maa-medical',name:'Maa Medical',type:'retail',emoji:'💊',area:'Warisnagar',desc:'Medicine retail shop',priority:false,minOrder:0}
-];
-const state = {
-  mode: localStorage.getItem('dm_mode') || 'both',
-  profile: JSON.parse(localStorage.getItem('dm_profile')||'{}'),
-  selectedStore: 'devindra-wholesale',
-  cart: JSON.parse(localStorage.getItem('dm_cart')||'[]'),
-  orders: JSON.parse(localStorage.getItem('dm_orders')||'[]'),
-  riderId: localStorage.getItem('dm_rider') || 'RIDER-001'
-};
-function save(){localStorage.setItem('dm_cart',JSON.stringify(state.cart));localStorage.setItem('dm_orders',JSON.stringify(state.orders));localStorage.setItem('dm_profile',JSON.stringify(state.profile));localStorage.setItem('dm_mode',state.mode)}
-function money(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN')}
-function qs(id){return document.getElementById(id)}
-function toast(msg){let t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-function iconFor(cat){cat=(cat||'').toLowerCase(); if(cat.includes('toffee')||cat.includes('fast'))return '🍬'; if(cat.includes('oil'))return '🛢️'; if(cat.includes('biscuit'))return '🍪'; if(cat.includes('masala'))return '🌶️'; if(cat.includes('snack'))return '🍿'; if(cat.includes('station'))return '✏️'; if(cat.includes('soap')||cat.includes('deterg'))return '🧼'; return '📦'}
-function productPrice(p){return Number(p.wholesalePrice || p.retailRefPrice || p.basePrice || 0)}
-function selectedStore(){return stores.find(s=>s.id===state.selectedStore)||stores[0]}
-function deliveryCharge(store,total){ if(store.type==='wholesale') return total>=5000?0:total>=3000?10:total>=1000?20:50; return 0 }
-function cartTotal(){let subtotal=state.cart.reduce((a,i)=>a+(i.price*i.qty),0);let del=deliveryCharge(selectedStore(),subtotal);return {subtotal,delivery:del,total:subtotal+del}}
-function newOrder(){let c=cartTotal(), st=selectedStore();return {id:'ORD-'+Date.now(),storeId:st.id,storeName:st.name,storeType:st.type,status:'Accepted',paymentMethod:st.type==='wholesale'?qs('payMethod')?.value||'COD':qs('payMethod')?.value||'COD',items:state.cart,total:c.total,subtotal:c.subtotal,delivery:c.delivery,pickupCode:'DMQ-'+Math.floor(100000+Math.random()*900000),createdAt:new Date().toLocaleString(),customerPhone:state.profile.phone||'',customerName:state.profile.name||''}}
-function canCancel(o){return ['Placed','Accepted','Pending'].includes(o.status)}
-function setStatus(id,status){let o=state.orders.find(x=>x.id===id); if(o){o.status=status; save(); renderAll&&renderAll(); toast('Status updated: '+status)}}
-function cancelOrder(id){let o=state.orders.find(x=>x.id===id); if(!o)return; if(!canCancel(o))return toast('Cancel not allowed now'); o.status='CancelledByCustomer'; o.refundStatus=o.paymentMethod==='Pay Online'?'refund_pending':'not_required'; save(); renderAll&&renderAll(); toast('Order cancelled')}
-function orderTimeline(o){const steps=['Placed','Accepted','Ready','Picked','On The Way','Delivered'];let idx=steps.indexOf(o.status);return `<div class="timeline">${steps.map((s,i)=>`<div class="${i<=idx?'done':''}">${i<=idx?'✅':'⬜'} ${s}</div>`).join('')}</div>`}
-function nav(active){return ''}
-async function tryFirebaseSave(collection, data){ /* backend hook ready; localStorage fallback active */ return {ok:false,mode:'local'}; }
+const P=window.DM_PRODUCTS||[],STATS=window.DM_STATS||{},CFG=window.DM_CONFIG||{};
+const stores=[{id:'devindra-wholesale',name:'Devindra Mart Wholesale',type:'wholesale',area:'All Areas',emoji:'🏆',desc:'Bulk kirana, carton, loose/patta rate, khata available',whatsapp:CFG.whatsappNumber||'919999999999'},{id:'hungry-point',name:'Hungry Point',type:'retail',area:'Warisnagar',emoji:'🍔',desc:'Food retail shop',whatsapp:CFG.whatsappNumber||'919999999999'},{id:'new-store',name:'New Shop Listing Demo',type:'retail',area:'Pending Approval',emoji:'🏪',desc:'New shop/customer registration workflow',whatsapp:CFG.whatsappNumber||'919999999999'}];
+const S={profile:JSON.parse(localStorage.dm_profile||'{}'),mode:localStorage.dm_mode||'both',store:localStorage.dm_store||'devindra-wholesale',cart:JSON.parse(localStorage.dm_cart||'[]'),orders:JSON.parse(localStorage.dm_orders||'[]'),khata:JSON.parse(localStorage.dm_khata||'{"status":"locked","delivered":0,"ordersRequired":20,"trust":0,"limit":0}'),riderId:localStorage.dm_rider||'RIDER-001',tab:location.hash.replace('#','')||''};
+function save(){localStorage.dm_profile=JSON.stringify(S.profile);localStorage.dm_mode=S.mode;localStorage.dm_store=S.store;localStorage.dm_cart=JSON.stringify(S.cart);localStorage.dm_orders=JSON.stringify(S.orders);localStorage.dm_khata=JSON.stringify(S.khata);localStorage.dm_rider=S.riderId}
+function qs(id){return document.getElementById(id)}function money(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN')}function toast(m){let t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2300)}
+function setTab(tab){document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));qs('tab-'+tab)?.classList.add('active');document.querySelectorAll('.bottomTabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));location.hash=tab}
+function store(){return stores.find(x=>x.id===S.store)||stores[0]}function icon(c){c=(c||'').toLowerCase();if(c.includes('oil'))return'🛢️';if(c.includes('biscuit'))return'🍪';if(c.includes('masala'))return'🌶️';if(c.includes('snack'))return'🍿';if(c.includes('rice')||c.includes('dal')||c.includes('aata'))return'🌾';return'📦'}
+function currentVariant(p){let idx=Number(localStorage['var_'+p.sku]||0);return (p.variants&&p.variants[idx])||p.variants?.[0]||{name:'Default',loose:0,carton:0,qty:1,img:''}}function unitMode(sku){return localStorage['unit_'+sku]||'loose'}function priceOf(p){let v=currentVariant(p);return unitMode(p.sku)==='carton'?Number(v.carton||v.loose||0):Number(v.loose||v.carton||0)}
+function delivery(total){if(!total)return 0;if(store().type==='wholesale')return total>=5000?0:total>=3000?10:total>=1000?20:50;return 0}function totals(){let sub=S.cart.reduce((a,i)=>a+i.qty*i.price,0),del=delivery(sub);return{sub,del,total:sub+del}}
+function canCancel(o){return ['Placed','Accepted','Pending'].includes(o.status)}function status(id,st){let o=S.orders.find(x=>x.id===id);if(!o)return;o.status=st;if(st==='Delivered'){S.khata.delivered=(S.khata.delivered||0)+1;S.khata.trust=Math.min(100,S.khata.delivered*3)}save();renderAll&&renderAll();toast('Status updated')}
+function cancelOrder(id){let o=S.orders.find(x=>x.id===id);if(!o)return;if(!canCancel(o))return toast('Cancel allowed nahi hai');o.status='CancelledByCustomer';save();renderAll&&renderAll();toast('Order cancelled')}
+function sendWA(o){window.open(`https://wa.me/${store().whatsapp}?text=Devindra%20Mart%20Order%0AOrder:%20${o.id}%0ATotal:%20${money(o.total)}%0AItems:%20${o.items.map(i=>i.name+' x '+i.qty).join(', ')}`,'_blank')}
 
-function init(){
-  
-  if(state.profile.phone){qs('loginScreen').classList.add('hidden');qs('appScreen').classList.remove('hidden')}
-  renderAll();
-}
-function renderAll(){renderStores();renderCategories();renderProducts();renderCart();renderOrders();renderProfile();}
-function login(){
-  let phone=qs('loginPhone').value.trim(); if(phone.length<10)return toast('Mobile number check karo');
-  if(!qs('robotCheck').checked)return toast('Robot verify tick karo');
-  state.profile.phone=phone;save();qs('loginScreen').classList.add('hidden');qs('addressScreen').classList.remove('hidden');qs('profilePhone').value=phone;
-}
-function saveAddress(){
-  state.profile.name=qs('profileName').value;state.profile.address=qs('profileAddress').value;state.profile.area=qs('area').value;state.mode=qs('shoppingMode').value;save();
-  qs('addressScreen').classList.add('hidden');qs('appScreen').classList.remove('hidden');renderAll()
-}
-function visibleStores(){
-  return stores.filter(s=>s.priority || state.mode==='both' || s.type===state.mode);
-}
-function renderStores(){
-  qs('storesBox').innerHTML=visibleStores().map(s=>`<div class="store">
-    <span class="badge ${s.type==='wholesale'?'gold':'green'}">${s.type}</span>
-    <h3>${s.emoji} ${s.name}</h3><p class="muted">${s.desc}</p><p><b>Area:</b> ${s.area}</p>
-    <button onclick="state.selectedStore='${s.id}';state.cart=[];save();renderAll()">Open Store</button>
-  </div>`).join('');
-  qs('storeTitle').textContent=selectedStore().name;
-}
-function renderCategories(){
-  let cats=[...new Set(P.map(p=>p.category).filter(Boolean))].slice(0,20);
-  qs('categoryTabs').innerHTML=`<button class="active" onclick="qs('searchInput').value='';renderProducts()">All</button>`+cats.map(c=>`<button onclick="qs('searchInput').value='${c.replace(/'/g,"")}';renderProducts()">${c}</button>`).join('');
-}
-function filteredProducts(){
-  let q=(qs('searchInput')?.value||'').toLowerCase();
-  let list=P;
-  if(q) list=P.filter(p=>[p.name,p.brand,p.category,p.subCategory,p.variant,p.localName,p.tags].join(' ').toLowerCase().includes(q));
-  return list.slice(0,120);
-}
-function renderProducts(){
-  qs('productsBox').innerHTML=filteredProducts().map((p,i)=>`<div class="product">
-    <div class="productImage">${p.imageUrl?`<img src="${p.imageUrl}">`:iconFor(p.category)}</div>
-    <span class="badge">${p.category}</span>
-    <h3>${p.name} ${p.variant?'- '+p.variant:''}</h3>
-    <p class="muted">${p.brand||''} • ${p.unitType||''} • Stock ${p.stock}</p>
-    <div class="price">${money(productPrice(p))}</div>
-    <p class="small">Carton: ${p.cartonQty||'-'} • Bundle: ${p.bundleQty||'-'}</p>
-    <button onclick="addProduct('${p.sku}')">Add to Cart</button>
-  </div>`).join('');
-}
-function addProduct(sku){let p=P.find(x=>x.sku===sku); if(!p)return; let ex=state.cart.find(x=>x.sku===sku); if(ex)ex.qty++; else state.cart.push({sku:p.sku,name:p.name,variant:p.variant,price:productPrice(p),qty:1,storeId:state.selectedStore}); save(); renderCart(); toast('Added')}
-function changeQty(sku,d){let i=state.cart.find(x=>x.sku===sku); if(!i)return; i.qty+=d; if(i.qty<=0)state.cart=state.cart.filter(x=>x.sku!==sku); save(); renderCart();}
-function renderCart(){
-  let c=cartTotal();
-  qs('cartSummary').innerHTML=state.cart.length?state.cart.map(i=>`<div class="rowBox"><b>${i.name}</b><p>${i.variant||''} • ${money(i.price)} x ${i.qty}</p><div class="qty"><button onclick="changeQty('${i.sku}',-1)">−</button><b>${i.qty}</b><button onclick="changeQty('${i.sku}',1)">+</button></div></div>`).join(''):'Cart empty';
-  qs('cartTotal').innerHTML=state.cart.length?`Subtotal ${money(c.subtotal)} ${selectedStore().type==='wholesale'?' + Delivery '+money(c.delivery):' + Delivery included'} = <b>${money(c.total)}</b>`:'Cart empty';
-  qs('payMethod').innerHTML=(selectedStore().type==='wholesale'?['COD','Pay Online','Khata']:['COD','Pay Online']).map(x=>`<option>${x}</option>`).join('');
-}
-function placeOrder(){
-  let c=cartTotal(), st=selectedStore(); if(!state.cart.length)return toast('Cart empty');
-  if(st.type==='wholesale' && c.subtotal<500)return toast('Wholesale minimum ₹500 required');
-  let o=newOrder(); state.orders.unshift(o); state.cart=[]; save(); renderAll(); toast('Order placed: '+o.id)
-}
-function renderOrders(){
-  qs('ordersBox').innerHTML=state.orders.map(o=>`<div class="order"><b>${o.storeName}</b><p>${o.id}<br>${money(o.total)} • ${o.paymentMethod}<br><span class="status ${o.status}">${o.status}</span></p>${orderTimeline(o)}${canCancel(o)?`<button class="red" onclick="cancelOrder('${o.id}')">Cancel Order</button>`:''}</div>`).join('')||'<p class="muted">No orders yet</p>';
-}
-function renderProfile(){qs('profileView').innerHTML=`<b>${state.profile.name||'Customer'}</b><br>${state.profile.phone||''}<br>${state.profile.address||'Address not saved'}<br><span class="badge green">Khata wholesale only</span>`}
-function logout(){localStorage.removeItem('dm_profile');location.reload()}
-document.addEventListener('DOMContentLoaded',init);
+function init(){if(S.profile.phone){qs('loginScreen').classList.add('hidden');qs('mainApp').classList.remove('hidden')}renderAll();setTab(S.tab||'home')}
+function login(){let p=qs('phone').value.trim();if(p.length<10)return toast('Mobile check karo');S.profile.phone=p;save();qs('loginScreen').classList.add('hidden');qs('addressScreen').classList.remove('hidden');qs('profilePhone').value=p}
+function saveAddress(){S.profile.name=qs('profileName').value;S.profile.address=qs('profileAddress').value;S.profile.area=qs('area').value;S.mode=qs('mode').value;save();qs('addressScreen').classList.add('hidden');qs('mainApp').classList.remove('hidden');renderAll();setTab('home')}
+function renderAll(){renderHome();renderProducts();renderCart();renderOrders();renderKhata();renderProfile();renderShops()}
+function renderHome(){qs('homeStats').innerHTML=`<div class="kpi"><b>${STATS.products}</b><p>Products</p></div><div class="kpi"><b>${S.orders.length}</b><p>Orders</p></div><div class="kpi"><b>${S.khata.status}</b><p>Khata</p></div><div class="kpi"><b>${money(totals().total)}</b><p>Cart</p></div>`}
+function categories(){return [...new Set(P.map(p=>p.category))]}function filtered(){let q=(qs('globalSearch')?.value||qs('search')?.value||'').toLowerCase();return P.filter(p=>[p.name,p.category,p.brand,p.tags,'atta aata poha chura tel oil'].join(' ').toLowerCase().includes(q))}
+function renderProducts(){if(qs('catBtns'))qs('catBtns').innerHTML='<button onclick="qs(\\'search\\').value=\\'\\';renderProducts()">All</button>'+categories().map(c=>`<button onclick="qs('search').value='${c}';renderProducts()">${c}</button>`).join('');if(!qs('products'))return;qs('products').innerHTML=filtered().map(p=>{let v=currentVariant(p),mode=unitMode(p.sku);return `<div class="product"><div class="productImg"><img src="${v.img}" onerror="this.parentNode.textContent='${icon(p.category)}'"></div><span class="badge">${p.category}</span>${p.scheme?`<span class="badge orange">${p.scheme}</span>`:''}<h3>${p.name}</h3><p class="muted">${p.brand}</p><select onchange="localStorage['var_${p.sku}']=this.value;renderProducts()">${(p.variants||[]).map((x,i)=>`<option value="${i}" ${x.name===v.name?'selected':''}>${x.name}</option>`).join('')}</select><div class="unitSwitch"><button class="${mode==='loose'?'active':''}" onclick="localStorage['unit_${p.sku}']='loose';renderProducts()">Loose</button><button class="${mode==='carton'?'active':''}" onclick="localStorage['unit_${p.sku}']='carton';renderProducts()">Carton</button></div><div class="price">${money(priceOf(p))}</div><p class="small">Carton Qty ${v.qty||'-'} • Stock ${p.stock}</p><button onclick="add('${p.sku}')">Add</button></div>`}).join('')}
+function add(sku){let p=P.find(x=>x.sku===sku),v=currentVariant(p),mode=unitMode(sku),ex=S.cart.find(x=>x.sku===sku&&x.variant===v.name&&x.mode===mode);if(ex)ex.qty++;else S.cart.push({sku:p.sku,name:p.name,variant:v.name,mode,price:priceOf(p),qty:1});save();renderCart();toast('Added')}
+function qty(sku,variant,mode,d){let it=S.cart.find(x=>x.sku===sku&&x.variant===variant&&x.mode===mode);if(!it)return;it.qty+=d;if(it.qty<=0)S.cart=S.cart.filter(x=>!(x.sku===sku&&x.variant===variant&&x.mode===mode));save();renderCart()}
+function renderCart(){let t=totals();qs('cartList').innerHTML=S.cart.length?S.cart.map(i=>`<div class="orderCard"><b>${i.name}</b><p>${i.variant} • ${i.mode} • ${money(i.price)} x ${i.qty}</p><div class="qty"><button onclick="qty('${i.sku}','${i.variant}','${i.mode}',-1)">−</button><b>${i.qty}</b><button onclick="qty('${i.sku}','${i.variant}','${i.mode}',1)">+</button></div></div>`).join(''):'<p class="muted">Cart empty</p>';qs('cartBill').innerHTML=S.cart.length?`Subtotal ${money(t.sub)} + Delivery ${money(t.del)} = <b>${money(t.total)}</b>`:'Cart empty';qs('pay').innerHTML=(store().type==='wholesale'?['COD','Pay Online'].concat(S.khata.status==='active'?['Khata']:[]):['COD','Pay Online']).map(x=>`<option>${x}</option>`).join('')}
+function placeOrder(){let t=totals();if(!S.cart.length)return toast('Cart empty');if(store().type==='wholesale'&&t.sub<500)return toast('Wholesale minimum ₹500');let o={id:'ORD-'+Date.now(),storeName:store().name,status:'Accepted',paymentMethod:qs('pay').value,items:[...S.cart],total:t.total,pickupCode:'DMQ-'+Math.floor(100000+Math.random()*900000)};S.orders.unshift(o);S.cart=[];save();renderAll();sendWA(o);toast('Order + WhatsApp')}
+function renderOrders(){qs('orderList').innerHTML=S.orders.map(o=>`<div class="orderCard"><b>${o.id}</b><p>${o.storeName}<br>${money(o.total)} • ${o.status}</p><button onclick="sendWA(S.orders.find(x=>x.id==='${o.id}'))">WhatsApp</button>${canCancel(o)?`<button class="red" onclick="cancelOrder('${o.id}')">Cancel</button>`:''}</div>`).join('')||'<p>No orders</p>'}
+function renderKhata(){let k=S.khata,show=store().type==='wholesale'||S.mode==='both';qs('khataTabBtn').style.display=show?'grid':'none';qs('khataBox').innerHTML=show?`<div class="kpi"><b>${k.status}</b><p>Khata status</p></div><div class="card"><h3>Eligibility</h3><p>Delivered ${k.delivered}/${k.ordersRequired} • Trust ${k.trust}</p><input placeholder="Aadhaar"><input placeholder="PAN"><button ${k.delivered>=k.ordersRequired?'':'disabled'}>Apply for Khata</button></div><div class="warn">30-day reminder + ₹1/day penalty hook ready.</div>`:'<div class="warn">Retail mode me khata hidden hai.</div>'}
+function renderProfile(){qs('profileBox').innerHTML=`<b>${S.profile.name||'Customer'}</b><br>${S.profile.phone||''}<br>${S.profile.address||''}<div class="moreBox"><b>More About</b><ul><li>Real product images + variant dropdown</li><li>Loose/carton pricing</li><li>Parcha + voice order hooks</li><li>Khata unlock trust logic</li><li>WhatsApp order</li></ul></div>`}
+function renderShops(){qs('shopBox').innerHTML=stores.map(s=>`<div class="card"><span class="badge ${s.type==='wholesale'?'gold':'green'}">${s.type}</span><h3>${s.emoji} ${s.name}</h3><p>${s.desc}</p><button onclick="S.store='${s.id}';S.cart=[];save();renderAll();setTab('home')">Use this shop</button></div>`).join('')}
+function parcha(){toast(qs('parchaFile').files[0]?'Parcha uploaded':'Select parcha image')}document.addEventListener('DOMContentLoaded',init);

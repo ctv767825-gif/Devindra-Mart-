@@ -1,51 +1,14 @@
 
-const P = window.DM_PRODUCTS || [];
-const STATS = window.DM_STATS || {};
-const stores = [
-  {id:'devindra-wholesale',name:'Devindra Mart Wholesale',type:'wholesale',emoji:'🏆',area:'All Areas',desc:'Bulk kirana, carton, loose/patta rate, khata available',priority:true,minOrder:500},
-  {id:'hungry-point',name:'Hungry Point',type:'retail',emoji:'🍔',area:'Warisnagar',desc:'Food retail shop',priority:false,minOrder:0},
-  {id:'glow-cosmetic',name:'Glow Cosmetic',type:'retail',emoji:'💄',area:'Samastipur',desc:'Cosmetic retail shop',priority:false,minOrder:0},
-  {id:'maa-medical',name:'Maa Medical',type:'retail',emoji:'💊',area:'Warisnagar',desc:'Medicine retail shop',priority:false,minOrder:0}
-];
-const state = {
-  mode: localStorage.getItem('dm_mode') || 'both',
-  profile: JSON.parse(localStorage.getItem('dm_profile')||'{}'),
-  selectedStore: 'devindra-wholesale',
-  cart: JSON.parse(localStorage.getItem('dm_cart')||'[]'),
-  orders: JSON.parse(localStorage.getItem('dm_orders')||'[]'),
-  riderId: localStorage.getItem('dm_rider') || 'RIDER-001'
-};
-function save(){localStorage.setItem('dm_cart',JSON.stringify(state.cart));localStorage.setItem('dm_orders',JSON.stringify(state.orders));localStorage.setItem('dm_profile',JSON.stringify(state.profile));localStorage.setItem('dm_mode',state.mode)}
-function money(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN')}
-function qs(id){return document.getElementById(id)}
-function toast(msg){let t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-function iconFor(cat){cat=(cat||'').toLowerCase(); if(cat.includes('toffee')||cat.includes('fast'))return '🍬'; if(cat.includes('oil'))return '🛢️'; if(cat.includes('biscuit'))return '🍪'; if(cat.includes('masala'))return '🌶️'; if(cat.includes('snack'))return '🍿'; if(cat.includes('station'))return '✏️'; if(cat.includes('soap')||cat.includes('deterg'))return '🧼'; return '📦'}
-function productPrice(p){return Number(p.wholesalePrice || p.retailRefPrice || p.basePrice || 0)}
-function selectedStore(){return stores.find(s=>s.id===state.selectedStore)||stores[0]}
-function deliveryCharge(store,total){ if(store.type==='wholesale') return total>=5000?0:total>=3000?10:total>=1000?20:50; return 0 }
-function cartTotal(){let subtotal=state.cart.reduce((a,i)=>a+(i.price*i.qty),0);let del=deliveryCharge(selectedStore(),subtotal);return {subtotal,delivery:del,total:subtotal+del}}
-function newOrder(){let c=cartTotal(), st=selectedStore();return {id:'ORD-'+Date.now(),storeId:st.id,storeName:st.name,storeType:st.type,status:'Accepted',paymentMethod:st.type==='wholesale'?qs('payMethod')?.value||'COD':qs('payMethod')?.value||'COD',items:state.cart,total:c.total,subtotal:c.subtotal,delivery:c.delivery,pickupCode:'DMQ-'+Math.floor(100000+Math.random()*900000),createdAt:new Date().toLocaleString(),customerPhone:state.profile.phone||'',customerName:state.profile.name||''}}
-function canCancel(o){return ['Placed','Accepted','Pending'].includes(o.status)}
-function setStatus(id,status){let o=state.orders.find(x=>x.id===id); if(o){o.status=status; save(); renderAll&&renderAll(); toast('Status updated: '+status)}}
-function cancelOrder(id){let o=state.orders.find(x=>x.id===id); if(!o)return; if(!canCancel(o))return toast('Cancel not allowed now'); o.status='CancelledByCustomer'; o.refundStatus=o.paymentMethod==='Pay Online'?'refund_pending':'not_required'; save(); renderAll&&renderAll(); toast('Order cancelled')}
-function orderTimeline(o){const steps=['Placed','Accepted','Ready','Picked','On The Way','Delivered'];let idx=steps.indexOf(o.status);return `<div class="timeline">${steps.map((s,i)=>`<div class="${i<=idx?'done':''}">${i<=idx?'✅':'⬜'} ${s}</div>`).join('')}</div>`}
-function nav(active){return ''}
-async function tryFirebaseSave(collection, data){ /* backend hook ready; localStorage fallback active */ return {ok:false,mode:'local'}; }
-
-function init(){document.body.insertAdjacentHTML('beforeend',nav('rider'));qs('riderId').value=state.riderId;renderAll();}
-function renderAll(){renderUnlocked();renderSettlement();}
-function unlock(){
-  state.riderId=qs('riderId').value||'RIDER-001';localStorage.setItem('dm_rider',state.riderId);
-  let code=qs('pickupCode').value.trim().toUpperCase();let o=state.orders.find(x=>x.pickupCode===code);
-  if(!o)return toast('Pickup code not found'); if(String(o.status).includes('Cancelled'))return toast('Order cancelled');
-  o.riderId=state.riderId;o.unlockedBy=state.riderId;o.status='Picked';save();renderAll();toast('Order unlocked')
-}
-function renderUnlocked(){
-  qs('unlockedBox').innerHTML=state.orders.filter(o=>o.riderId===state.riderId||o.unlockedBy===state.riderId).map(o=>`<div class="order"><b>${o.id}</b><p>${o.storeName}<br>${o.paymentMethod==='COD'?'Collect cash':'No cash collection'}<br>${money(o.total)} • ${o.status}</p><button onclick="setStatus('${o.id}','On The Way')">On The Way</button><button class="green" onclick="setStatus('${o.id}','Delivered')">Delivered</button></div>`).join('')||'<p class="muted">No unlocked orders. Enter pickup code.</p>';
-}
-function renderSettlement(){
-  let cod=state.orders.filter(o=>(o.riderId===state.riderId||o.unlockedBy===state.riderId)&&o.paymentMethod==='COD'&&o.status==='Delivered').reduce((a,o)=>a+Number(o.total||0),0);
-  qs('settlementBox').innerHTML=`Expected COD: <b>${money(cod)}</b><br><input id="cashEntered" placeholder="Enter cash amount"><button onclick="checkCash(${cod})">Submit Settlement</button>`;
-}
-function checkCash(expected){let v=Number(qs('cashEntered').value||0); if(v!==expected)return toast('Mismatch blocked. Exact cash required.'); toast('Settlement submitted')}
-document.addEventListener('DOMContentLoaded',init);
+const P=window.DM_PRODUCTS||[],STATS=window.DM_STATS||{},CFG=window.DM_CONFIG||{};
+const stores=[{id:'devindra-wholesale',name:'Devindra Mart Wholesale',type:'wholesale',area:'All Areas',emoji:'🏆',desc:'Bulk kirana, carton, loose/patta rate, khata available',whatsapp:CFG.whatsappNumber||'919999999999'},{id:'hungry-point',name:'Hungry Point',type:'retail',area:'Warisnagar',emoji:'🍔',desc:'Food retail shop',whatsapp:CFG.whatsappNumber||'919999999999'},{id:'new-store',name:'New Shop Listing Demo',type:'retail',area:'Pending Approval',emoji:'🏪',desc:'New shop/customer registration workflow',whatsapp:CFG.whatsappNumber||'919999999999'}];
+const S={profile:JSON.parse(localStorage.dm_profile||'{}'),mode:localStorage.dm_mode||'both',store:localStorage.dm_store||'devindra-wholesale',cart:JSON.parse(localStorage.dm_cart||'[]'),orders:JSON.parse(localStorage.dm_orders||'[]'),khata:JSON.parse(localStorage.dm_khata||'{"status":"locked","delivered":0,"ordersRequired":20,"trust":0,"limit":0}'),riderId:localStorage.dm_rider||'RIDER-001',tab:location.hash.replace('#','')||''};
+function save(){localStorage.dm_profile=JSON.stringify(S.profile);localStorage.dm_mode=S.mode;localStorage.dm_store=S.store;localStorage.dm_cart=JSON.stringify(S.cart);localStorage.dm_orders=JSON.stringify(S.orders);localStorage.dm_khata=JSON.stringify(S.khata);localStorage.dm_rider=S.riderId}
+function qs(id){return document.getElementById(id)}function money(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN')}function toast(m){let t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2300)}
+function setTab(tab){document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));qs('tab-'+tab)?.classList.add('active');document.querySelectorAll('.bottomTabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));location.hash=tab}
+function store(){return stores.find(x=>x.id===S.store)||stores[0]}function icon(c){c=(c||'').toLowerCase();if(c.includes('oil'))return'🛢️';if(c.includes('biscuit'))return'🍪';if(c.includes('masala'))return'🌶️';if(c.includes('snack'))return'🍿';if(c.includes('rice')||c.includes('dal')||c.includes('aata'))return'🌾';return'📦'}
+function currentVariant(p){let idx=Number(localStorage['var_'+p.sku]||0);return (p.variants&&p.variants[idx])||p.variants?.[0]||{name:'Default',loose:0,carton:0,qty:1,img:''}}function unitMode(sku){return localStorage['unit_'+sku]||'loose'}function priceOf(p){let v=currentVariant(p);return unitMode(p.sku)==='carton'?Number(v.carton||v.loose||0):Number(v.loose||v.carton||0)}
+function delivery(total){if(!total)return 0;if(store().type==='wholesale')return total>=5000?0:total>=3000?10:total>=1000?20:50;return 0}function totals(){let sub=S.cart.reduce((a,i)=>a+i.qty*i.price,0),del=delivery(sub);return{sub,del,total:sub+del}}
+function canCancel(o){return ['Placed','Accepted','Pending'].includes(o.status)}function status(id,st){let o=S.orders.find(x=>x.id===id);if(!o)return;o.status=st;if(st==='Delivered'){S.khata.delivered=(S.khata.delivered||0)+1;S.khata.trust=Math.min(100,S.khata.delivered*3)}save();renderAll&&renderAll();toast('Status updated')}
+function cancelOrder(id){let o=S.orders.find(x=>x.id===id);if(!o)return;if(!canCancel(o))return toast('Cancel allowed nahi hai');o.status='CancelledByCustomer';save();renderAll&&renderAll();toast('Order cancelled')}
+function sendWA(o){window.open(`https://wa.me/${store().whatsapp}?text=Devindra%20Mart%20Order%0AOrder:%20${o.id}%0ATotal:%20${money(o.total)}%0AItems:%20${o.items.map(i=>i.name+' x '+i.qty).join(', ')}`,'_blank')}
+function init(){home();unlockView();orders();cash();profile();setTab(S.tab||'home')}function home(){qs('rHome').innerHTML='<div class="quickGrid"><button class="quickBtn" onclick="toast(\\'Online/Offline changed\\')">🟢 Online</button><button class="quickBtn" onclick="setTab(\\'unlock\\')">🔐 Unlock</button><button class="quickBtn" onclick="setTab(\\'cash\\')">💵 Cash</button><button class="quickBtn" onclick="setTab(\\'profile\\')">👤 Profile</button></div><div class="warn">Zero orders by default. Pickup code/QR ke baad order show hoga.</div><div id="rOrderMini"></div>';orders()}function unlockView(){qs('unlockBox').innerHTML=`<input id="riderId2" value="${S.riderId}"><input id="pickupCode" placeholder="Pickup code"><button onclick="unlock()">Unlock</button><button class="secondary">Scan QR</button>`}function unlock(){S.riderId=qs('riderId2').value;let code=qs('pickupCode').value.trim().toUpperCase();let o=S.orders.find(x=>x.pickupCode===code);if(!o)return toast('Invalid pickup code');o.riderId=S.riderId;o.status='Picked';save();orders();setTab('orders')}function orders(){let html=S.orders.filter(o=>o.riderId===S.riderId).map(o=>`<div class="orderCard"><b>${o.id}</b><p>${money(o.total)} • ${o.status}</p><button onclick="status('${o.id}','On The Way')">On Way</button><button class="green" onclick="status('${o.id}','Delivered')">Delivered</button></div>`).join('')||'<p>No unlocked orders</p>';if(qs('rOrders'))qs('rOrders').innerHTML=html;if(qs('rOrderMini'))qs('rOrderMini').innerHTML=html}function cash(){qs('rCash').innerHTML='<div class="kpi"><b>₹0</b><p>Expected COD</p></div><input placeholder="Enter cash"><div class="grid3"><input placeholder="₹500"><input placeholder="₹200"><input placeholder="₹100"></div><button>Submit Settlement</button>'}function profile(){qs('rProfile').innerHTML='<div class="grid2"><div class="card"><h3>Earnings / Attendance</h3><div class="grid3"><div class="kpi"><b>₹0</b><p>Earnings</p></div><div class="kpi"><b>0</b><p>Deliveries</p></div><div class="kpi"><b>0</b><p>Leads</p></div></div></div><div class="card"><h3>KYC</h3><input placeholder="Aadhaar"><input placeholder="PAN"><button>Submit</button></div><div class="card"><h3>Parent Agreement</h3><div class="signatureBox">Signature</div><label><input type="checkbox"> Agreement accepted</label></div><div class="card"><h3>New Customer Lead</h3><input placeholder="Shop/customer name"><input placeholder="Mobile"><button>Submit Lead</button></div></div>'}document.addEventListener('DOMContentLoaded',init);
