@@ -1,0 +1,16 @@
+FINAL PREMIUM BUILD
+4 Apps:
+- Customer
+- Admin
+- Billing/Merchant
+- Rider
+
+Merged:
+- Variant dropdown
+- Loose/Carton
+- Premium tabs
+- Merchant permissions
+- Khata rules
+- WhatsApp controls
+- Excel upload structure
+- PWA structure

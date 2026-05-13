@@ -1,32 +1,15 @@
 {
   "name": "Devindra Mart",
-  "short_name": "Devindra Mart",
-  "start_url": "/index.html",
-  "scope": "/",
+  "short_name": "Devindra",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#eef4fb",
+  "background_color": "#f4f7fb",
   "theme_color": "#123ea9",
-  "orientation": "portrait",
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "logo.svg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Admin",
-      "url": "/admin.html"
-    },
-    {
-      "name": "Billing",
-      "url": "/billing.html"
-    },
-    {
-      "name": "Rider",
-      "url": "/rider.html"
+      "type": "image/svg+xml"
     }
   ]
 }

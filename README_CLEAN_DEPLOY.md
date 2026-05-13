@@ -10,6 +10,6 @@ Open:
 
 Clean patch:
 - Customer app no longer shows Admin/Billing/Rider nav.
-- Demo labels removed.
+-  labels removed.
 - Empty cart delivery fixed.
 - Apps are separated by URL.
