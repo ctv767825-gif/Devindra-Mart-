@@ -1,0 +1,7 @@
+FINAL VERIFIED FEATURES
+- 4 separate apps
+- multilingual support
+- rider unlock code system
+- support number lock
+- no merchant private number
+- PWA install support
