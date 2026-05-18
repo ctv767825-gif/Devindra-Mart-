@@ -1,0 +1,6 @@
+import Shell from "../../shared/Shell";
+import { SUPPORT, canUseWhatsAppOrder, resolveStoreOpen, storeModeRules, translated } from "../../shared/engines";
+const stores=[{id:"devindra-master",slug:"devindra-mart-wholesale",name:"Devindra Mart Wholesale",mode:"wholesale"},{id:"fastfood1",name:"Fast Food Corner",mode:"retail"}];
+const products=[{product:"Fortune Oil",product_hinglish:"Fortune Tel",category:"Oil",unit:"Carton",loosePrice:150,cartonPrice:6960,stock:20,storeId:"devindra-master"},{product:"Burger",category:"Fast Food",unit:"Piece",loosePrice:69,stock:20,storeId:"fastfood1"}];
+export default function CustomerApp(){ const open=resolveStoreOpen(stores); return <Shell title="Devindra Mart" subtitle="Customer App"><section className="grid"><Card title="Store Open Logic" text={open.action}/><Card title="Support" text={SUPPORT.phone}/><Card title="WhatsApp Order" text={canUseWhatsAppOrder(stores[0])?"Only Devindra Wholesale":"Off"}/><Card title="Language" text="English / Hindi / Hinglish"/>{products.map(p=><Card key={p.product} title={translated(p,"product","hinglish")} text={`${p.category} • ₹${p.loosePrice} • ${p.unit}`}/>)}</section></Shell> }
+function Card({title,text}){return <div className="card"><h3>{title}</h3><p>{text}</p><button>Add / Open</button></div>}

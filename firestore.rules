@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore { match /databases/{database}/documents {
+function signedIn(){return request.auth!=null}
+function userDoc(){return get(/databases/$(database)/documents/users/$(request.auth.uid))}
+function role(){return signedIn()?userDoc().data.role:null}
+function isAdmin(){return role()=="admin"} function isBilling(){return role()=="billing"} function isMerchant(){return role()=="merchant"} function isRider(){return role()=="rider"} function isCustomer(){return role()=="customer"}
+match /users/{id}{allow create: if signedIn()&&request.auth.uid==id; allow read,update: if signedIn()&&(request.auth.uid==id||isAdmin()); allow delete: if isAdmin();}
+match /settings/{id}{allow read: if true; allow write: if isAdmin();}
+match /stores/{id}{allow read: if true; allow write: if isAdmin();}
+match /products/{id}{allow read: if true; allow create,update: if isAdmin()||isBilling()||isMerchant(); allow delete: if isAdmin();}
+match /orders/{id}{allow create: if isCustomer(); allow read,update: if isAdmin()||isBilling()||(isCustomer()&&resource.data.customerId==request.auth.uid)||(isMerchant()&&resource.data.storeOwnerId==request.auth.uid)||(isRider()&&resource.data.riderId==request.auth.uid);}
+match /khata/{id}{allow read: if isAdmin()||isBilling()||(isCustomer()&&resource.data.customerId==request.auth.uid); allow write: if isAdmin()||isBilling();}
+match /payments/{id}{allow create: if isCustomer(); allow read: if isAdmin()||isBilling()||(isCustomer()&&resource.data.customerId==request.auth.uid); allow update: if isAdmin()||isBilling();}
+match /riderLocations/{id}{allow create,update: if isRider()&&request.auth.uid==id; allow read: if isAdmin()||isBilling();}
+match /notifications/{id}{allow read: if signedIn(); allow create: if isAdmin()||isBilling(); allow update: if signedIn();}
+match /fcmTokens/{id}{allow create,update: if signedIn(); allow read: if isAdmin();}
+match /logs/{id}{allow read,write: if isAdmin();} match /backups/{id}{allow read,write: if isAdmin();}
+}}

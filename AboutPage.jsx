@@ -1,0 +1,1 @@
+export default function AboutPage(){return <main className="login"><div className="panel"><h1>Devindra Mart</h1><p>Bharose ke saath vyapar</p><h3>Founder: Aditya Jha</h3><p>Contact: 7678256489</p><p>Multi-store wholesale + retail marketplace with Customer, Admin, Billing and Rider apps.</p></div></main>}

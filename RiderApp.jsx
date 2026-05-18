@@ -1,0 +1,3 @@
+import Shell from "../../shared/Shell";
+import { generatePickupCode, verifyCashSettlement } from "../../shared/engines";
+export default function RiderApp(){ const code=generatePickupCode({areaCode:"WAR"}); const cash=verifyCashSettlement(1000,{500:2}); return <Shell title="Devindra Rider" subtitle="QR / Code Unlock"><section className="grid"><div className="card"><h3>Rider Approval</h3><p>Aadhaar/PAN + Admin approval required</p></div><div className="card"><h3>Pickup Code</h3><p>{code}</p></div><div className="card"><h3>Hidden Orders</h3><p>Unlock ke bina details hidden</p></div><div className="card"><h3>COD Settlement</h3><p>{cash.message}</p></div><div className="card"><h3>Multiple Unlock</h3><p>One code = one order, multiple allowed</p></div></section></Shell>}
